@@ -1,0 +1,107 @@
+import { supabase } from "./supabase";
+import { Post } from "./types";
+
+function slugify(title: string): string {
+  const date = new Date().toISOString().split("T")[0];
+  const slug = title
+    .toLowerCase()
+    .replace(/[^\w\s가-힣-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+  return `${date}-${slug}`;
+}
+
+export async function getAllPosts(): Promise<Post[]> {
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select("*")
+    .order("createdAt", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching posts:", error);
+    return [];
+  }
+
+  return posts.map((post: any) => ({
+    ...post,
+    id: post.id,
+    summary: post.summary || "",
+    repo: post.repo || "",
+    commits: post.commits || [],
+    tags: post.tags || [],
+    date: post.createdAt, // Supabase returns ISO string
+  }));
+}
+
+export async function getPostById(id: string): Promise<Post | null> {
+  const { data: post, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !post) {
+    return null;
+  }
+
+  return {
+    ...post,
+    summary: post.summary || "",
+    repo: post.repo || "",
+    commits: post.commits || [],
+    tags: post.tags || [],
+    date: post.createdAt,
+  };
+}
+
+export async function createPost(
+  title: string,
+  content: string,
+  metadata: {
+    summary: string;
+    repo: string;
+    commits: string[];
+    tags: string[];
+  }
+): Promise<string> {
+  const slug = slugify(title);
+
+  // slug 중복 처리
+  let uniqueSlug = slug;
+  let counter = 1;
+
+  while (true) {
+    const { data } = await supabase
+      .from("posts")
+      .select("slug")
+      .eq("slug", uniqueSlug)
+      .single();
+
+    if (!data) break; // 중복 없음
+
+    uniqueSlug = `${slug}-${counter}`;
+    counter++;
+  }
+
+  const { data, error } = await supabase.from("posts").insert({
+    slug: uniqueSlug,
+    title,
+    content,
+    summary: metadata.summary,
+    repo: metadata.repo,
+    commits: metadata.commits,
+    tags: metadata.tags,
+  }).select("id").single();
+
+  if (error) {
+    throw new Error(`Failed to create post: ${error.message}`);
+  }
+
+  return data.id;
+}
+
+export async function deletePost(id: string): Promise<boolean> {
+  const { error } = await supabase.from("posts").delete().eq("id", id);
+  return !error;
+}
