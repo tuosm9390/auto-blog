@@ -42,12 +42,13 @@ export async function POST(request: NextRequest) {
     // 4. 게시 여부에 따라 저장
     let id: string | null = null;
     if (publish) {
-      id = await createPost(result.title, result.content, {
+      const created = await createPost(result.title, result.content, {
         summary: result.summary,
         repo: repoFullName,
         commits: result.commits,
         tags: result.tags,
       });
+      id = created.id;
     }
 
     return NextResponse.json({

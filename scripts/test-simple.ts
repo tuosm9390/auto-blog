@@ -3,12 +3,13 @@ import { createPost, deletePost, getPostById } from "../lib/posts";
 async function main() {
   console.log("Testing simple post creation...");
   try {
-    const id = await createPost("Test Simple", "Content", {
+    const result = await createPost("Test Simple", "Content", {
       summary: "Summary",
       repo: "test/repo",
       commits: [],
       tags: [],
     });
+    const { id } = result;
     console.log("Created id:", id);
 
     const post = await getPostById(id);
