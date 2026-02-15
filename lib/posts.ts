@@ -27,6 +27,7 @@ interface DbPost {
 export async function getAllPosts(options?: {
   query?: string;
   tag?: string;
+  repo?: string;
 }): Promise<Post[]> {
   let queryBuilder = supabase
     .from("posts")
@@ -42,6 +43,10 @@ export async function getAllPosts(options?: {
 
   if (options?.tag) {
     queryBuilder = queryBuilder.contains("tags", [options.tag]);
+  }
+
+  if (options?.repo) {
+    queryBuilder = queryBuilder.eq("repo", options.repo);
   }
 
   const { data: posts, error } = await queryBuilder;
@@ -174,4 +179,24 @@ export async function getAllTags(): Promise<string[]> {
   });
 
   return Array.from(tags).sort();
+}
+
+export async function getAllRepos(): Promise<string[]> {
+  const { data, error } = await supabase.from("posts").select("repo");
+
+  if (error || !data) {
+    return [];
+  }
+
+  const repos = new Set<string>();
+  data.forEach((post: { repo: string | null }) => {
+    if (post.repo) {
+      // "owner/repo" -> "repo" (optional, but user requested project distinction. 
+      // Usually repo name is enough, but full name is safer. 
+      // Let's keep full name for uniqueness, maybe display short name in UI)
+      repos.add(post.repo);
+    }
+  });
+
+  return Array.from(repos).sort();
 }

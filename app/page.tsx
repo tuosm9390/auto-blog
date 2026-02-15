@@ -1,19 +1,21 @@
 import Link from "next/link";
-import { getAllPosts, getAllTags } from "@/lib/posts";
+import { getAllPosts, getAllTags, getAllRepos } from "@/lib/posts";
 import PostCard from "@/components/PostCard";
 import SearchInput from "@/components/SearchInput";
 import TagFilter from "@/components/TagFilter";
+import RepoFilter from "@/components/RepoFilter";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; tag?: string }>;
+  searchParams: Promise<{ q?: string; tag?: string; repo?: string }>;
 }
 
 export default async function HomePage({ searchParams }: PageProps) {
-  const { q, tag } = await searchParams;
-  const posts = await getAllPosts({ query: q, tag });
+  const { q, tag, repo } = await searchParams;
+  const posts = await getAllPosts({ query: q, tag, repo });
   const allTags = await getAllTags();
+  const allRepos = await getAllRepos();
 
   return (
     <div>
@@ -28,7 +30,10 @@ export default async function HomePage({ searchParams }: PageProps) {
       </section>
 
       <div className="search-filter-bar">
-        <SearchInput />
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flex: 1 }}>
+          <RepoFilter repos={allRepos} />
+          <SearchInput />
+        </div>
         <TagFilter tags={allTags} />
       </div>
 
@@ -43,9 +48,9 @@ export default async function HomePage({ searchParams }: PageProps) {
           <div className="empty-state__icon">🔍</div>
           <h2 className="empty-state__title">검색 결과가 없습니다</h2>
           <p className="empty-state__text">
-            다른 검색어 키워드나 태그를 선택해보세요
+            다른 검색어 키워드, 태그, 또는 프로젝트를 선택해보세요
           </p>
-          {(q || tag) && (
+          {(q || tag || repo) && (
             <Link href="/" className="empty-state__link">
               초기화
             </Link>
