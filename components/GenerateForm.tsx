@@ -37,6 +37,23 @@ export default function GenerateForm() {
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
 
+  if (!session) {
+    return (
+      <div className="generate-page animate-in">
+        <h1 className="generate-page__title">새 포스트 생성</h1>
+        <p className="generate-page__subtitle">
+          GitHub 레포지토리의 커밋을 AI가 분석하여 블로그 글을 자동으로 작성합니다
+        </p>
+        <div className="status-message status-message--info" style={{ marginTop: 32, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+          <p>글 생성 기능을 이용하려면 로그인이 필요합니다.</p>
+          <a href="/api/auth/signin" className="btn btn--primary">
+            로그인하기
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     if (session?.accessToken) {
       fetch("/api/github/repos")
