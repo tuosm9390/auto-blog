@@ -1,11 +1,19 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/posts";
+import { getAllPosts, getAllTags } from "@/lib/posts";
 import PostCard from "@/components/PostCard";
+import SearchInput from "@/components/SearchInput";
+import TagFilter from "@/components/TagFilter";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-  const posts = await getAllPosts();
+interface PageProps {
+  searchParams: Promise<{ q?: string; tag?: string }>;
+}
+
+export default async function HomePage({ searchParams }: PageProps) {
+  const { q, tag } = await searchParams;
+  const posts = await getAllPosts({ query: q, tag });
+  const allTags = await getAllTags();
 
   return (
     <div>
@@ -19,22 +27,29 @@ export default async function HomePage() {
         </p>
       </section>
 
+      <div className="search-filter-bar">
+        <SearchInput />
+        <TagFilter tags={allTags} />
+      </div>
+
       {posts.length > 0 ? (
         <div className="posts-grid">
           {posts.map((post, index) => (
-            <PostCard key={post.slug} post={post} index={index} />
+            <PostCard key={post.id} post={post} index={index} />
           ))}
         </div>
       ) : (
         <div className="empty-state">
-          <div className="empty-state__icon">📝</div>
-          <h2 className="empty-state__title">아직 포스트가 없습니다</h2>
+          <div className="empty-state__icon">🔍</div>
+          <h2 className="empty-state__title">검색 결과가 없습니다</h2>
           <p className="empty-state__text">
-            GitHub 레포지토리를 연결하고 첫 포스트를 생성해보세요
+            다른 검색어 키워드나 태그를 선택해보세요
           </p>
-          <Link href="/generate" className="empty-state__link">
-            ✦ 첫 글 생성하기
-          </Link>
+          {(q || tag) && (
+            <Link href="/" className="empty-state__link">
+              초기화
+            </Link>
+          )}
         </div>
       )}
     </div>

@@ -5,6 +5,8 @@ import PostContent from "@/components/PostContent";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { Metadata } from "next";
+import { auth } from "@/auth";
+import PostControls from "@/components/PostControls";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PostPage({ params }: PageProps) {
+  const session = await auth();
   const { id } = await params;
   const post = await getPostById(id);
 
@@ -77,6 +80,8 @@ export default async function PostPage({ params }: PageProps) {
       )}
 
       <PostContent content={post.content} />
+
+      {session && <PostControls postId={id} />}
     </article>
   );
 }

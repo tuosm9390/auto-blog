@@ -82,7 +82,7 @@ export async function analyzeCommits(
       // The error message suggests 2.0 quota is hit. Let's switch to 1.5-flash as default for stability if 2.0 is problematic, 
       // or just retry. Given the error "limit: 0", it might be that 2.0 flash free tier is currently exhausted or unavailable for this key.
       // Let's change default to 1.5-flash which is stable.
-      const modelName = "gemini-flash-latest";
+      const modelName = "gemini-2.5-flash-lite";
       const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig: { responseMimeType: "application/json" }

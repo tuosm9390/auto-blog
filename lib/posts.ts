@@ -12,11 +12,27 @@ function slugify(title: string): string {
   return `${date}-${slug}`;
 }
 
-export async function getAllPosts(): Promise<Post[]> {
-  const { data: posts, error } = await supabase
+export async function getAllPosts(options?: {
+  query?: string;
+  tag?: string;
+}): Promise<Post[]> {
+  let queryBuilder = supabase
     .from("posts")
     .select("*")
     .order("createdAt", { ascending: false });
+
+  if (options?.query) {
+    const q = options.query;
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${q}%,summary.ilike.%${q}%,content.ilike.%${q}%`
+    );
+  }
+
+  if (options?.tag) {
+    queryBuilder = queryBuilder.contains("tags", [options.tag]);
+  }
+
+  const { data: posts, error } = await queryBuilder;
 
   if (error) {
     console.error("Error fetching posts:", error);
@@ -104,4 +120,46 @@ export async function createPost(
 export async function deletePost(id: string): Promise<boolean> {
   const { error } = await supabase.from("posts").delete().eq("id", id);
   return !error;
+}
+
+export async function updatePost(
+  id: string,
+  title: string,
+  content: string,
+  metadata: {
+    summary: string;
+    repo: string;
+    commits: string[];
+    tags: string[];
+  }
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      title,
+      content,
+      summary: metadata.summary,
+      repo: metadata.repo,
+      commits: metadata.commits,
+      tags: metadata.tags,
+      updatedAt: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  return !error;
+}
+
+export async function getAllTags(): Promise<string[]> {
+  const { data, error } = await supabase.from("posts").select("tags");
+
+  if (error || !data) {
+    return [];
+  }
+
+  const tags = new Set<string>();
+  data.forEach((post: any) => {
+    post.tags?.forEach((tag: string) => tags.add(tag));
+  });
+
+  return Array.from(tags).sort();
 }
