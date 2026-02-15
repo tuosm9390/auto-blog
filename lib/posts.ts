@@ -12,6 +12,18 @@ function slugify(title: string): string {
   return `${date}-${slug}`;
 }
 
+interface DbPost {
+  id: string;
+  slug: string;
+  title: string;
+  content: string;
+  summary: string | null;
+  repo: string | null;
+  commits: string[] | null;
+  tags: string[] | null;
+  createdAt: string;
+}
+
 export async function getAllPosts(options?: {
   query?: string;
   tag?: string;
@@ -39,7 +51,7 @@ export async function getAllPosts(options?: {
     return [];
   }
 
-  return posts.map((post: any) => ({
+  return posts.map((post: DbPost) => ({
     ...post,
     id: post.id,
     summary: post.summary || "",
@@ -157,7 +169,7 @@ export async function getAllTags(): Promise<string[]> {
   }
 
   const tags = new Set<string>();
-  data.forEach((post: any) => {
+  data.forEach((post: { tags: string[] | null }) => {
     post.tags?.forEach((tag: string) => tags.add(tag));
   });
 

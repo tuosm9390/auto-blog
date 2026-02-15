@@ -4,7 +4,7 @@ import { createPost, getPostById, deletePost, getAllPosts } from "../lib/posts";
 async function main() {
   console.log("🔍 Database Verification Started...");
 
-  const testSlug = "test-post-" + Date.now();
+
   const testTitle = "Test Post for DB Verification";
 
   try {

@@ -39,7 +39,7 @@ ${filesChanged}
 ${patches}`;
   });
 
-  return `당신은 숙련된 개발 블로그 작성자입니다. 아래 GitHub 레포지토리의 커밋 변경사항을 분석하여 개발 블로그 포스트를 작성해주세요.
+  return `You are an experienced development blogger. Please write a development blog post by analyzing the commit changes in the GitHub repository below.
 
 레포지토리: ${repoFullName}
 
@@ -47,25 +47,25 @@ ${commitSummaries.join("\n\n---\n\n")}
 
 ---
 
-위 커밋 변경사항을 분석하여 다음 형식의 JSON으로 블로그 포스트를 작성해주세요:
+Please analyze the above commit changes and write a blog post in JSON in the following format:
 
 {
-  "title": "블로그 제목 (매력적이고 구체적인 제목)",
-  "summary": "2-3문장의 요약",
-  "tags": ["태그1", "태그2", "태그3"],
-  "content": "마크다운 형식의 블로그 본문"
+  "title": "blog title (attractive and specific title),"
+  "summary": "summary of 2-3 sentences",
+  "tags": ["TAG1", "TAG2", "TAG3"],
+  "content": "Blog body in markdown format"
 }
 
-작성 규칙:
-1. 한국어로 작성
-2. 개발자가 읽기 편한 톤으로 작성
-3. 단순한 변경 나열이 아닌, **왜** 이 변경을 했는지, **어떤 문제**를 해결했는지 분석
-4. 기술적 인사이트와 배운 점을 포함
-5. 코드 변경의 핵심 부분을 코드 블록으로 인용
-6. 제목은 "오늘의 개발일지" 같은 뻔한 제목이 아닌, 구체적인 작업 내용을 반영
-7. 마크다운의 제목은 ## (h2)부터 시작 (h1은 블로그 제목에 사용)
+Create Rules:
+1. Written in Korean
+2. Developers write in easy-to-read tones
+3. It's not just listing changes, it's **Why** made changes and **What problem** solved
+4. Includes technical insights and lessons learned
+5. Cited the key part of the code change as a code block
+6. The title is not an obvious title like "Today's Development Diary", but reflects specific work
+7. Markdown's title starts with ## (h2) (h1 is used for blog title)
 
-JSON만 반환해주세요. 다른 텍스트는 포함하지 마세요.`;
+Please return JSON only. Do not include any other text.`;
 }
 
 export async function analyzeCommits(
@@ -90,8 +90,9 @@ export async function analyzeCommits(
 
       const result = await model.generateContent(prompt);
       return result.response.text();
-    } catch (error: any) {
-      if (retryCount < 3 && (error.status === 429 || error.message?.includes("429"))) {
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (retryCount < 3 && (err.status === 429 || err.message?.includes("429"))) {
         const delay = Math.pow(2, retryCount) * 2000; // 2s, 4s, 8s
         console.log(`API Rate Limited. Retrying in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -103,14 +104,14 @@ export async function analyzeCommits(
 
   const responseText = await generateWithRetry();
 
-  // JSON 파싱 (코드블록 감싸기 대응)
-  // JSON 파싱 (코드블록 제거 불필요, 하지만 안전을 위해 검사)
-  let jsonStr = responseText;
-  if (jsonStr.startsWith("```json")) {
-    jsonStr = jsonStr.replace(/^```json\s*/, "").replace(/```\s*$/, "");
-  } else if (jsonStr.startsWith("```")) {
-    jsonStr = jsonStr.replace(/^```\s*/, "").replace(/```\s*$/, "");
+  // JSON 파싱 (마크다운 코드블록 및 불필요한 텍스트 제거)
+  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error("AI Response (Failed to find JSON):", responseText);
+    throw new Error("AI 응답에서 JSON을 찾을 수 없습니다.");
   }
+
+  const jsonStr = jsonMatch[0];
 
   try {
     const parsed = JSON.parse(jsonStr);
@@ -122,9 +123,11 @@ export async function analyzeCommits(
       commits: commitDiffs.map((cd) => cd.commit.sha),
       repo: repoFullName,
     };
-  } catch {
+  } catch (error) {
+    console.error("JSON Parse Error:", error);
+    console.error("AI Response (Failed to parse):", responseText);
     throw new Error(
-      "AI 응답을 파싱할 수 없습니다. 응답: " + responseText.substring(0, 200)
+      "AI 응답을 파싱할 수 없습니다. 원본 응답은 서버 로그를 확인해주세요."
     );
   }
 }

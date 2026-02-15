@@ -9,6 +9,12 @@ import { ko } from "date-fns/locale";
 
 type Status = "idle" | "loading-commits" | "selecting" | "generating" | "preview" | "publishing" | "done" | "error";
 
+interface Repo {
+  name: string;
+  full_name: string;
+  private: boolean;
+}
+
 interface GenerateResult {
   title: string;
   content: string;
@@ -22,7 +28,7 @@ interface GenerateResult {
 
 export default function GenerateForm() {
   const { data: session } = useSession();
-  const [repos, setRepos] = useState<any[]>([]);
+  const [repos, setRepos] = useState<Repo[]>([]);
   const [repo, setRepo] = useState("");
   const [commits, setCommits] = useState<CommitInfo[]>([]);
   const [selectedShas, setSelectedShas] = useState<string[]>([]);
