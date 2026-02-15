@@ -14,7 +14,7 @@ interface PageProps {
 export default async function HomePage({ searchParams }: PageProps) {
   const { q, tag, repo } = await searchParams;
   const posts = await getAllPosts({ query: q, tag, repo });
-  const allTags = await getAllTags();
+  const allTags = await getAllTags({ repo }); // Filter tags by repo
   const allRepos = await getAllRepos();
 
   return (

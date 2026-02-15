@@ -166,8 +166,14 @@ export async function updatePost(
   return !error;
 }
 
-export async function getAllTags(): Promise<string[]> {
-  const { data, error } = await supabase.from("posts").select("tags");
+export async function getAllTags(options?: { repo?: string }): Promise<string[]> {
+  let queryBuilder = supabase.from("posts").select("tags");
+
+  if (options?.repo) {
+    queryBuilder = queryBuilder.eq("repo", options.repo);
+  }
+
+  const { data, error } = await queryBuilder;
 
   if (error || !data) {
     return [];
