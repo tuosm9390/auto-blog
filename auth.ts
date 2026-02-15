@@ -21,7 +21,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       // Send properties to the client, like an access_token from a provider.
-      // @ts-expect-error accessToken is not typed in default session
       session.accessToken = token.accessToken
       return session
     },

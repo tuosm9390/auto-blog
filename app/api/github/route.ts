@@ -18,8 +18,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const session = await auth();
-    // @ts-expect-error accessToken type
-    const token = session?.accessToken as string | undefined;
+    const token = session?.accessToken;
 
     const commits = await getRecentCommits(owner, repo, since, until, 30, token);
     return NextResponse.json({ commits });
