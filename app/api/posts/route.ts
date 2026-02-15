@@ -24,14 +24,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const slug = createPost(title, content, {
+    const { id, slug } = await createPost(title, content, {
       summary: summary || "",
       repo: repo || "",
       commits: commits || [],
       tags: tags || [],
     });
 
-    return NextResponse.json({ slug, message: "포스트가 생성되었습니다." });
+    return NextResponse.json({ id, slug, message: "포스트가 생성되었습니다." });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "알 수 없는 오류";

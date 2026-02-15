@@ -92,7 +92,7 @@ export async function createPost(
     commits: string[];
     tags: string[];
   }
-): Promise<string> {
+): Promise<{ id: string; slug: string }> {
   const slug = slugify(title);
 
   // slug 중복 처리
@@ -120,13 +120,13 @@ export async function createPost(
     repo: metadata.repo,
     commits: metadata.commits,
     tags: metadata.tags,
-  }).select("id").single();
+  }).select("id, slug").single();
 
   if (error) {
     throw new Error(`Failed to create post: ${error.message}`);
   }
 
-  return data.id;
+  return { id: data.id, slug: data.slug };
 }
 
 export async function deletePost(id: string): Promise<boolean> {

@@ -10,12 +10,13 @@ async function main() {
   try {
     // 1. Create
     console.log("1. Creating test post...");
-    const createdId = await createPost(testTitle, "# Hello World", {
+    const result = await createPost(testTitle, "# Hello World", {
       summary: "This is a test post",
       repo: "test/repo",
       commits: ["sha1", "sha2"],
       tags: ["test", "db"],
     });
+    const { id: createdId } = result;
     console.log(`✅ Created post with id: ${createdId}`);
 
     // 2. Read (All)
