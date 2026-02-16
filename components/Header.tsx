@@ -18,7 +18,24 @@ export default async function Header() {
           <Link href="/generate" className="header__nav-link header__nav-link--accent">
             ✦ 새 글 생성
           </Link>
-          {session ? <SignOut /> : <SignIn />}
+          {session?.user ? (
+            <div className="header__user">
+              <div className="header__profile">
+                {session.user.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name ?? "Profile"}
+                    className="header__profile-img"
+                  />
+                )}
+                <span className="header__profile-name">{session.user.username || session.user.name}</span>
+              </div>
+              <SignOut />
+            </div>
+          ) : (
+            <SignIn />
+          )}
         </nav>
       </div>
     </header>
