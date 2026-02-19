@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
 import { CommitDiff, GenerateResult } from "./types";
 
 function getGeminiClient() {
@@ -65,8 +65,8 @@ ${commitSummaries.join("\n\n---\n\n")}
 
 ---
 
-## Output Format (JSON Only)
-Provide the result in the following JSON structure. **The content must be in Korean.**
+## Output Format
+Provide the result as a structured JSON object. **The content must be in Korean.**
 
 {
   "title": "A compelling, specific title (e.g., 'How we optimized query performance by 50%' instead of 'Refactoring')",
@@ -86,8 +86,7 @@ Provide the result in the following JSON structure. **The content must be in Kor
 6. **Tone**: Professional, insightful, yet easy to read (like a high-quality engineering blog).
 
 ## Constraints
-- **Language**: Korean (한국어).
-- **Format**: JSON only. No opening/closing remarks."`;
+- **Language**: Korean (한국어)."`;
 }
 
 export async function analyzeCommits(
@@ -97,17 +96,27 @@ export async function analyzeCommits(
   const genAI = getGeminiClient();
   const prompt = buildPrompt(commitDiffs, repoFullName);
 
+  const schema: Schema = {
+    description: "Technical blog post analysis result",
+    type: SchemaType.OBJECT,
+    properties: {
+      title: { type: SchemaType.STRING, description: "Engaging blog title in Korean" },
+      summary: { type: SchemaType.STRING, description: "Short summary in Korean" },
+      tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+      content: { type: SchemaType.STRING, description: "Detailed blog post content in Markdown, written in Korean" }
+    },
+    required: ["title", "summary", "tags", "content"]
+  };
+
   const generateWithRetry = async (retryCount = 0): Promise<string> => {
     try {
-      // Fallback to 1.5-flash if 2.0 is rate limited or consistent errors occur
-      // For now, let's try 2.0 and fallback or just retry. 
-      // The error message suggests 2.0 quota is hit. Let's switch to 1.5-flash as default for stability if 2.0 is problematic, 
-      // or just retry. Given the error "limit: 0", it might be that 2.0 flash free tier is currently exhausted or unavailable for this key.
-      // Let's change default to 1.5-flash which is stable.
-      const modelName = "gemini-2.5-flash-lite";
+      const modelName = "gemini-2.5-flash-lite"; // flash-lite often stable for high throughput
       const model = genAI.getGenerativeModel({
         model: modelName,
-        generationConfig: { responseMimeType: "application/json" }
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: schema
+        }
       });
 
       const result = await model.generateContent(prompt);
@@ -115,7 +124,7 @@ export async function analyzeCommits(
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
       if (retryCount < 3 && (err.status === 429 || err.message?.includes("429"))) {
-        const delay = Math.pow(2, retryCount) * 2000; // 2s, 4s, 8s
+        const delay = Math.pow(2, retryCount) * 2000;
         console.log(`API Rate Limited. Retrying in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return generateWithRetry(retryCount + 1);
@@ -127,16 +136,20 @@ export async function analyzeCommits(
   const responseText = await generateWithRetry();
 
   // JSON 파싱 (마크다운 코드블록 및 불필요한 텍스트 제거)
-  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    console.error("AI Response (Failed to find JSON):", responseText);
-    throw new Error("AI 응답에서 JSON을 찾을 수 없습니다.");
+  let cleanText = responseText.replace(/```json/g, "").replace(/```/g, "");
+
+  const start = cleanText.indexOf("{");
+  const end = cleanText.lastIndexOf("}");
+
+  if (start !== -1 && end !== -1 && start < end) {
+    cleanText = cleanText.substring(start, end + 1);
+  } else if (cleanText.trim().length === 0) {
+    console.error("AI Response is empty.");
+    throw new Error("AI 응답이 비어있습니다.");
   }
 
-  const jsonStr = jsonMatch[0];
-
   try {
-    const parsed = JSON.parse(jsonStr);
+    const parsed = JSON.parse(cleanText);
     return {
       title: parsed.title,
       content: parsed.content,
@@ -147,9 +160,10 @@ export async function analyzeCommits(
     };
   } catch (error) {
     console.error("JSON Parse Error:", error);
-    console.error("AI Response (Failed to parse):", responseText);
+    console.error("Raw AI Response (first 500 chars):", responseText.substring(0, 500));
+    console.error("Cleaned Text (first 500 chars):", cleanText.substring(0, 500));
     throw new Error(
-      "AI 응답을 파싱할 수 없습니다. 원본 응답은 서버 로그를 확인해주세요."
+      "AI 응답을 파싱할 수 없습니다. (Structured Output 사용됨, 상세 로그 확인 필요)"
     );
   }
 }
