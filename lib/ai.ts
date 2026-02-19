@@ -39,33 +39,55 @@ ${filesChanged}
 ${patches}`;
   });
 
-  return `You are an experienced development blogger. Please write a development blog post by analyzing the commit changes in the GitHub repository below.
+  return `You are an expert Senior Software Engineer and Tech Writer.
+Your task is to write a high-quality technical blog post by deeply analyzing the provided GitHub commit changes.
 
-레포지토리: ${repoFullName}
+## Goal
+Go beyond a simple summary. You must reverse-engineer the developer's thought process, identifying the *technical challenges*, *root causes*, and *architectural decisions* hidden within the code changes.
+
+## Analysis Framework (Apply these lenses to the changes)
+
+### 1. Identify the Intent
+- **Refactoring**: Did the developer apply the **Boy Scout Rule**, **DRY** (Don't Repeat Yourself), or **SRP** (Single Responsibility Principle)? How did readability or maintainability improve?
+- **Bug Fix**: What was the likely **root cause**? How was the issue **isolated**? Does the fix handle edge cases?
+- **Feature**: What **user problem** does this solve? How does it fit into the existing architecture?
+
+### 2. Code Review Simulation
+Imagine you are reviewing this code. Ask yourself:
+- "Is this code more readable than before?"
+- "Are there any side effects handling added?"
+- "Is the error handling robust?"
+
+## Input Data
+Repository: ${repoFullName}
 
 ${commitSummaries.join("\n\n---\n\n")}
 
 ---
 
-Please analyze the above commit changes and write a blog post in JSON in the following format:
+## Output Format (JSON Only)
+Provide the result in the following JSON structure. **The content must be in Korean.**
 
 {
-  "title": "blog title (attractive and specific title),"
-  "summary": "summary of 2-3 sentences",
-  "tags": ["TAG1", "TAG2", "TAG3"],
-  "content": "Blog body in markdown format"
+  "title": "A compelling, specific title (e.g., 'How we optimized query performance by 50%' instead of 'Refactoring')",
+  "summary": "A concise executive summary (2-3 sentences)",
+  "tags": ["Technical Keyword", "Framework", "Pattern"],
+  "content": "The main blog post in Markdown format."
 }
 
-Create Rules:
-1. Written in Korean
-2. Developers write in easy-to-read tones
-3. It's not just listing changes, it's **Why** made changes and **What problem** solved
-4. Includes technical insights and lessons learned
-5. Cited the key part of the code change as a code block
-6. The title is not an obvious title like "Today's Development Diary", but reflects specific work
-7. Markdown's title starts with ## (h2) (h1 is used for blog title)
+## Writing Guidelines for 'content'
+1. **Hook**: Start with the problem definition. "We often encounter X..."
+2. **Context**: Explain *why* this change was necessary.
+3. **Deep Dive**: Use the **Analysis Framework** above. Explain the *How* and *Why*.
+   - If it's a bug fix, explain the debugging logic (Reproduction -> Isolation -> Fix).
+   - If it's refactoring, explain the benefits (e.g., "By extracting this logic to a Hook, we reduced duplication...").
+4. **Code Evidence**: **MANDATORY**. Include the key parts of the provided diffs as code blocks to prove your points.
+5. **Lessons Learned**: Conclude with a takeaway for other developers.
+6. **Tone**: Professional, insightful, yet easy to read (like a high-quality engineering blog).
 
-Please return JSON only. Do not include any other text.`;
+## Constraints
+- **Language**: Korean (한국어).
+- **Format**: JSON only. No opening/closing remarks."`;
 }
 
 export async function analyzeCommits(
