@@ -3,7 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "AutoBlog — AI 자동 포스팅 블로그",
@@ -24,6 +24,7 @@ export default function RootLayout({
           <main className="main">{children}</main>
           <Footer />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
