@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { getRecentCommits, getCommitDiff } from "@/lib/github";
 import { analyzeCommits } from "@/lib/ai";
 import { createPost } from "@/lib/posts";
+import { recordProcessedCommits } from "@/lib/settings";
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
     const body = await request.json();
     const { owner, repo, since, until, commitShas, publish } = body;
 
@@ -41,14 +44,23 @@ export async function POST(request: NextRequest) {
 
     // 4. 게시 여부에 따라 저장
     let id: string | null = null;
+    const username = session?.user?.username || "";
+
     if (publish) {
       const created = await createPost(result.title, result.content, {
         summary: result.summary,
         repo: repoFullName,
         commits: result.commits,
         tags: result.tags,
+        status: "published",
+        author: username,
       });
       id = created.id;
+
+      // 처리된 커밋 기록
+      if (username) {
+        await recordProcessedCommits(username, repoFullName, result.commits, created.id);
+      }
     }
 
     return NextResponse.json({

@@ -24,6 +24,10 @@ export interface CommitDiff {
   };
 }
 
+export type PostingMode = "auto" | "manual";
+export type PostStatus = "draft" | "published";
+export type AutoSchedule = "daily" | "weekly";
+
 export interface Post {
   id: string;
   slug: string;
@@ -34,6 +38,18 @@ export interface Post {
   repo: string;
   commits: string[];
   tags: string[];
+  status: PostStatus;
+  author: string;
+}
+
+export interface UserSettings {
+  id: string;
+  github_username: string;
+  posting_mode: PostingMode;
+  auto_repos: string[];
+  auto_schedule: AutoSchedule;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface GenerateRequest {

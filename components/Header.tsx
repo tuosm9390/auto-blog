@@ -18,6 +18,11 @@ export default async function Header() {
           <Link href="/generate" className="header__nav-link header__nav-link--accent">
             ✦ 새 글 생성
           </Link>
+          {session?.user && (
+            <Link href="/settings" className="header__nav-link">
+              설정
+            </Link>
+          )}
           {session?.user ? (
             <div className="header__user">
               <div className="header__profile">

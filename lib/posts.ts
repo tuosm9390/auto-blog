@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { Post } from "./types";
+import { Post, PostStatus } from "./types";
 
 function slugify(title: string): string {
   const date = new Date().toISOString().split("T")[0];
@@ -21,6 +21,8 @@ interface DbPost {
   repo: string | null;
   commits: string[] | null;
   tags: string[] | null;
+  status: PostStatus | null;
+  author: string | null;
   createdAt: string;
 }
 
@@ -28,6 +30,7 @@ export async function getAllPosts(options?: {
   query?: string;
   tag?: string;
   repo?: string;
+  status?: PostStatus;
 }): Promise<Post[]> {
   let queryBuilder = supabase
     .from("posts")
@@ -49,6 +52,13 @@ export async function getAllPosts(options?: {
     queryBuilder = queryBuilder.eq("repo", options.repo);
   }
 
+  if (options?.status) {
+    queryBuilder = queryBuilder.eq("status", options.status);
+  } else {
+    // 기본적으로 published 포스트만 표시
+    queryBuilder = queryBuilder.eq("status", "published");
+  }
+
   const { data: posts, error } = await queryBuilder;
 
   if (error) {
@@ -63,7 +73,9 @@ export async function getAllPosts(options?: {
     repo: post.repo || "",
     commits: post.commits || [],
     tags: post.tags || [],
-    date: post.createdAt, // Supabase returns ISO string
+    status: post.status || "published",
+    author: post.author || "",
+    date: post.createdAt,
   }));
 }
 
@@ -84,6 +96,8 @@ export async function getPostById(id: string): Promise<Post | null> {
     repo: post.repo || "",
     commits: post.commits || [],
     tags: post.tags || [],
+    status: post.status || "published",
+    author: post.author || "",
     date: post.createdAt,
   };
 }
@@ -96,6 +110,8 @@ export async function createPost(
     repo: string;
     commits: string[];
     tags: string[];
+    status?: PostStatus;
+    author?: string;
   }
 ): Promise<{ id: string; slug: string }> {
   const slug = slugify(title);
@@ -111,21 +127,27 @@ export async function createPost(
       .eq("slug", uniqueSlug)
       .single();
 
-    if (!data) break; // 중복 없음
+    if (!data) break;
 
     uniqueSlug = `${slug}-${counter}`;
     counter++;
   }
 
-  const { data, error } = await supabase.from("posts").insert({
-    slug: uniqueSlug,
-    title,
-    content,
-    summary: metadata.summary,
-    repo: metadata.repo,
-    commits: metadata.commits,
-    tags: metadata.tags,
-  }).select("id, slug").single();
+  const { data, error } = await supabase
+    .from("posts")
+    .insert({
+      slug: uniqueSlug,
+      title,
+      content,
+      summary: metadata.summary,
+      repo: metadata.repo,
+      commits: metadata.commits,
+      tags: metadata.tags,
+      status: metadata.status || "published",
+      author: metadata.author || "",
+    })
+    .select("id, slug")
+    .single();
 
   if (error) {
     throw new Error(`Failed to create post: ${error.message}`);
@@ -166,8 +188,43 @@ export async function updatePost(
   return !error;
 }
 
+export async function publishDraft(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      status: "published",
+      updatedAt: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  return !error;
+}
+
+export async function getDraftsByAuthor(author: string): Promise<Post[]> {
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("author", author)
+    .eq("status", "draft")
+    .order("createdAt", { ascending: false });
+
+  if (error || !posts) return [];
+
+  return posts.map((post: DbPost) => ({
+    ...post,
+    id: post.id,
+    summary: post.summary || "",
+    repo: post.repo || "",
+    commits: post.commits || [],
+    tags: post.tags || [],
+    status: post.status || "draft",
+    author: post.author || "",
+    date: post.createdAt,
+  }));
+}
+
 export async function getAllTags(options?: { repo?: string }): Promise<string[]> {
-  let queryBuilder = supabase.from("posts").select("tags");
+  let queryBuilder = supabase.from("posts").select("tags").eq("status", "published");
 
   if (options?.repo) {
     queryBuilder = queryBuilder.eq("repo", options.repo);
@@ -188,7 +245,10 @@ export async function getAllTags(options?: { repo?: string }): Promise<string[]>
 }
 
 export async function getAllRepos(): Promise<string[]> {
-  const { data, error } = await supabase.from("posts").select("repo");
+  const { data, error } = await supabase
+    .from("posts")
+    .select("repo")
+    .eq("status", "published");
 
   if (error || !data) {
     return [];
@@ -197,9 +257,6 @@ export async function getAllRepos(): Promise<string[]> {
   const repos = new Set<string>();
   data.forEach((post: { repo: string | null }) => {
     if (post.repo) {
-      // "owner/repo" -> "repo" (optional, but user requested project distinction. 
-      // Usually repo name is enough, but full name is safer. 
-      // Let's keep full name for uniqueness, maybe display short name in UI)
       repos.add(post.repo);
     }
   });
