@@ -22,8 +22,8 @@ function buildPrompt(commitDiffs: CommitDiff[], repoFullName: string): string {
       .filter((f) => f.patch)
       .map((f) => {
         const truncatedPatch =
-          (f.patch?.length || 0) > 1500
-            ? f.patch!.substring(0, 1500) + "\n... (truncated)"
+          (f.patch?.length || 0) > 3000
+            ? f.patch!.substring(0, 3000) + "\n... (truncated)"
             : f.patch;
         return `### ${f.filename}\n\`\`\`diff\n${truncatedPatch}\n\`\`\``;
       })
@@ -39,54 +39,149 @@ ${filesChanged}
 ${patches}`;
   });
 
-  return `You are an expert Senior Software Engineer and Tech Writer.
-Your task is to write a high-quality technical blog post by deeply analyzing the provided GitHub commit changes.
+  return `You are an expert Senior Software Engineer and Tech Writer with 10+ years of experience writing for top engineering blogs (like Netflix Tech Blog, Uber Engineering, and Vercel Blog).
+Your task is to write a high-quality, in-depth technical blog post by deeply analyzing the provided GitHub commit changes.
 
 ## Goal
-Go beyond a simple summary. You must reverse-engineer the developer's thought process, identifying the *technical challenges*, *root causes*, and *architectural decisions* hidden within the code changes.
+Go beyond a simple summary. You must reverse-engineer the developer's thought process, identifying the *technical challenges*, *root causes*, and *architectural decisions* hidden within the code changes. The reader should be able to fully understand WHAT changed, WHY it changed, and HOW it was implemented just by reading your post.
 
-## Analysis Framework (Apply these lenses to the changes)
+## Step-by-Step Analysis Process (Chain-of-Thought)
+Think through the changes in this order before writing:
 
-### 1. Identify the Intent
-- **Refactoring**: Did the developer apply the **Boy Scout Rule**, **DRY** (Don't Repeat Yourself), or **SRP** (Single Responsibility Principle)? How did readability or maintainability improve?
-- **Bug Fix**: What was the likely **root cause**? How was the issue **isolated**? Does the fix handle edge cases?
+**Step 1 - Categorize**: What type of change is this? (Feature / Bug Fix / Refactoring / Performance / Security / Infrastructure)
+**Step 2 - Context**: What problem existed before? What was the trigger for this work?
+**Step 3 - Decompose**: Break down each file change into its functional unit — which module, component, or function was affected? What is its role in the project?
+**Step 4 - Analyze**: For each functional unit, what EXACTLY changed and WHY? What was the before state vs. after state?
+**Step 5 - Connect**: How do the individual changes connect to form a cohesive solution? What is the overarching architectural decision?
+**Step 6 - Evaluate**: What are the trade-offs? What improved? Any potential risks or edge cases?
+
+## Analysis Framework (Apply ALL lenses)
+
+### 1. Intent Identification
+- **Refactoring**: Did the developer apply **DRY**, **SRP**, **Boy Scout Rule**? How did readability/maintainability improve?
+- **Bug Fix**: What was the **root cause**? How was the issue **isolated**? Does the fix handle edge cases?
 - **Feature**: What **user problem** does this solve? How does it fit into the existing architecture?
 
 ### 2. Code Review Simulation
-Imagine you are reviewing this code. Ask yourself:
-- "Is this code more readable than before?"
-- "Are there any side effects handling added?"
-- "Is the error handling robust?"
+Imagine you are reviewing this PR. Ask yourself:
+- "Is this code more readable and maintainable than before?"
+- "Are there proper error handling and edge case coverage?"
+- "What design pattern or architectural decision is reflected here?"
+- "Are there potential side effects on other parts of the system?"
+
+### 3. Functional Decomposition (CRITICAL)
+For EACH significant code change:
+- **File & Module**: Which file was changed and what is its role in the project architecture?
+- **Function/Component**: What specific function or component was modified?
+- **Responsibility**: What is this code responsible for in the system?
+- **Before vs. After**: Describe the concrete behavioral difference
+- **Dependencies**: What other modules depend on or are affected by this change?
 
 ## Input Data
 Repository: ${repoFullName}
 
-${commitSummaries.join("\n\n---\n\n")}
+${commitSummaries.join("\\n\\n---\\n\\n")}
 
 ---
 
 ## Output Format
-Provide the result as a structured JSON object. **The content must be in Korean.**
+Provide the result as a structured JSON object. **ALL content must be in Korean (한국어).**
 
 {
-  "title": "A compelling, specific title (e.g., 'How we optimized query performance by 50%' instead of 'Refactoring')",
-  "summary": "A concise executive summary (2-3 sentences)",
-  "tags": ["Technical Keyword", "Framework", "Pattern"],
+  "title": "A compelling, specific title that captures the technical essence",
+  "summary": "A concise executive summary (2-3 sentences) that answers: What changed? Why? What's the impact?",
+  "tags": ["Technical Keyword", "Framework", "Pattern", "Concept"],
   "content": "The main blog post in Markdown format."
 }
 
-## Writing Guidelines for 'content'
-1. **Hook**: Start with the problem definition. "We often encounter X..."
-2. **Context**: Explain *why* this change was necessary.
-3. **Deep Dive**: Use the **Analysis Framework** above. Explain the *How* and *Why*.
-   - If it's a bug fix, explain the debugging logic (Reproduction -> Isolation -> Fix).
-   - If it's refactoring, explain the benefits (e.g., "By extracting this logic to a Hook, we reduced duplication...").
-4. **Code Evidence**: **MANDATORY**. Include the key parts of the provided diffs as code blocks to prove your points.
-5. **Lessons Learned**: Conclude with a takeaway for other developers.
-6. **Tone**: Professional, insightful, yet easy to read (like a high-quality engineering blog).
+## Blog Post Structure Template for 'content'
+Follow this structure precisely:
+
+### Section 1: 도입 (Hook + Context)
+- Start with the problem or motivation: "...하는 상황에서 어떤 문제가 있었는지"
+- Explain the previous state and what triggered this work
+- Set expectations for what the reader will learn
+
+### Section 2: 변경 사항 분석 (Deep Dive)
+For EACH major change area, create a sub-section with:
+
+**2-1. [Module/Component Name] 변경**
+- Explain the role of this module in the project
+- Describe WHAT was changed and WHY
+- Show the code with proper context (see Code Evidence Rules below)
+
+**2-2. [Next Module/Component Name] 변경**
+- (Repeat the same pattern for each change area)
+
+### Section 3: 영향 분석 (Impact Analysis)
+- How this change affects the overall system
+- Performance / UX / Maintainability / Security implications
+- Inter-module effects and dependency chain impacts
+
+### Section 4: 핵심 교훈 (Lessons Learned)
+- Actionable takeaways for other developers
+- Design principles demonstrated by this change
+- Common pitfalls and how to avoid them
+
+## Code Evidence Rules (CRITICAL - STRICTLY FOLLOW)
+1. **Quantity**: Include AT LEAST 3 code blocks per post. NEVER write a post with fewer than 2 code blocks.
+2. **Length**: Each code block MUST be 10-30 lines minimum. NEVER show just 2-3 lines of code in isolation.
+3. **Context**: Always include the full function signature, surrounding logic, and enough code for the reader to understand the function's PURPOSE.
+4. **Annotation**: Before EVERY code block, write 2-3 sentences explaining:
+   - What module this code belongs to
+   - What this code is responsible for
+   - Why this particular code is important to the change
+5. **Before/After**: When code is modified, show the BEFORE and AFTER versions. Use:
+   - Separate code blocks labeled "변경 전:" and "변경 후:" OR
+   - A single diff block showing the delta
+6. **Language Tags**: ALWAYS use proper language tags: \`\`\`typescript, \`\`\`tsx, \`\`\`css, \`\`\`sql, \`\`\`diff etc.
+7. **Inline Comments**: Add Korean inline comments to complex code to help the reader understand logic flow.
+
+## Self-Critique Checklist (Verify before finalizing)
+Before outputting your response, verify:
+- Did I explain the PURPOSE of every code block, not just show it?
+- Is every code block long enough (10+ lines) to provide meaningful context?
+- Did I cover ALL major file changes, not just the most obvious ones?
+- Would a junior developer understand WHY these changes were made?
+- Did I include both BEFORE and AFTER states for modifications?
+- Is the post thorough enough while remaining engaging to read?
+
+## Example of Good vs. Bad Code Inclusion
+
+❌ BAD (too short, no context):
+\`\`\`typescript
+const result = await model.generateContent(prompt);
+\`\`\`
+
+✅ GOOD (full context, annotated):
+\`\`\`typescript
+// lib/ai.ts - AI 콘텐츠 생성 모듈의 핵심 함수
+// Gemini API를 호출하여 커밋 분석 결과를 생성하는 역할을 담당
+export async function analyzeCommits(
+  commitDiffs: CommitDiff[],
+  repoFullName: string
+): Promise<GenerateResult> {
+  const genAI = getGeminiClient();
+  const prompt = buildPrompt(commitDiffs, repoFullName);
+
+  // Structured Output으로 JSON 형태의 응답을 보장
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash-lite",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: schema // 스키마 기반 강제 출력 구조
+    }
+  });
+
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+}
+\`\`\`
 
 ## Constraints
-- **Language**: Korean (한국어)."`;
+- **Language**: ALL text must be in Korean (한국어).
+- **Tone**: Professional, insightful, yet approachable — like a senior engineer explaining to a colleague.
+- **Depth**: Prioritize depth over breadth. It's better to deeply analyze 3 key changes than superficially mention 10.`;
 }
 
 export async function analyzeCommits(
@@ -135,9 +230,17 @@ export async function analyzeCommits(
 
   const responseText = await generateWithRetry();
 
-  // JSON 파싱 (마크다운 코드블록 및 불필요한 텍스트 제거)
-  let cleanText = responseText.replace(/```json/g, "").replace(/```/g, "");
+  // JSON 파싱 — Structured Output 사용 시 이미 순수 JSON이지만,
+  // 비정상 응답 대비 JSON wrapper만 제거 (content 내부의 ``` 는 보존)
+  let cleanText = responseText.trim();
 
+  // JSON이 ```json ... ``` 으로 감싸진 경우에만 외부 wrapper 제거
+  const jsonBlockMatch = cleanText.match(/^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/);
+  if (jsonBlockMatch) {
+    cleanText = jsonBlockMatch[1];
+  }
+
+  // JSON 시작/끝 위치 찾기
   const start = cleanText.indexOf("{");
   const end = cleanText.lastIndexOf("}");
 

@@ -531,21 +531,40 @@ body {
 
 .markdown-content pre {
   margin: 20px 0;
-  padding: 20px 24px;
-  background: var(--bg-secondary);
+  padding: 0;
+  background: #1e1e2e;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow-x: auto;
   font-size: 14px;
   line-height: 1.6;
+  position: relative;
 }
 
 .markdown-content pre code {
+  display: block;
   background: none;
-  padding: 0;
+  padding: 20px 24px;
   border: none;
-  color: var(--text-primary);
+  color: inherit;
   font-size: inherit;
+  border-radius: inherit;
+}
+
+/* highlight.js 스타일 오버라이드 */
+.markdown-content pre code.hljs {
+  padding: 20px 24px;
+  background: #1e1e2e;
+  border-radius: inherit;
+}
+
+/* 인라인 코드에는 highlight.js 스타일 미적용 */
+.markdown-content :not(pre)>code {
+  background: var(--bg-tertiary);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--accent);
 }
 
 .markdown-content blockquote {
