@@ -16,7 +16,8 @@ ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can manage own settings" ON user_settings;
 CREATE POLICY "Users can manage own settings"
   ON user_settings FOR ALL
-  USING (true);
+  USING (true)
+  WITH CHECK (true);
 
 -- 2. processed_commits 테이블
 CREATE TABLE IF NOT EXISTS processed_commits (
@@ -33,7 +34,8 @@ ALTER TABLE processed_commits ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can manage own commits" ON processed_commits;
 CREATE POLICY "Users can manage own commits"
   ON processed_commits FOR ALL
-  USING (true);
+  USING (true)
+  WITH CHECK (true);
 
 -- 3. posts 테이블 컬럼 추가
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'published'

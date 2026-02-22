@@ -32,10 +32,14 @@ export default function SettingsPage() {
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [expandedDraft, setExpandedDraft] = useState<string | null>(null);
 
+  const username = session?.user?.username;
+
   useEffect(() => {
-    if (!session?.user) return;
+    if (!username) return;
+    if (settings) return; // 이미 로드된 경우 재요청 방지
     loadData();
-  }, [session]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [username]);
 
   const loadData = async () => {
     setLoading(true);
