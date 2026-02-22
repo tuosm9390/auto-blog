@@ -44,21 +44,47 @@ export default function SettingsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [settingsRes, reposRes, draftsRes] = await Promise.all([
-        fetch("/api/settings"),
-        fetch("/api/github/repos"),
-        fetch("/api/posts/drafts"),
+      // Promise.allSettled: 개별 API 실패 시에도 나머지 데이터는 정상 로드
+      const [settingsResult, reposResult, draftsResult] = await Promise.allSettled([
+        fetch("/api/settings").then(r => r.ok ? r.json() : Promise.reject(`settings: ${r.status}`)),
+        fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
+        fetch("/api/posts/drafts").then(r => r.ok ? r.json() : Promise.reject(`drafts: ${r.status}`)),
       ]);
 
-      const settingsData = await settingsRes.json();
-      const reposData = await reposRes.json();
-      const draftsData = await draftsRes.json();
+      // 각 API 결과를 개별 처리
+      if (settingsResult.status === "fulfilled" && settingsResult.value.settings) {
+        setSettings(settingsResult.value.settings);
+      } else {
+        // Settings API 실패 시 기본값으로 초기화 (빈 화면 방지)
+        console.warn("설정 로드 실패, 기본값 사용:", settingsResult.status === "rejected" ? settingsResult.reason : "데이터 없음");
+        setSettings({
+          github_username: username || "",
+          posting_mode: "manual",
+          auto_repos: [],
+          auto_schedule: "daily",
+        });
+      }
 
-      if (settingsData.settings) setSettings(settingsData.settings);
-      if (reposData.repos) setRepos(reposData.repos);
-      if (draftsData.drafts) setDrafts(draftsData.drafts);
+      if (reposResult.status === "fulfilled" && reposResult.value.repos) {
+        setRepos(reposResult.value.repos);
+      } else {
+        console.warn("레포 목록 로드 실패:", reposResult.status === "rejected" ? reposResult.reason : "데이터 없음");
+      }
+
+      if (draftsResult.status === "fulfilled" && draftsResult.value.drafts) {
+        setDrafts(draftsResult.value.drafts);
+      } else {
+        console.warn("초안 목록 로드 실패:", draftsResult.status === "rejected" ? draftsResult.reason : "데이터 없음");
+      }
     } catch (err) {
       console.error("데이터 로드 실패:", err);
+      // 전체 실패 시에도 기본값으로 표시
+      setSettings({
+        github_username: username || "",
+        posting_mode: "manual",
+        auto_repos: [],
+        auto_schedule: "daily",
+      });
     } finally {
       setLoading(false);
     }
