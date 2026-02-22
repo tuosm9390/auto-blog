@@ -1,6 +1,61 @@
 import { Octokit } from "octokit";
 import { CommitInfo, CommitDiff, FileDiff } from "./types";
 
+// 변경사항 분석에서 제외할 파일 패턴
+// - 자동 생성 파일, 민감 정보, 바이너리 등 AI 분석에 불필요한 파일 제외
+const EXCLUDED_FILE_PATTERNS: string[] = [
+  // 패키지 관리 (Lock 파일 + manifest)
+  "package-lock.json",
+  "package.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "bun.lockb",
+  // 환경변수 / 시크릿
+  ".env",
+  ".env.local",
+  ".env.development",
+  ".env.production",
+  ".env.test",
+  // 빌드 결과물 디렉토리
+  ".next/",
+  "dist/",
+  "build/",
+  "out/",
+  "node_modules/",
+  // 바이너리 / 미디어 확장자
+  ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp",
+  ".woff", ".woff2", ".ttf", ".eot",
+  ".mp4", ".mp3", ".wav",
+  ".pdf", ".zip", ".tar", ".gz",
+  // 설정 / 메타데이터
+  ".eslintcache",
+  "tsconfig.tsbuildinfo",
+  ".DS_Store",
+  "Thumbs.db",
+];
+
+/**
+ * 파일명이 제외 대상인지 판별
+ * - 정확한 파일명 매칭 (예: package-lock.json)
+ * - 확장자 매칭 (예: .png)
+ * - 디렉토리 접두사 매칭 (예: .next/)
+ */
+function shouldExcludeFile(filename: string): boolean {
+  const lowerFilename = filename.toLowerCase();
+  return EXCLUDED_FILE_PATTERNS.some((pattern) => {
+    if (pattern.endsWith("/")) {
+      // 디렉토리 패턴: 경로에 해당 디렉토리가 포함되면 제외
+      return lowerFilename.startsWith(pattern) || lowerFilename.includes("/" + pattern);
+    }
+    if (pattern.startsWith(".") && !pattern.includes("/") && !pattern.includes("env")) {
+      // 확장자 패턴 (.png, .jpg 등) — .env 계열은 정확 매칭
+      return lowerFilename.endsWith(pattern);
+    }
+    // 정확한 파일명 매칭 (경로 끝부분 또는 단독 파일명)
+    return lowerFilename === pattern || lowerFilename.endsWith("/" + pattern);
+  });
+}
+
 function getOctokit(token?: string) {
   const authToken = token || process.env.GITHUB_TOKEN;
   if (!authToken) {
@@ -53,13 +108,15 @@ export async function getCommitDiff(
     ref: sha,
   });
 
-  const files: FileDiff[] = (data.files || []).map((file) => ({
-    filename: file.filename,
-    status: file.status || "modified",
-    additions: file.additions,
-    deletions: file.deletions,
-    patch: file.patch,
-  }));
+  const files: FileDiff[] = (data.files || [])
+    .filter((file) => !shouldExcludeFile(file.filename))
+    .map((file) => ({
+      filename: file.filename,
+      status: file.status || "modified",
+      additions: file.additions,
+      deletions: file.deletions,
+      patch: file.patch,
+    }));
 
   return {
     commit: {
@@ -101,13 +158,15 @@ export async function getCommitComparison(
       date: commit.commit.author?.date || new Date().toISOString(),
       url: commit.html_url,
     },
-    files: (data.files || []).map((file) => ({
-      filename: file.filename,
-      status: file.status || "modified",
-      additions: file.additions,
-      deletions: file.deletions,
-      patch: file.patch,
-    })),
+    files: (data.files || [])
+      .filter((file) => !shouldExcludeFile(file.filename))
+      .map((file) => ({
+        filename: file.filename,
+        status: file.status || "modified",
+        additions: file.additions,
+        deletions: file.deletions,
+        patch: file.patch,
+      })),
     stats: {
       total: data.files?.length || 0,
       additions: data.files?.reduce((sum, f) => sum + f.additions, 0) || 0,
