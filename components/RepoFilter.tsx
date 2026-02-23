@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import classNames from "classnames";
 
 interface RepoFilterProps {
   repos: string[];
@@ -28,26 +27,23 @@ export default function RepoFilter({ repos }: RepoFilterProps) {
 
   const handleRepoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    router.push(`/?${createQueryString("repo", value)}`);
+    router.push(`/posts?${createQueryString("repo", value)}`);
   };
 
   if (repos.length === 0) return null;
 
   return (
-    <div className="repo-filter">
-      <select
-        className="form-input form-input--sm"
-        value={currentRepo || ""}
-        onChange={handleRepoChange}
-        style={{ minWidth: "160px" }}
-      >
-        <option value="">모든 프로젝트</option>
-        {repos.map((repo) => (
-          <option key={repo} value={repo}>
-            {repo.split("/")[1] || repo} {/* owner/repo -> repo */}
-          </option>
-        ))}
-      </select>
-    </div>
+    <select
+      className="bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-secondary focus:outline-none focus:border-border-strong transition-colors cursor-pointer min-w-40"
+      value={currentRepo || ""}
+      onChange={handleRepoChange}
+    >
+      <option value="">모든 프로젝트</option>
+      {repos.map((repo) => (
+        <option key={repo} value={repo}>
+          {repo.split("/")[1] || repo}
+        </option>
+      ))}
+    </select>
   );
 }

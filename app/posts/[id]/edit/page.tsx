@@ -21,9 +21,9 @@ export default async function EditPage({ params }: PageProps) {
   }
 
   return (
-    <div className="generate-page animate-in">
-      <h1 className="generate-page__title">포스트 수정</h1>
-      <p className="generate-page__subtitle">
+    <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
+      <h1 className="text-3xl font-display font-bold mb-2">포스트 수정</h1>
+      <p className="text-text-secondary mb-8">
         {post.title} 글을 수정합니다.
       </p>
 

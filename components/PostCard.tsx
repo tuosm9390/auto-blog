@@ -16,18 +16,27 @@ export default function PostCard({ post, index }: PostCardProps) {
   return (
     <Link
       href={`/posts/${post.id}`}
-      className={`post-card animate-in animate-in--delay-${Math.min(index + 1, 3)}`}
+      className="block border border-border-subtle rounded-xl p-6 hover:bg-surface hover:border-border-strong transition-all duration-300 group animate-fade-in-up"
+      style={{ animationDelay: `${Math.min(index * 0.08, 0.3)}s` }}
     >
-      <div className="post-card__header">
-        <span className="post-card__date">{formattedDate}</span>
-        {post.repo && <span className="post-card__repo">{post.repo}</span>}
+      <div className="flex items-center justify-between mb-3 text-xs">
+        <span className="text-text-tertiary">{formattedDate}</span>
+        {post.repo && (
+          <span className="px-2 py-0.5 border border-border-subtle rounded-full text-text-tertiary">
+            {post.repo}
+          </span>
+        )}
       </div>
-      <h2 className="post-card__title">{post.title}</h2>
-      <p className="post-card__summary">{post.summary}</p>
+      <h2 className="text-lg font-semibold mb-2 text-text-primary group-hover:text-accent transition-colors line-clamp-2">
+        {post.title}
+      </h2>
+      <p className="text-sm text-text-secondary mb-4 line-clamp-2">
+        {post.summary}
+      </p>
       {post.tags.length > 0 && (
-        <div className="post-card__tags">
+        <div className="flex gap-2 flex-wrap">
           {post.tags.map((tag) => (
-            <span key={tag} className="tag">
+            <span key={tag} className="text-xs text-text-tertiary">
               #{tag}
             </span>
           ))}

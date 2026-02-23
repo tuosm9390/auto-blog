@@ -51,9 +51,9 @@ export default function EditForm({ post }: { post: Post }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="animate-in">
-      <div className="form-group">
-        <label htmlFor="title" className="form-label">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium mb-2">
           제목
         </label>
         <input
@@ -62,13 +62,13 @@ export default function EditForm({ post }: { post: Post }) {
           name="title"
           value={formData.title}
           onChange={handleChange}
-          className="form-input"
+          className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-border-strong transition-colors"
           required
         />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="summary" className="form-label">
+      <div>
+        <label htmlFor="summary" className="block text-sm font-medium mb-2">
           요약
         </label>
         <input
@@ -77,12 +77,12 @@ export default function EditForm({ post }: { post: Post }) {
           name="summary"
           value={formData.summary}
           onChange={handleChange}
-          className="form-input"
+          className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-border-strong transition-colors"
         />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="tags" className="form-label">
+      <div>
+        <label htmlFor="tags" className="block text-sm font-medium mb-2">
           태그 (쉼표로 구분)
         </label>
         <input
@@ -91,12 +91,12 @@ export default function EditForm({ post }: { post: Post }) {
           name="tags"
           value={formData.tags}
           onChange={handleChange}
-          className="form-input"
+          className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-border-strong transition-colors"
         />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="content" className="form-label">
+      <div>
+        <label htmlFor="content" className="block text-sm font-medium mb-2">
           내용 (Markdown)
         </label>
         <textarea
@@ -104,27 +104,27 @@ export default function EditForm({ post }: { post: Post }) {
           name="content"
           value={formData.content}
           onChange={handleChange}
-          className="form-input"
+          className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-border-strong transition-colors min-h-[400px]"
           rows={15}
           required
-          style={{ fontFamily: "var(--font-mono)", fontSize: "14px" }}
+          style={{ fontFamily: "var(--font-mono)" }}
         />
       </div>
 
-      <div className="btn-group">
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn--primary"
-        >
-          {loading ? "저장 중..." : "저장하기"}
-        </button>
+      <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
         <button
           type="button"
           onClick={() => router.back()}
-          className="btn btn--secondary"
+          className="px-6 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer"
         >
           취소
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-6 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer"
+        >
+          {loading ? "저장 중..." : "저장하기"}
         </button>
       </div>
     </form>
