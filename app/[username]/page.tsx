@@ -4,6 +4,7 @@ import { getAllPosts } from "@/lib/posts";
 import PostsClient from "@/components/PostsClient";
 import UserProfileBox from "@/components/UserProfileBox";
 import { Metadata } from "next";
+import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -17,21 +18,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
 
   const profile = await getProfileByUsername(plainUsername);
-  if (!profile) return { title: "사용자를 찾을 수 없습니다" };
+  const displayName = profile?.name || plainUsername;
 
   return {
-    title: `${profile.name || plainUsername} (@${plainUsername}) — AutoBlog`,
-    description: profile.bio || `${plainUsername}님의 기술 블로그입니다.`,
+    title: `${displayName} (@${plainUsername}) — AutoBlog`,
+    description: profile?.bio || `${plainUsername}님의 기술 블로그입니다.`,
   };
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
+  const session = await auth();
   const { username } = await params;
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
+  const isOwner = session?.user?.username === plainUsername;
 
-  const profile = await getProfileByUsername(plainUsername);
+  let profile = await getProfileByUsername(plainUsername);
+
+  // 아직 profiles 테이블에 연동되지 않은 작성자를 위한 폴백
   if (!profile) {
-    notFound();
+    profile = {
+      id: "unknown",
+      username: plainUsername,
+      name: session?.user?.name || plainUsername,
+      avatar_url: (session?.user as any)?.avatar_url || session?.user?.image || null,
+      bio: null,
+      updated_at: new Date().toISOString()
+    };
   }
 
   // 해당 유저의 글만 가져오기
@@ -45,7 +57,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       {/* 유저 프로필 헤더 */}
-      <UserProfileBox profile={profile} variant="large" />
+      <UserProfileBox profile={profile} variant="large" isOwner={isOwner} />
 
       {/* 포스트 리스트 */}
       <PostsClient initialPosts={userPosts} tags={userTags} repos={userRepos} basePath={`/@${plainUsername}`} />

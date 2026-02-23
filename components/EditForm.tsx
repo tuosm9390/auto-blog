@@ -41,7 +41,9 @@ export default function EditForm({ post }: { post: Post }) {
       if (!res.ok) throw new Error("수정 실패");
 
       toast.success("🎉 포스트가 성공적으로 수정되었습니다!");
-      router.push(`/@${post.author}/${post.slug}`);
+      const targetSlug = post.id; // slug 인코딩 오류를 방지하기 위해 UUID 경로로 고정
+      const targetAuthor = post.author || "unknown";
+      router.push(`/@${targetAuthor}/${targetSlug}`);
       router.refresh();
     } catch (error) {
       console.error(error);

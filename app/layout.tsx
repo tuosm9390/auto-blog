@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://auto-blog-eta.vercel.app"),
   title: {
     default: "AI Tech Blog | 개발 및 자동화 인사이트",
-    template: "%s | AI Tech Blog"
+    template: "%s"
   },
   description:
     "AI 기반 코드 분석, 기술 트렌드, 자동화 아키텍처 및 소프트웨어 엔지니어링 인사이트를 다루는 전문가의 기술 블로그입니다.",

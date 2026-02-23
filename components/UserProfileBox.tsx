@@ -1,13 +1,14 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Profile } from "@/lib/profiles";
+import BioEditor from "./BioEditor";
 
 interface UserProfileBoxProps {
   profile: Profile;
   variant?: "large" | "compact";
+  isOwner?: boolean;
 }
 
-export default function UserProfileBox({ profile, variant = "large" }: UserProfileBoxProps) {
+export default function UserProfileBox({ profile, variant = "large", isOwner = false }: UserProfileBoxProps) {
   const isLarge = variant === "large";
   const avatarSize = isLarge ? "w-24 h-24 md:w-32 md:h-32" : "w-16 h-16 md:w-20 md:h-20";
   const titleSize = isLarge ? "text-3xl" : "text-xl md:text-2xl";
@@ -17,11 +18,11 @@ export default function UserProfileBox({ profile, variant = "large" }: UserProfi
     <section className={`flex flex-col md:flex-row items-center md:items-start gap-6 ${padding}`}>
       <Link href={`/@${profile.username}`} className={`${avatarSize} rounded-full overflow-hidden bg-surface flex-shrink-0 border border-border-strong relative group`}>
         {profile.avatar_url ? (
-          <Image
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
             src={profile.avatar_url}
             alt={profile.username}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-title text-4xl bg-surface/50 group-hover:bg-surface transition-colors">
@@ -39,9 +40,13 @@ export default function UserProfileBox({ profile, variant = "large" }: UserProfi
         {isLarge && (
           <p className="text-text-tertiary text-sm mb-4">@{profile.username}</p>
         )}
-        <p className="text-text-secondary max-w-2xl leading-relaxed">
-          {profile.bio || "작성자 소개글이 없습니다."}
-        </p>
+        {isLarge && isOwner ? (
+          <BioEditor initialBio={profile.bio || ""} username={profile.username} />
+        ) : (
+          <p className="text-text-secondary max-w-2xl leading-relaxed whitespace-pre-wrap">
+            {profile.bio || "작성자 소개글이 없습니다."}
+          </p>
+        )}
       </div>
     </section>
   );

@@ -14,6 +14,9 @@ export default async function Header() {
           <span className="font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors">AutoBlog</span>
         </Link>
         <nav className="flex items-center gap-4">
+          <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium hidden sm:inline">
+            서비스 소개
+          </Link>
           <Link href="/generate" className="text-sm text-accent hover:text-accent-hover transition-colors font-medium">
             ✦ 새 글 생성
           </Link>

@@ -69,6 +69,7 @@ export async function getAllPosts(options?: {
   return posts.map((post: DbPost) => ({
     ...post,
     id: post.id,
+    slug: post.slug || post.id, // slug가 없는 구형 데이터를 위해 id 대체
     summary: post.summary || "",
     repo: post.repo || "",
     commits: post.commits || [],
@@ -103,12 +104,19 @@ export async function getPostById(id: string): Promise<Post | null> {
 }
 
 export async function getPostByUsernameAndSlug(username: string, slug: string): Promise<Post | null> {
-  const { data: post, error } = await supabase
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+  let query = supabase
     .from("posts")
     .select("*")
-    .eq("author", username)
-    .eq("slug", slug)
-    .single();
+    .eq("author", username);
+
+  if (isUuid) {
+    query = query.eq("id", slug);
+  } else {
+    query = query.eq("slug", slug);
+  }
+
+  const { data: post, error } = await query.single();
 
   if (error || !post) {
     return null;
@@ -237,6 +245,7 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
   return posts.map((post: DbPost) => ({
     ...post,
     id: post.id,
+    slug: post.slug || post.id, // slug가 없는 구형 데이터를 위해 id 대체
     summary: post.summary || "",
     repo: post.repo || "",
     commits: post.commits || [],

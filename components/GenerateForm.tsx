@@ -109,10 +109,10 @@ export default function GenerateForm() {
 
       {error && <div className="border border-error/50 bg-error/10 rounded-xl p-4 mb-6 text-sm text-error">⚠ {error}</div>}
       {statusMessage && <div className="border border-border-subtle rounded-xl p-4 mb-6 text-sm text-text-secondary text-center">{statusMessage}</div>}
-      {status === "done" && result?.slug && (
+      {status === "done" && result && (
         <div className="border border-success/50 bg-success/10 rounded-xl p-4 mb-6 text-sm text-success flex items-center justify-between">
           <span>✓ 포스트가 성공적으로 게시되었습니다!</span>
-          <a href={`/@${result.author}/${result.slug}`} className="px-3 py-1 border border-success/50 rounded-lg text-xs font-medium hover:bg-success/20 transition-colors">글 보기 →</a>
+          <a href={`/@${result.author}/${result.id}`} className="px-3 py-1 border border-success/50 rounded-lg text-xs font-medium hover:bg-success/20 transition-colors">글 보기 →</a>
         </div>
       )}
 
@@ -203,10 +203,10 @@ export default function GenerateForm() {
               </button>
             </div>
           )}
-          {status === "done" && (
+          {status === "done" && result && (
             <div className="flex gap-3 justify-end">
               <button onClick={reset} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">새 글 생성</button>
-              <a href={`/@${result.author}/${result.slug}`} className="px-6 py-2 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors">글 보기 →</a>
+              <a href={`/@${result.author}/${result.id}`} className="px-6 py-2 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors">글 보기 →</a>
             </div>
           )}
         </div>

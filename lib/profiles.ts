@@ -41,3 +41,16 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
   }
   return data as Profile;
 }
+
+export async function updateBio(username: string, bio: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ bio, updated_at: new Date().toISOString() })
+    .eq("username", username);
+
+  if (error) {
+    console.error("Error updating bio:", error);
+    return false;
+  }
+  return true;
+}

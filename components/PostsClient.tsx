@@ -64,7 +64,9 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
       <div className="flex flex-col gap-4">
         {filteredPosts.length > 0 ? (
           filteredPosts.map((post, idx) => {
-            const postHref = basePath ? `${basePath}/${post.slug}` : `/@${post.author}/${post.slug}`;
+            const authorPart = post.author || "unknown";
+            const slugPart = post.id; // slug 인코딩 에러 방지 및 고유 식별을 위해 UUID 채택
+            const postHref = basePath ? `${basePath}/${slugPart}` : `/@${authorPart}/${slugPart}`;
             return (
               <Link
                 key={post.id}
@@ -75,7 +77,7 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
                 <div className="flex items-center justify-between mb-3 text-xs">
                   <div className="flex items-center gap-2">
                     {!basePath && (
-                      <span className="font-semibold text-accent hover:underline">@{post.author}</span>
+                      <span className="font-semibold text-accent hover:underline">@{authorPart}</span>
                     )}
                     <span className="text-text-tertiary">
                       {format(new Date(post.date || new Date()), "yyyy.MM.dd", { locale: ko })}

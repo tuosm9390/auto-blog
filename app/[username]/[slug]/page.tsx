@@ -36,9 +36,19 @@ export default async function PostPage({ params }: PageProps) {
 
   const post = await getPostByUsernameAndSlug(plainUsername, slug);
   // 프로필 데이터도 함께 패치
-  const profile = await getProfileByUsername(plainUsername);
+  let profile = await getProfileByUsername(plainUsername);
+  if (!profile) {
+    profile = {
+      id: "unknown",
+      username: plainUsername,
+      name: session?.user?.name || plainUsername,
+      avatar_url: (session?.user as any)?.avatar_url || session?.user?.image || null,
+      bio: null,
+      updated_at: new Date().toISOString()
+    };
+  }
 
-  if (!post || !profile) {
+  if (!post) {
     notFound();
   }
 
