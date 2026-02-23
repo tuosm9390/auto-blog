@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPostById } from "@/lib/posts";
+import { getPostByUsernameAndSlug, getPostById } from "@/lib/posts";
+import { getProfileByUsername } from "@/lib/profiles";
 import PostContent from "@/components/PostContent";
+import UserProfileBox from "@/components/UserProfileBox";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { Metadata } from "next";
@@ -11,25 +13,32 @@ import PostControls from "@/components/PostControls";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ username: string; slug: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params;
-  const post = await getPostById(id);
+  const { username, slug } = await params;
+  // URL 인코딩 처리된 username(예: @hong) 복원 로직 추가 (필요 없을 시 그대로 진행)
+  const plainUsername = decodeURIComponent(username).replace(/^@/, "");
+
+  const post = await getPostByUsernameAndSlug(plainUsername, slug);
   if (!post) return { title: "포스트를 찾을 수 없습니다" };
   return {
-    title: `${post.title} — AutoBlog`,
+    title: `${post.title} — ${plainUsername}`,
     description: post.summary,
   };
 }
 
 export default async function PostPage({ params }: PageProps) {
   const session = await auth();
-  const { id } = await params;
-  const post = await getPostById(id);
+  const { username, slug } = await params;
+  const plainUsername = decodeURIComponent(username).replace(/^@/, "");
 
-  if (!post) {
+  const post = await getPostByUsernameAndSlug(plainUsername, slug);
+  // 프로필 데이터도 함께 패치
+  const profile = await getProfileByUsername(plainUsername);
+
+  if (!post || !profile) {
     notFound();
   }
 
@@ -39,8 +48,8 @@ export default async function PostPage({ params }: PageProps) {
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
-      <Link href="/posts" className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors mb-8">
-        ← 모든 포스트
+      <Link href={`/@${plainUsername}`} className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors mb-8">
+        ← @{plainUsername}의 블로그
       </Link>
 
       <div className="flex items-center gap-3 text-xs text-text-tertiary mb-4">
@@ -85,7 +94,11 @@ export default async function PostPage({ params }: PageProps) {
 
       <PostContent content={post.content} />
 
-      {session && <PostControls postId={id} />}
+      {/* 작성자 프로필 정보 (Compact) */}
+      <UserProfileBox profile={profile} variant="compact" />
+
+      {/* 권한 판별: 로그인된 계정과 작성자가 같을 때만 컨트롤 노출 */}
+      {session?.user?.username === plainUsername && <PostControls postId={post.id} username={plainUsername} slug={slug} />}
     </article>
   );
 }

@@ -41,7 +41,7 @@ export default function EditForm({ post }: { post: Post }) {
       if (!res.ok) throw new Error("수정 실패");
 
       toast.success("🎉 포스트가 성공적으로 수정되었습니다!");
-      router.push(`/posts/${post.id}`);
+      router.push(`/@${post.author}/${post.slug}`);
       router.refresh();
     } catch (error) {
       console.error(error);

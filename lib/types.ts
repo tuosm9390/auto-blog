@@ -69,6 +69,7 @@ export interface GenerateResult {
   repo: string;
   id?: string;
   slug?: string;
+  author?: string;
 }
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 

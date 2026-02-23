@@ -10,9 +10,10 @@ interface PostsClientProps {
   initialPosts: Post[];
   tags: string[];
   repos: string[];
+  basePath?: string; // 특정 유저 프로필 페이지일 경우 해당 유저 경로 (예: /@username)
 }
 
-export default function PostsClient({ initialPosts, tags, repos }: PostsClientProps) {
+export default function PostsClient({ initialPosts, tags, repos, basePath }: PostsClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRepo, setSelectedRepo] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
@@ -62,33 +63,41 @@ export default function PostsClient({ initialPosts, tags, repos }: PostsClientPr
       {/* 포스트 리스트 (1열) */}
       <div className="flex flex-col gap-4">
         {filteredPosts.length > 0 ? (
-          filteredPosts.map((post, idx) => (
-            <Link
-              key={post.id}
-              href={`/posts/${post.id}`}
-              className="block border border-border-subtle rounded-xl p-6 hover:bg-surface hover:border-border-strong transition-all duration-300 group animate-fade-in-up"
-              style={{ animationDelay: `${Math.min(idx * 0.05, 0.3)}s` }}
-            >
-              <div className="flex items-center justify-between mb-3 text-xs">
-                <span className="text-text-tertiary">
-                  {format(new Date(post.date || new Date()), "yyyy.MM.dd", { locale: ko })}
-                </span>
-                <span className="px-2 py-0.5 border border-border-subtle rounded-full text-text-tertiary">
-                  {post.repo || "Unknown"}
-                </span>
-              </div>
-              <h2 className="text-lg font-semibold mb-2 text-text-primary group-hover:text-accent transition-colors line-clamp-2">
-                {post.title}
-              </h2>
-              <p className="text-sm text-text-secondary mb-3 line-clamp-2">{post.summary}</p>
-              <div className="flex gap-2 flex-wrap">
-                {post.tags.slice(0, 3).map((tag) => (
-                  <span key={tag} className="text-xs text-text-tertiary">#{tag}</span>
-                ))}
-                {post.tags.length > 3 && <span className="text-xs text-text-tertiary">+{post.tags.length - 3}</span>}
-              </div>
-            </Link>
-          ))
+          filteredPosts.map((post, idx) => {
+            const postHref = basePath ? `${basePath}/${post.slug}` : `/@${post.author}/${post.slug}`;
+            return (
+              <Link
+                key={post.id}
+                href={postHref}
+                className="block border border-border-subtle rounded-xl p-6 hover:bg-surface hover:border-border-strong transition-all duration-300 group animate-fade-in-up"
+                style={{ animationDelay: `${Math.min(idx * 0.05, 0.3)}s` }}
+              >
+                <div className="flex items-center justify-between mb-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    {!basePath && (
+                      <span className="font-semibold text-accent hover:underline">@{post.author}</span>
+                    )}
+                    <span className="text-text-tertiary">
+                      {format(new Date(post.date || new Date()), "yyyy.MM.dd", { locale: ko })}
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 border border-border-subtle rounded-full text-text-tertiary">
+                    {post.repo || "Unknown"}
+                  </span>
+                </div>
+                <h2 className="text-lg font-semibold mb-2 text-text-primary group-hover:text-accent transition-colors line-clamp-2">
+                  {post.title}
+                </h2>
+                <p className="text-sm text-text-secondary mb-3 line-clamp-2">{post.summary}</p>
+                <div className="flex gap-2 flex-wrap">
+                  {post.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="text-xs text-text-tertiary">#{tag}</span>
+                  ))}
+                  {post.tags.length > 3 && <span className="text-xs text-text-tertiary">+{post.tags.length - 3}</span>}
+                </div>
+              </Link>
+            );
+          })
         ) : (
           <div className="text-center py-16 text-text-secondary whitespace-pre-line">
             <p>조건에 맞는 포스트가 발견되지 않았습니다.{"\n"}다른 검색어나 태그를 선택해 보세요.</p>

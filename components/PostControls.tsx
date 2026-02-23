@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/ConfirmProvider";
 
-export default function PostControls({ postId }: { postId: string }) {
+export default function PostControls({ postId, username, slug }: { postId: string, username: string, slug: string }) {
   const router = useRouter();
   const confirm = useConfirm();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -29,7 +29,7 @@ export default function PostControls({ postId }: { postId: string }) {
       if (!res.ok) throw new Error("삭제 실패");
 
       toast.success("🗑️ 포스트가 성공적으로 삭제되었습니다.");
-      router.push("/posts");
+      router.push(`/@${username}`);
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -41,7 +41,7 @@ export default function PostControls({ postId }: { postId: string }) {
 
   return (
     <div className="mt-8 pt-6 border-t border-border-subtle flex gap-3">
-      <Link href={`/posts/${postId}/edit`} className="px-5 py-2.5 border border-border-subtle rounded-lg text-sm font-medium text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors cursor-pointer">
+      <Link href={`/@${username}/${slug}/edit`} className="px-5 py-2.5 border border-border-subtle rounded-lg text-sm font-medium text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors cursor-pointer">
         수정
       </Link>
       <button

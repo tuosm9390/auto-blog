@@ -102,6 +102,30 @@ export async function getPostById(id: string): Promise<Post | null> {
   };
 }
 
+export async function getPostByUsernameAndSlug(username: string, slug: string): Promise<Post | null> {
+  const { data: post, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("author", username)
+    .eq("slug", slug)
+    .single();
+
+  if (error || !post) {
+    return null;
+  }
+
+  return {
+    ...post,
+    summary: post.summary || "",
+    repo: post.repo || "",
+    commits: post.commits || [],
+    tags: post.tags || [],
+    status: post.status || "published",
+    author: post.author || "",
+    date: post.createdAt,
+  };
+}
+
 export async function createPost(
   title: string,
   content: string,
