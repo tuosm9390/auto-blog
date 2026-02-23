@@ -40,7 +40,6 @@ export interface Post {
   tags: string[];
   status: PostStatus;
   author: string;
-  jobId?: string;
 }
 
 export interface UserSettings {
@@ -70,7 +69,6 @@ export interface GenerateResult {
   repo: string;
   id?: string;
   slug?: string;
-  jobId?: string;
 }
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 

@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/'],
+      disallow: ['/api/', '/settings', '/jobs', '/generate', '/login', '/profile'],
     },
-    sitemap: 'https://your-autoblog-domain.com/sitemap.xml',
+    sitemap: 'https://auto-blog-eta.vercel.app/sitemap.xml',
   };
 }

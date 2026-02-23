@@ -1,5 +1,15 @@
 import { getAllPosts, getAllTags, getAllRepos } from "@/lib/posts";
 import PostsClient from "./PostsClient";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "포스트 목록 | AI Tech Blog",
+  description: "AI가 분석한 개발 인사이트와 기술 글 모음. GitHub 커밋 기반으로 자동 생성된 고품질 기술 블로그입니다.",
+  openGraph: {
+    title: "포스트 목록 | AI Tech Blog",
+    description: "AI가 분석한 개발 인사이트와 기술 글 모음",
+  },
+};
 
 export const dynamic = "force-dynamic";
 

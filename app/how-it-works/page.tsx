@@ -1,5 +1,15 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "사용 방법 | AI Tech Blog",
+  description: "GitHub 커밋을 AI가 분석하여 기술 블로그 포스트를 자동 생성하는 과정을 단계별로 안내합니다.",
+  openGraph: {
+    title: "사용 방법 | AI Tech Blog",
+    description: "GitHub 커밋 기반 AI 자동 블로그 생성 과정 안내",
+  },
+};
 
 export default async function HowItWorksPage() {
   const session = await auth();

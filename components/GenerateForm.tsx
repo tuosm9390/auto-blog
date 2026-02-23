@@ -24,6 +24,12 @@ export default function GenerateForm() {
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
 
+  useEffect(() => {
+    if (session?.accessToken) {
+      fetch("/api/github/repos").then(r => r.json()).then(d => { if (d.repos) setRepos(d.repos); }).catch(console.error);
+    }
+  }, [session]);
+
   if (!session) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 animate-fade-in-up">
@@ -36,12 +42,6 @@ export default function GenerateForm() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (session?.accessToken) {
-      fetch("/api/github/repos").then(r => r.json()).then(d => { if (d.repos) setRepos(d.repos); }).catch(console.error);
-    }
-  }, [session]);
 
   const fetchCommits = async () => {
     if (!repo) { setError("Repository를 선택해주세요."); return; }

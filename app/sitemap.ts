@@ -1,19 +1,44 @@
 import { MetadataRoute } from 'next';
+import { getAllPosts } from '@/lib/posts';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+const BASE_URL = 'https://auto-blog-eta.vercel.app';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // 정적 페이지
+  const staticPages: MetadataRoute.Sitemap = [
     {
-      url: 'https://auto-blog-eta.vercel.app',
+      url: BASE_URL,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: 'https://auto-blog-eta.vercel.app/posts',
+      url: `${BASE_URL}/posts`,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 0.8,
+      priority: 0.9,
     },
-    // 추후 블로그 포스트를 읽어와서 동적으로 sitemap 항목을 추가할 수 있습니다.
+    {
+      url: `${BASE_URL}/how-it-works`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
   ];
+
+  // 동적 포스트 페이지
+  let postPages: MetadataRoute.Sitemap = [];
+  try {
+    const posts = await getAllPosts();
+    postPages = posts.map((post) => ({
+      url: `${BASE_URL}/posts/${post.id}`,
+      lastModified: new Date(post.date),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error('Sitemap: 포스트 조회 실패', error);
+  }
+
+  return [...staticPages, ...postPages];
 }
