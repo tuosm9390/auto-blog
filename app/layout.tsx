@@ -1,32 +1,59 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import Providers from "@/components/Providers";
-import { Analytics } from "@vercel/analytics/react";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: "AutoBlog — AI 자동 포스팅 블로그",
+  metadataBase: new URL("https://your-autoblog-domain.com"),
+  title: {
+    default: "AI Tech Blog | 개발 및 자동화 인사이트",
+    template: "%s | AI Tech Blog"
+  },
   description:
-    "GitHub 레포지토리의 커밋 변경사항을 AI가 분석하여 자동으로 블로그 글을 생성합니다.",
+    "AI 기반 코드 분석, 기술 트렌드, 자동화 아키텍처 및 소프트웨어 엔지니어링 인사이트를 다루는 전문가의 기술 블로그입니다.",
+  keywords: ["기술 블로그", "개발자", "AI", "자동화", "소프트웨어 엔지니어링", "Next.js", "회고", "코드 분석"],
+  creator: "AI Tech Blogger",
+  openGraph: {
+    title: "AI Tech Blog | 개발 및 자동화 인사이트",
+    description:
+      "AI 기반 코드 분석, 기술 트렌드, 자동화 아키텍처 및 소프트웨어 엔지니어링 인사이트를 다루는 전문가의 기술 블로그입니다.",
+    type: "website",
+    locale: "ko_KR",
+    siteName: "AI Tech Blog",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Tech Blog | 개발 및 자동화 인사이트",
+    description: "AI 기반 기술 및 코드 인사이트 자동화 블로그.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="ko">
-      <head>
-        <meta name="google-site-verification" content="MDjk5WdTY8Pl_7kx3O84WmAebWeKmh2-1BK39ZzeGWA" />
-      </head>
-      <body>
-        <Providers>
-          <Header />
-          <main className="main">{children}</main>
-          <Footer />
-        </Providers>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        {children}
       </body>
     </html>
   );
