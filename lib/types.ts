@@ -40,6 +40,7 @@ export interface Post {
   tags: string[];
   status: PostStatus;
   author: string;
+  jobId?: string;
 }
 
 export interface UserSettings {
@@ -67,4 +68,20 @@ export interface GenerateResult {
   tags: string[];
   commits: string[];
   repo: string;
+  id?: string;
+  slug?: string;
+  jobId?: string;
+}
+export type JobStatus = "pending" | "processing" | "completed" | "failed";
+
+export interface AIJob {
+  id: string;
+  github_username: string;
+  repo: string;
+  commit_shas: string[];
+  status: JobStatus;
+  result?: GenerateResult;
+  error?: string;
+  created_at: string;
+  updated_at: string;
 }

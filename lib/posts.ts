@@ -23,6 +23,7 @@ interface DbPost {
   tags: string[] | null;
   status: PostStatus | null;
   author: string | null;
+  jobId: string | null;
   createdAt: string;
 }
 
@@ -75,6 +76,7 @@ export async function getAllPosts(options?: {
     tags: post.tags || [],
     status: post.status || "published",
     author: post.author || "",
+    jobId: post.jobId || undefined,
     date: post.createdAt,
   }));
 }
@@ -98,6 +100,7 @@ export async function getPostById(id: string): Promise<Post | null> {
     tags: post.tags || [],
     status: post.status || "published",
     author: post.author || "",
+    jobId: post.jobId || undefined,
     date: post.createdAt,
   };
 }
@@ -112,6 +115,7 @@ export async function createPost(
     tags: string[];
     status?: PostStatus;
     author?: string;
+    jobId?: string;
   }
 ): Promise<{ id: string; slug: string }> {
   const slug = slugify(title);
@@ -149,8 +153,8 @@ export async function createPost(
     .select("id, slug")
     .single();
 
-  if (error) {
-    throw new Error(`Failed to create post: ${error.message}`);
+  if (error || !data) {
+    throw new Error(`Failed to create post: ${error?.message || "Unknown error"}`);
   }
 
   return { id: data.id, slug: data.slug };
@@ -219,6 +223,7 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
     tags: post.tags || [],
     status: post.status || "draft",
     author: post.author || "",
+    jobId: post.jobId || undefined,
     date: post.createdAt,
   }));
 }

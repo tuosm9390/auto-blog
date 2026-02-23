@@ -21,9 +21,14 @@ export default async function Header() {
             ✦ 새 글 생성
           </Link>
           {session?.user && (
-            <Link href="/settings" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
-              설정
-            </Link>
+            <>
+              <Link href="/jobs" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+                작업 현황
+              </Link>
+              <Link href="/settings" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+                설정
+              </Link>
+            </>
           )}
           {session?.user ? (
             <div className="flex items-center gap-3 ml-2">

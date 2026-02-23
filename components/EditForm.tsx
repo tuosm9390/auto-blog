@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Post } from "@/lib/types";
+import { toast } from "sonner";
 
 export default function EditForm({ post }: { post: Post }) {
   const router = useRouter();
@@ -39,12 +40,12 @@ export default function EditForm({ post }: { post: Post }) {
 
       if (!res.ok) throw new Error("수정 실패");
 
-      alert("수정되었습니다.");
+      toast.success("🎉 포스트가 성공적으로 수정되었습니다!");
       router.push(`/posts/${post.id}`);
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert("수정 중 오류가 발생했습니다.");
+      toast.error("❌ 수정 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }

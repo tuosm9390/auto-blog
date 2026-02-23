@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Post } from "@/lib/types";
 import PostContent from "@/components/PostContent";
+import { Suspense } from "react";
+import { toast } from "sonner";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 interface Repo {
   name: string;
@@ -20,17 +24,19 @@ interface UserSettingsData {
 
 type Tab = "settings" | "drafts";
 
-export default function SettingsPage() {
+function SettingsContent() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<Tab>("settings");
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab) === "drafts" ? "drafts" : "settings";
+
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [settings, setSettings] = useState<UserSettingsData | null>(null);
   const [repos, setRepos] = useState<Repo[]>([]);
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [expandedDraft, setExpandedDraft] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   const username = session?.user?.username;
 
@@ -64,19 +70,16 @@ export default function SettingsPage() {
     }
   };
 
-  const showMessage = (text: string, type: "success" | "error") => {
-    setMessage(text); setMessageType(type);
-    setTimeout(() => { setMessage(""); setMessageType(""); }, 3000);
-  };
-
   const saveSettings = async () => {
     if (!settings) return;
     setSaving(true);
     try {
       const res = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ posting_mode: settings.posting_mode, auto_repos: settings.auto_repos, auto_schedule: settings.auto_schedule }) });
       if (!res.ok) throw new Error("저장 실패");
-      showMessage("설정이 저장되었습니다.", "success");
-    } catch { showMessage("설정 저장에 실패했습니다.", "error"); }
+      toast.success("설정이 저장되었습니다.");
+    } catch {
+      toast.error("설정 저장에 실패했습니다.");
+    }
     finally { setSaving(false); }
   };
 
@@ -93,12 +96,27 @@ export default function SettingsPage() {
   };
 
   const handleDraftAction = async (postId: string, action: "publish" | "delete") => {
+    const isPublish = action === "publish";
+
+    const isConfirmed = await confirm({
+      title: isPublish ? "초안 게시" : "초안 삭제",
+      description: isPublish
+        ? "🚀 이 초안을 블로그에 정식으로 게시하시겠습니까?"
+        : "🚨 이 초안을 영구적으로 삭제하시겠습니까?\n삭제된 데이터는 다시 복구할 수 없습니다.",
+      confirmText: isPublish ? "게시" : "삭제",
+      destructive: !isPublish,
+    });
+
+    if (!isConfirmed) return;
+
     try {
       const res = await fetch("/api/posts/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ postId, action }) });
       if (!res.ok) throw new Error("처리 실패");
       setDrafts((prev) => prev.filter((d) => d.id !== postId));
-      showMessage(action === "publish" ? "게시가 완료되었습니다." : "삭제되었습니다.", "success");
-    } catch { showMessage("처리에 실패했습니다.", "error"); }
+      toast.success(isPublish ? "🎉 초안이 성공적으로 게시되었습니다!" : "🗑️ 초안이 완전히 삭제되었습니다.");
+    } catch {
+      toast.error(`❌ ${isPublish ? "게시" : "삭제"} 처리에 실패했습니다. 다시 시도해주세요.`);
+    }
   };
 
   if (!session?.user) {
@@ -126,12 +144,6 @@ export default function SettingsPage() {
     <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       <h1 className="text-3xl font-display font-bold mb-2">설정</h1>
       <p className="text-text-secondary mb-6">포스팅 모드와 자동화 설정을 관리합니다</p>
-
-      {message && (
-        <div className={`border rounded-xl p-4 mb-6 text-sm ${messageType === "success" ? "border-success/50 bg-success/10 text-success" : "border-error/50 bg-error/10 text-error"}`}>
-          {messageType === "success" ? "✓" : "⚠"} {message}
-        </div>
-      )}
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-border-subtle mb-6">
@@ -270,5 +282,18 @@ export default function SettingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-3xl mx-auto px-4 py-32 text-center">
+        <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-text-secondary">설정 데이터를 불러오는 중...</p>
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   );
 }

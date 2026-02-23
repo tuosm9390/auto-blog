@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllPosts, createPost, deletePost } from "@/lib/posts";
+import { deleteJob } from "@/lib/jobs";
+import { auth } from "@/auth";
 
 export async function GET() {
   try {
-    const posts = getAllPosts();
+    const posts = await getAllPosts();
     return NextResponse.json({ posts });
   } catch (error) {
     const message =
@@ -13,9 +15,14 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
-    const { title, content, summary, repo, commits, tags } = body;
+    const { title, content, summary, repo, commits, tags, status, jobId } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -29,7 +36,14 @@ export async function POST(request: NextRequest) {
       repo: repo || "",
       commits: commits || [],
       tags: tags || [],
+      status: status || "published",
+      author: session.user.username || session.user.name || "",
     });
+
+    // jobId가 있으면 작업 내역 서비스에서도 삭제 (백그라운드 정리)
+    if (jobId) {
+      await deleteJob(jobId).catch(err => console.error("Job cleanup error:", err));
+    }
 
     return NextResponse.json({ id, slug, message: "포스트가 생성되었습니다." });
   } catch (error) {

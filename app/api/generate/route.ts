@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getRecentCommits, getCommitDiff } from "@/lib/github";
-import { analyzeCommits } from "@/lib/ai";
-import { createPost } from "@/lib/posts";
-import { recordProcessedCommits } from "@/lib/settings";
+import { getRecentCommits } from "@/lib/github";
+import { createJob, runAIAnalysisBackground } from "@/lib/jobs";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     const body = await request.json();
-    const { owner, repo, since, until, commitShas, publish } = body;
+    const { owner, repo, since, until, commitShas } = body;
+    const username = session?.user?.username;
+
+    if (!username) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     if (!owner || !repo) {
       return NextResponse.json(
@@ -18,9 +21,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. 커밋 목록 가져오기
+    // 1. 커밋 목록 확정
     let shas: string[] = commitShas || [];
-
     if (shas.length === 0) {
       const commits = await getRecentCommits(owner, repo, since, until, 10);
       shas = commits.map((c) => c.sha);
@@ -33,44 +35,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. 각 커밋의 diff 가져오기
-    const commitDiffs = await Promise.all(
-      shas.slice(0, 10).map((sha) => getCommitDiff(owner, repo, sha))
-    );
+    // 2. Job 생성
+    const job = await createJob(username, `${owner}/${repo}`, shas);
 
-    // 3. AI 분석
-    const repoFullName = `${owner}/${repo}`;
-    const result = await analyzeCommits(commitDiffs, repoFullName);
+    // 3. 백그라운드 분석 시작 (await 하지 않음)
+    // Next.js (Node.js) 환경에서 응답 반환 후에도 프로세스가 유지되도록 함
+    // Vercel 환경에서는 request.waitUntil()을 사용하는 것이 권장되지만, 여기선 기본 구현
+    runAIAnalysisBackground(job.id, owner, repo, shas, username).catch(console.error);
 
-    // 4. 게시 여부에 따라 저장
-    let id: string | null = null;
-    const username = session?.user?.username || "";
-
-    if (publish) {
-      const created = await createPost(result.title, result.content, {
-        summary: result.summary,
-        repo: repoFullName,
-        commits: result.commits,
-        tags: result.tags,
-        status: "published",
-        author: username,
-      });
-      id = created.id;
-
-      // 처리된 커밋 기록
-      if (username) {
-        await recordProcessedCommits(username, repoFullName, result.commits, created.id);
-      }
-    }
-
+    // 4. 즉시 Job ID 반환
     return NextResponse.json({
-      ...result,
-      id,
-      published: !!publish,
+      success: true,
+      jobId: job.id,
+      message: "AI 분석 작업이 백그라운드에서 시작되었습니다."
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "알 수 없는 오류";
+    const message = error instanceof Error ? error.message : "알 수 없는 오류";
     console.error("Generate error:", error);
     return NextResponse.json({ error: message }, { status: 500 });
   }

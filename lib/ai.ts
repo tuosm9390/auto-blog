@@ -230,43 +230,61 @@ export async function analyzeCommits(
 
   const responseText = await generateWithRetry();
 
-  // JSON 파싱 — Structured Output 사용 시 이미 순수 JSON이지만,
-  // 비정상 응답 대비 JSON wrapper만 제거 (content 내부의 ``` 는 보존)
+  // 1. 응답이 비어있는지 확인
+  if (!responseText || responseText.trim().length === 0) {
+    console.error("AI Response is empty.");
+    throw new Error("AI 응답이 비어있습니다. 안전 필터에 의해 차단되었거나 API 오류일 수 있습니다.");
+  }
+
+  // 2. JSON 파싱 — Structured Output 사용 시 이미 순수 JSON이지만,
+  // 비정상 응답 대비 불필요한 마크다운 wrapper 제거 로직 (defensive)
   let cleanText = responseText.trim();
 
-  // JSON이 ```json ... ``` 으로 감싸진 경우에만 외부 wrapper 제거
+  // JSON이 ```json ... ``` 으로 감싸진 경우 외부 wrapper 제거
   const jsonBlockMatch = cleanText.match(/^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/);
   if (jsonBlockMatch) {
     cleanText = jsonBlockMatch[1];
   }
 
-  // JSON 시작/끝 위치 찾기
+  // 실제 JSON 객체의 시작과 끝 위치를 찾아 추출 (비정상 텍스트 섞여있을 경우 대비)
   const start = cleanText.indexOf("{");
   const end = cleanText.lastIndexOf("}");
 
   if (start !== -1 && end !== -1 && start < end) {
     cleanText = cleanText.substring(start, end + 1);
-  } else if (cleanText.trim().length === 0) {
-    console.error("AI Response is empty.");
-    throw new Error("AI 응답이 비어있습니다.");
   }
 
   try {
     const parsed = JSON.parse(cleanText);
+
+    // 3. 스키마 검증 (필수 필드 누락 여부 확인)
+    const requiredFields = ["title", "content", "summary"];
+    const missingFields = requiredFields.filter(f => !parsed[f]);
+
+    if (missingFields.length > 0) {
+      console.warn(`일부 필드가 AI 응답에서 누락되었습니다: ${missingFields.join(", ")}`);
+      // 필수 필드가 없는 경우 폴백 기본값 설정 또는 에러 발생
+      if (!parsed.title && !parsed.content) {
+        throw new Error("핵심 콘텐츠(title, content)가 응답에 포함되지 않았습니다.");
+      }
+    }
+
     return {
-      title: parsed.title,
-      content: parsed.content,
-      summary: parsed.summary,
-      tags: parsed.tags || [],
+      title: parsed.title || "분석된 제목이 없습니다.",
+      content: parsed.content || "분석된 내용이 생성되지 않았습니다.",
+      summary: parsed.summary || "요약 정보가 없습니다.",
+      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
       commits: commitDiffs.map((cd) => cd.commit.sha),
       repo: repoFullName,
     };
   } catch (error) {
-    console.error("JSON Parse Error:", error);
-    console.error("Raw AI Response (first 500 chars):", responseText.substring(0, 500));
-    console.error("Cleaned Text (first 500 chars):", cleanText.substring(0, 500));
+    console.error("AI Response Parsing or Validation Error:", error);
+    console.error("Raw AI Response (first 1000 chars):", responseText.substring(0, 1000));
+
+    // 4. 파싱 에러 발생 시 최후의 폴백 (사용자가 내용을 아예 못 보는 것보다는 에러 메시지라도 포함된 객체 반환 검토)
+    // 여기서는 일단 명확한 에러를 던져 상위 레이어에서 재시도하게 함
     throw new Error(
-      "AI 응답을 파싱할 수 없습니다. (Structured Output 사용됨, 상세 로그 확인 필요)"
+      `AI 응답 분석 실패: ${error instanceof Error ? error.message : "JSON 파싱 에러"}. 상세 로그를 확인해 주세요.`
     );
   }
 }

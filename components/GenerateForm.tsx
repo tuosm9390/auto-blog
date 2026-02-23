@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { CommitInfo } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import { CommitInfo, GenerateResult } from "@/lib/types";
 import PostContent from "./PostContent";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -10,9 +11,9 @@ import { ko } from "date-fns/locale";
 type Status = "idle" | "loading-commits" | "selecting" | "generating" | "preview" | "publishing" | "done" | "error";
 
 interface Repo { name: string; full_name: string; private: boolean; }
-interface GenerateResult { title: string; content: string; summary: string; tags: string[]; commits: string[]; repo: string; slug?: string; id?: string; }
 
 export default function GenerateForm() {
+  const router = useRouter();
   const { data: session } = useSession();
   const [repos, setRepos] = useState<Repo[]>([]);
   const [repo, setRepo] = useState("");
@@ -61,24 +62,42 @@ export default function GenerateForm() {
 
   const generatePost = async () => {
     if (selectedShas.length === 0) { setError("최소 1개의 커밋을 선택해주세요."); return; }
-    setStatus("generating"); setError(""); setStatusMessage("AI가 변경사항을 분석하고 글을 작성하는 중...");
+    setStatus("generating"); setError(""); setStatusMessage("백그라운드에서 분석 작업을 시작하는 중...");
     const selectedRepo = repos.find(r => r.name === repo);
     const owner = selectedRepo ? selectedRepo.full_name.split("/")[0] : session?.user?.name || "";
     try {
-      const res = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ owner, repo, commitShas: selectedShas, publish: false }) });
-      const data = await res.json(); if (!res.ok) throw new Error(data.error);
-      setResult(data); setStatus("preview"); setStatusMessage("");
-    } catch (err) { setError(err instanceof Error ? err.message : "글 생성 실패"); setStatus("error"); setStatusMessage(""); }
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ owner, repo, commitShas: selectedShas })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // 즉시 작업 관리 페이지로 이동
+      router.push(`/jobs?new=${data.jobId}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "작업 요청 실패");
+      setStatus("error");
+      setStatusMessage("");
+    }
   };
 
-  const publishPost = async () => {
-    if (!result) return;
+  const publishPostFromJob = async (jobResult: GenerateResult) => {
     setStatus("publishing"); setStatusMessage("포스트 게시 중...");
     try {
-      const res = await fetch("/api/posts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(result) });
-      const data = await res.json(); if (!res.ok) throw new Error(data.error);
-      setResult({ ...result, slug: data.slug, id: data.id }); setStatus("done"); setStatusMessage("");
-    } catch (err) { setError(err instanceof Error ? err.message : "게시 실패"); setStatus("error"); setStatusMessage(""); }
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...jobResult, status: "draft" })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.location.href = "/settings"; // 초안 관리 탭으로 이동
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "게시 실패");
+      setStatus("error");
+    }
   };
 
   const reset = () => { setCommits([]); setSelectedShas([]); setResult(null); setStatus("idle"); setError(""); setStatusMessage(""); };
@@ -179,7 +198,7 @@ export default function GenerateForm() {
             <div className="flex gap-3 justify-end">
               <button onClick={reset} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">처음으로</button>
               <button onClick={() => setStatus("selecting")} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">다시 생성</button>
-              <button onClick={publishPost} disabled={status === "publishing"} className="px-6 py-2 bg-success text-black font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer">
+              <button onClick={() => result && publishPostFromJob(result)} disabled={status === "publishing"} className="px-6 py-2 bg-success text-black font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer">
                 {status === "publishing" ? "게시 중..." : "✓ 게시하기"}
               </button>
             </div>

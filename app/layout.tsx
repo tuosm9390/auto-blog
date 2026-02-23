@@ -56,6 +56,8 @@ export const metadata: Metadata = {
 import Providers from "@/components/Providers";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ConfirmProvider from "@/components/ConfirmProvider";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -66,9 +68,23 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} bg-canvas text-text-primary font-body min-h-screen flex flex-col`}>
         <Providers>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <ConfirmProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <Toaster
+              position="bottom-right"
+              theme="dark"
+              toastOptions={{
+                className: "border-border-strong rounded-xl bg-elevated text-text-primary font-body !shadow-2xl",
+                style: {
+                  background: 'var(--color-elevated)',
+                  borderColor: 'var(--color-border-strong)',
+                  color: 'var(--color-text-primary)',
+                }
+              }}
+            />
+          </ConfirmProvider>
         </Providers>
       </body>
     </html>
