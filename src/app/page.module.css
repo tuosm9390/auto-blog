@@ -1,141 +1,290 @@
+/* 기존 테마 색상 및 뷰티풀 다크모드 팔레트 세팅 */
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
+  --background: #030303;
+  --foreground: #ffffff;
 
-  --text-primary: #000;
-  --text-secondary: #666;
+  --text-primary: #ededed;
+  --text-secondary: #888888;
+  --text-highlight: #ffffff;
 
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
+  --accent-glow: rgba(255, 255, 255, 0.15);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-border: rgba(255, 255, 255, 0.08);
 
-  display: flex;
+  --button-primary: #ffffff;
+  --button-primary-text: #000000;
+  --button-secondary: transparent;
+  --button-secondary-border: rgba(255, 255, 255, 0.2);
+
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans);
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 1. Hero Section */
+.heroSection {
+  min-height: 90vh;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  text-align: center;
+  padding: 0 24px;
+  position: relative;
+  background: radial-gradient(circle at 50% -20%, var(--accent-glow) 0%, transparent 60%);
 }
 
-.main {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
-}
-
-.intro {
+.heroContent {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
+  align-items: center;
+  max-width: 900px;
+  z-index: 10;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
+.heroBadge {
+  font-size: 11px;
   font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
+  letter-spacing: 2px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  margin-bottom: 32px;
 }
 
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
+.heroTitle {
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.heroHighlight {
+  background: linear-gradient(180deg, #fff 0%, #888 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroSubtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+  margin-bottom: 48px;
+}
+
+.ctaGroup {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 14px 28px;
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.primaryButton {
+  background: var(--button-primary);
+  color: var(--button-primary-text);
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px rgba(255, 255, 255, 0.4);
+}
+
+.secondaryButton {
+  background: var(--button-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--button-secondary-border);
+}
+
+.secondaryButton:hover {
+  background: var(--card-bg);
+  border-color: var(--text-secondary);
+}
+
+
+/* 2. Marquee Reviews Section */
+.reviewSection {
+  padding: 80px 0;
+  overflow: hidden;
+  border-top: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(0, 0, 0, 0) 100%);
+}
+
+.marqueeHeader {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.marqueeHeader h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}
+
+.marqueeContainer {
+  display: flex;
+  width: 100vw;
+  overflow: hidden;
+  margin-bottom: 24px;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marqueeTrack {
+  display: flex;
+  gap: 24px;
+  padding-right: 24px;
+  width: max-content;
+}
+
+/* 무한 롤링 애니메이션 */
+@keyframes scrollLeft {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scrollRight {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.marqueeLeft {
+  animation: scrollLeft 60s linear infinite;
+}
+
+.marqueeRight {
+  animation: scrollRight 70s linear infinite;
+}
+
+.marqueeTrack:hover {
+  animation-play-state: paused;
+}
+
+.reviewCard {
+  width: 350px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  transition: border-color 0.3s ease;
+}
+
+.reviewCard:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.reviewQuote {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.reviewAuthor {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.authorBadge {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
   color: var(--text-secondary);
 }
 
-.intro a {
-  font-weight: 500;
+
+/* 3. Features Grid */
+.featureSection {
+  padding: 120px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+}
+
+.featureCard {
+  background: transparent;
+  padding: 32px 0;
+  border-top: 1px solid var(--card-border);
+}
+
+.featureIcon {
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.featureCard h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
   color: var(--text-primary);
 }
 
-.ctas {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
+.featureCard p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
 }
 
-.ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
+
+/* 4. Final CTA */
+.ctaSection {
+  text-align: center;
+  padding: 120px 24px;
+  background: radial-gradient(circle at 50% 100%, var(--card-bg) 0%, transparent 60%);
+  border-top: 1px solid var(--card-border);
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.ctaSection h2 {
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  margin-bottom: 40px;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
-}
-
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
-}
-
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+@media (max-width: 768px) {
+  .featureGrid {
+    grid-template-columns: 1fr;
   }
 }
