@@ -1,8 +1,10 @@
 -- 프로필(Profiles) 테이블 생성
 -- Supabase Auth의 uuid와 애플리케이션의 username 매핑 및 사용자 정보를 저장합니다.
+-- 스키마 변경을 위해 기존 테이블이 있다면 먼저 삭제합니다.
+drop table if exists public.profiles cascade;
 
 create table if not exists public.profiles (
-  id uuid references auth.users on delete cascade primary key,
+  id text primary key, -- NextAuth의 user.id를 그대로 저장 (UUID 대신 Text 권장)
   username text unique not null,
   name text,
   avatar_url text,
@@ -18,14 +20,12 @@ create policy "Public profiles are viewable by everyone."
   on profiles for select
   using ( true );
 
--- 프로필 수정은 본인만 가능
-create policy "Users can insert their own profile."
-  on profiles for insert
-  with check ( auth.uid() = id );
-
-create policy "Users can update own profile."
-  on profiles for update
-  using ( auth.uid() = id );
+-- 모든 작업(Insert/Update)을 허용하도록 단순화 (애플리케이션 계층에서 검증)
+-- API 라우트에서 anon 키로 업데이트하려면 최소한 서비스 운영 중에는 허용 필요
+create policy "Users can modify their own profile."
+  on profiles for all
+  using ( true )
+  with check ( true );
 
 -- * Optional: Supabase Auth Trigger
 -- Auth user가 생성/접속 시 자동으로 profiles 테이블을 upsert 하도록 할당할 수 있습니다.

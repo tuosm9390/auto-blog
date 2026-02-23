@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 
 export interface Profile {
-  id: string; // uuid
+  id: string; // NextAuth user.id (Text)
   username: string; // github login
   name: string | null;
   avatar_url: string | null;
