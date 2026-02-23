@@ -30,8 +30,8 @@ export default function Home() {
             매력적인 개발자 포트폴리오를 자동으로 생성하세요.
           </p>
           <div className={styles.ctaGroup}>
-            <a href="#demo" className={styles.primaryButton}>무료로 시작하기</a>
-            <a href="#how" className={styles.secondaryButton}>작동 방식 보기</a>
+            <a href="/login" className={styles.primaryButton}>무료로 시작하기</a>
+            <a href="/how-it-works" className={styles.secondaryButton}>작동 방식 보기</a>
           </div>
         </div>
       </section>
