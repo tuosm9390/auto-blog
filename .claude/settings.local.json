@@ -3,7 +3,9 @@
     "allow": [
       "Bash(cd:*)",
       "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm run build 2>&1)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm uninstall @anthropic-ai/sdk 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && rm lib/claude.ts && npm run build 2>&1)"
     ]
   }
 }
