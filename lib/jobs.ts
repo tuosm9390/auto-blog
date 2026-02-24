@@ -99,14 +99,7 @@ export async function runAIAnalysisBackground(
     const repoFullName = `${owner}/${repo}`;
     const result = await analyzeCommits(commitDiffs, repoFullName);
 
-    // 4. Claude polishing pass (prose + SEO)
-    const { polishPost } = await import("./claude");
-    const polished = await polishPost(result);
-    result.content = polished.content;
-    result.summary = polished.summary;
-    result.tags = [...new Set([...result.tags, ...polished.seoKeywords])];
-
-    // 5. 분석 결과와 함께 Job 완료
+    // 4. 분석 결과와 함께 Job 완료
     await updateJobStatus(jobId, "completed", result);
     console.log(`Job ${jobId} completed successfully.`);
   };

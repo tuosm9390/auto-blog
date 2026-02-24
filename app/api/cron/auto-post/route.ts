@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAutoModeUsers, getUnprocessedCommits, recordProcessedCommits } from "@/lib/settings";
 import { getCommitDiff } from "@/lib/github";
 import { analyzeCommits } from "@/lib/ai";
-import { polishPost } from "@/lib/claude";
 import { createPost } from "@/lib/posts";
 
 export async function GET(request: NextRequest) {
@@ -53,12 +52,6 @@ export async function GET(request: NextRequest) {
 
           // Gemini 분석
           const analysisResult = await analyzeCommits(commitDiffs, repo);
-
-          // Claude polishing pass (수동 생성과 동일한 품질 유지)
-          const polished = await polishPost(analysisResult);
-          analysisResult.content = polished.content;
-          analysisResult.summary = polished.summary;
-          analysisResult.tags = [...new Set([...analysisResult.tags, ...polished.seoKeywords])];
 
           const created = await createPost(analysisResult.title, analysisResult.content, {
             summary: analysisResult.summary,
