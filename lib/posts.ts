@@ -188,7 +188,8 @@ export async function createPost(
     .single();
 
   if (error || !data) {
-    throw new Error(`Failed to create post: ${error?.message || "Unknown error"}`);
+    console.error("createPost DB error:", error?.message);
+    throw new Error("포스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 
   return { id: data.id, slug: data.slug };
