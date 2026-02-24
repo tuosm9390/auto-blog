@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. 커밋 목록 확정
+    // 1. 커밋 목록 확정 (사용자 OAuth 토큰 전달 — private repo 접근 지원)
     let shas: string[] = commitShas || [];
     if (shas.length === 0) {
-      const commits = await getRecentCommits(owner, repo, since, until, 10);
+      const commits = await getRecentCommits(owner, repo, since, until, 10, session?.accessToken);
       shas = commits.map((c) => c.sha);
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // 3. 백그라운드 분석 시작 (await 하지 않음)
     // Next.js (Node.js) 환경에서 응답 반환 후에도 프로세스가 유지되도록 함
     // Vercel 환경에서는 request.waitUntil()을 사용하는 것이 권장되지만, 여기선 기본 구현
-    runAIAnalysisBackground(job.id, owner, repo, shas, username).catch(console.error);
+    runAIAnalysisBackground(job.id, owner, repo, shas).catch(console.error);
 
     // 4. 즉시 Job ID 반환
     return NextResponse.json({

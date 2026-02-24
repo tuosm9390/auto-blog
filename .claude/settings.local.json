@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm run build 2>&1)",
+      "Bash(node:*)"
+    ]
+  }
+}

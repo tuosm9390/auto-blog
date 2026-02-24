@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPostByUsernameAndSlug, getPostById } from "@/lib/posts";
+import { getPostByUsernameAndSlug } from "@/lib/posts";
 import { getProfileByUsername } from "@/lib/profiles";
 import PostContent from "@/components/PostContent";
 import UserProfileBox from "@/components/UserProfileBox";
@@ -26,6 +26,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${post.title} — ${plainUsername}`,
     description: post.summary,
+    keywords: post.tags,
+    openGraph: {
+      title: post.title,
+      description: post.summary,
+      type: "article",
+      publishedTime: post.date,
+      authors: [plainUsername],
+      tags: post.tags,
+    },
   };
 }
 
@@ -38,11 +47,12 @@ export default async function PostPage({ params }: PageProps) {
   // 프로필 데이터도 함께 패치
   let profile = await getProfileByUsername(plainUsername);
   if (!profile) {
+    // 방문자 세션이 아닌 작성자 username 기반으로 폴백 프로필 생성
     profile = {
       id: "unknown",
       username: plainUsername,
-      name: session?.user?.name || plainUsername,
-      avatar_url: (session?.user as any)?.avatar_url || session?.user?.image || null,
+      name: plainUsername,
+      avatar_url: null,
       bio: null,
       updated_at: new Date().toISOString()
     };

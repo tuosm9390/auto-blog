@@ -2,19 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAutoModeUsers, getUnprocessedCommits, recordProcessedCommits } from "@/lib/settings";
 import { getCommitDiff } from "@/lib/github";
 import { analyzeCommits } from "@/lib/ai";
+import { polishPost } from "@/lib/claude";
 import { createPost } from "@/lib/posts";
 
 export async function GET(request: NextRequest) {
-  // Vercel Cron 보안 검증
-  const authHeader = request.headers.get("authorization");
+  // CRON_SECRET이 없으면 엔드포인트 자체를 비활성화
   const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    console.error("CRON_SECRET 환경변수가 설정되지 않았습니다.");
+    return NextResponse.json({ error: "서버 설정 오류" }, { status: 500 });
+  }
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "인증 실패" }, { status: 401 });
   }
 
   try {
-    // 자동 모드 설정된 모든 사용자 조회
     const autoUsers = await getAutoModeUsers();
 
     if (autoUsers.length === 0) {
@@ -29,9 +33,6 @@ export async function GET(request: NextRequest) {
     for (const user of autoUsers) {
       for (const repo of user.auto_repos) {
         try {
-          // 미처리 커밋 조회 — Cron에서는 서버 토큰 사용
-          // 참고: 사용자별 토큰이 필요하면 user_settings에 토큰을 저장해야 함
-          // 현재는 서버 GITHUB_TOKEN을 사용 (환경 변수)
           const unprocessed = await getUnprocessedCommits(
             user.github_username,
             repo,
@@ -39,28 +40,26 @@ export async function GET(request: NextRequest) {
           );
 
           if (unprocessed.length === 0) {
-            results.push({
-              username: user.github_username,
-              repo,
-              status: "no_new_commits",
-            });
+            results.push({ username: user.github_username, repo, status: "no_new_commits" });
             continue;
           }
 
-          // 최대 10개 커밋만 처리
-          const commitsToProcess = unprocessed.slice(0, 10);
-          const shas = commitsToProcess.map((c) => c.sha);
+          const shas = unprocessed.slice(0, 10).map((c) => c.sha);
           const [owner, repoName] = repo.split("/");
 
-          // 각 커밋의 diff 조회
           const commitDiffs = await Promise.all(
             shas.map((sha) => getCommitDiff(owner, repoName, sha))
           );
 
-          // AI 분석
+          // Gemini 분석
           const analysisResult = await analyzeCommits(commitDiffs, repo);
 
-          // draft 상태로 포스트 저장
+          // Claude polishing pass (수동 생성과 동일한 품질 유지)
+          const polished = await polishPost(analysisResult);
+          analysisResult.content = polished.content;
+          analysisResult.summary = polished.summary;
+          analysisResult.tags = [...new Set([...analysisResult.tags, ...polished.seoKeywords])];
+
           const created = await createPost(analysisResult.title, analysisResult.content, {
             summary: analysisResult.summary,
             repo,
@@ -70,7 +69,6 @@ export async function GET(request: NextRequest) {
             author: user.github_username,
           });
 
-          // 처리된 커밋 기록
           await recordProcessedCommits(user.github_username, repo, shas, created.id);
 
           results.push({
@@ -80,15 +78,8 @@ export async function GET(request: NextRequest) {
             postId: created.id,
           });
         } catch (repoError) {
-          console.error(
-            `자동 포스팅 실패 [${user.github_username}/${repo}]:`,
-            repoError
-          );
-          results.push({
-            username: user.github_username,
-            repo,
-            status: "error",
-          });
+          console.error(`자동 포스팅 실패 [${user.github_username}/${repo}]:`, repoError);
+          results.push({ username: user.github_username, repo, status: "error" });
         }
       }
     }

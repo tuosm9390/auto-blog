@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getDraftsByAuthor, publishDraft, deletePost } from "@/lib/posts";
+import { getDraftsByAuthor, getPostById, publishDraft, deletePost } from "@/lib/posts";
 
 export async function GET() {
   const session = await auth();
@@ -24,6 +24,15 @@ export async function POST(request: NextRequest) {
 
     if (!postId) {
       return NextResponse.json({ error: "postId가 필요합니다." }, { status: 400 });
+    }
+
+    // 소유권 확인: postId의 작성자가 현재 사용자인지 검증
+    const post = await getPostById(postId);
+    if (!post) {
+      return NextResponse.json({ error: "포스트를 찾을 수 없습니다." }, { status: 404 });
+    }
+    if (post.author !== session.user.username) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     if (action === "publish") {

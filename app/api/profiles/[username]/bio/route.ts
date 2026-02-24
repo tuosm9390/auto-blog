@@ -12,6 +12,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ username
     }
 
     const { bio } = await req.json();
+
+    if (typeof bio !== "string") {
+      return NextResponse.json({ error: "bio는 문자열이어야 합니다." }, { status: 400 });
+    }
+    if (bio.length > 300) {
+      return NextResponse.json({ error: "bio는 300자 이하여야 합니다." }, { status: 400 });
+    }
+
     const success = await updateBio(username, bio);
 
     if (!success) {

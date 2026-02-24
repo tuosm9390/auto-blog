@@ -30,7 +30,7 @@ export async function updateJobStatus(
   result?: GenerateResult,
   errorText?: string
 ): Promise<void> {
-  const updateData: any = {
+  const updateData: { status: JobStatus; updated_at: string; result?: GenerateResult; error?: string } = {
     status,
     updated_at: new Date().toISOString(),
   };
@@ -75,36 +75,48 @@ export async function deleteJob(jobId: string): Promise<boolean> {
   return !error;
 }
 
+const JOB_TIMEOUT_MS = 5 * 60 * 1000; // 5분
+
 export async function runAIAnalysisBackground(
   jobId: string,
   owner: string,
   repo: string,
-  shas: string[],
-  githubUsername: string
+  shas: string[]
 ): Promise<void> {
   const { getCommitDiff } = await import("./github");
   const { analyzeCommits } = await import("./ai");
-  // const { createPost } = await import("./posts");
-  // const { recordProcessedCommits } = await import("./settings");
 
-  try {
+  const run = async () => {
     // 1. 상태를 processing으로 변경
     await updateJobStatus(jobId, "processing");
 
-    // 2. Diff 가져오기
-    // 성능을 위해 최대 5개 커밋만 분석
+    // 2. Diff 가져오기 (최대 5개 커밋)
     const commitDiffs = await Promise.all(
       shas.slice(0, 5).map((sha) => getCommitDiff(owner, repo, sha))
     );
 
-    // 3. AI 분석
+    // 3. AI 분석 (Gemini)
     const repoFullName = `${owner}/${repo}`;
     const result = await analyzeCommits(commitDiffs, repoFullName);
 
-    // 4. 분석 결과와 함께 Job 완료
-    await updateJobStatus(jobId, "completed", result);
+    // 4. Claude polishing pass (prose + SEO)
+    const { polishPost } = await import("./claude");
+    const polished = await polishPost(result);
+    result.content = polished.content;
+    result.summary = polished.summary;
+    result.tags = [...new Set([...result.tags, ...polished.seoKeywords])];
 
+    // 5. 분석 결과와 함께 Job 완료
+    await updateJobStatus(jobId, "completed", result);
     console.log(`Job ${jobId} completed successfully.`);
+  };
+
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Job timed out after 5 minutes")), JOB_TIMEOUT_MS)
+  );
+
+  try {
+    await Promise.race([run(), timeout]);
   } catch (error) {
     const message = error instanceof Error ? error.message : "AI 분석 중 오류 발생";
     console.error(`Job ${jobId} failed:`, error);

@@ -38,7 +38,8 @@ export async function getAllPosts(options?: {
     .order("createdAt", { ascending: false });
 
   if (options?.query) {
-    const q = options.query;
+    // PostgREST or() 필터 구문에서 쉼표와 괄호는 필터 구분자로 해석되므로 제거
+    const q = options.query.replace(/[,()]/g, "");
     queryBuilder = queryBuilder.or(
       `title.ilike.%${q}%,summary.ilike.%${q}%,content.ilike.%${q}%`
     );
@@ -148,11 +149,12 @@ export async function createPost(
 ): Promise<{ id: string; slug: string }> {
   const slug = slugify(title);
 
-  // slug 중복 처리
+  // slug 중복 처리 (최대 100회 시도)
   let uniqueSlug = slug;
   let counter = 1;
+  const MAX_SLUG_ATTEMPTS = 100;
 
-  while (true) {
+  while (counter <= MAX_SLUG_ATTEMPTS) {
     const { data } = await supabase
       .from("posts")
       .select("slug")
@@ -163,6 +165,10 @@ export async function createPost(
 
     uniqueSlug = `${slug}-${counter}`;
     counter++;
+  }
+
+  if (counter > MAX_SLUG_ATTEMPTS) {
+    throw new Error("slug 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 
   const { data, error } = await supabase

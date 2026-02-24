@@ -31,16 +31,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // author는 반드시 세션의 GitHub username만 사용 (name 폴백 제거)
+    const author = session.user.username;
+    if (!author) {
+      return NextResponse.json({ error: "사용자 정보를 확인할 수 없습니다." }, { status: 401 });
+    }
+
     const { id, slug } = await createPost(title, content, {
       summary: summary || "",
       repo: repo || "",
       commits: commits || [],
       tags: tags || [],
       status: status || "published",
-      author: session.user.username || session.user.name || "",
+      author,
     });
 
-    // jobId가 있으면 작업 내역 서비스에서도 삭제 (백그라운드 정리)
     if (jobId) {
       await deleteJob(jobId).catch(err => console.error("Job cleanup error:", err));
     }
@@ -54,6 +59,12 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  // 인증 확인
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const slug = searchParams.get("slug");
 
@@ -64,7 +75,7 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  const deleted = deletePost(slug);
+  const deleted = await deletePost(slug);
   if (!deleted) {
     return NextResponse.json(
       { error: "포스트를 찾을 수 없습니다." },

@@ -80,7 +80,7 @@ For EACH significant code change:
 ## Input Data
 Repository: ${repoFullName}
 
-${commitSummaries.join("\\n\\n---\\n\\n")}
+${commitSummaries.join("\n\n---\n\n")}
 
 ---
 

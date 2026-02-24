@@ -98,9 +98,10 @@ export async function getRecentCommits(
 export async function getCommitDiff(
   owner: string,
   repo: string,
-  sha: string
+  sha: string,
+  token?: string
 ): Promise<CommitDiff> {
-  const octokit = getOctokit();
+  const octokit = getOctokit(token);
 
   const { data } = await octokit.rest.repos.getCommit({
     owner,
