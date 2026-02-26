@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import { Post } from "@/lib/types";
-import PostContent from "@/components/PostContent";
 import { Suspense } from "react";
 import { toast } from "sonner";
-import { useConfirm } from "@/components/ConfirmProvider";
 
 interface Repo {
   name: string;
@@ -22,21 +18,13 @@ interface UserSettingsData {
   auto_schedule: "daily" | "weekly";
 }
 
-type Tab = "settings" | "drafts";
-
 function SettingsContent() {
   const { data: session } = useSession();
-  const searchParams = useSearchParams();
-  const initialTab = (searchParams.get("tab") as Tab) === "drafts" ? "drafts" : "settings";
 
-  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [settings, setSettings] = useState<UserSettingsData | null>(null);
   const [repos, setRepos] = useState<Repo[]>([]);
-  const [drafts, setDrafts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [expandedDraft, setExpandedDraft] = useState<string | null>(null);
-  const confirm = useConfirm();
 
   const username = session?.user?.username;
 
@@ -50,10 +38,9 @@ function SettingsContent() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [settingsResult, reposResult, draftsResult] = await Promise.allSettled([
+      const [settingsResult, reposResult] = await Promise.allSettled([
         fetch("/api/settings").then(r => r.ok ? r.json() : Promise.reject(`settings: ${r.status}`)),
         fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
-        fetch("/api/posts/drafts").then(r => r.ok ? r.json() : Promise.reject(`drafts: ${r.status}`)),
       ]);
       if (settingsResult.status === "fulfilled" && settingsResult.value.settings) {
         setSettings(settingsResult.value.settings);
@@ -61,7 +48,6 @@ function SettingsContent() {
         setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
       }
       if (reposResult.status === "fulfilled" && reposResult.value.repos) setRepos(reposResult.value.repos);
-      if (draftsResult.status === "fulfilled" && draftsResult.value.drafts) setDrafts(draftsResult.value.drafts);
     } catch (err) {
       console.error("데이터 로드 실패:", err);
       setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
@@ -95,30 +81,6 @@ function SettingsContent() {
     setSettings({ ...settings, auto_repos: updated });
   };
 
-  const handleDraftAction = async (postId: string, action: "publish" | "delete") => {
-    const isPublish = action === "publish";
-
-    const isConfirmed = await confirm({
-      title: isPublish ? "초안 게시" : "초안 삭제",
-      description: isPublish
-        ? "🚀 이 초안을 블로그에 정식으로 게시하시겠습니까?"
-        : "🚨 이 초안을 영구적으로 삭제하시겠습니까?\n삭제된 데이터는 다시 복구할 수 없습니다.",
-      confirmText: isPublish ? "게시" : "삭제",
-      destructive: !isPublish,
-    });
-
-    if (!isConfirmed) return;
-
-    try {
-      const res = await fetch("/api/posts/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ postId, action }) });
-      if (!res.ok) throw new Error("처리 실패");
-      setDrafts((prev) => prev.filter((d) => d.id !== postId));
-      toast.success(isPublish ? "🎉 초안이 성공적으로 게시되었습니다!" : "🗑️ 초안이 완전히 삭제되었습니다.");
-    } catch {
-      toast.error(`❌ ${isPublish ? "게시" : "삭제"} 처리에 실패했습니다. 다시 시도해주세요.`);
-    }
-  };
-
   if (!session?.user) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 animate-fade-in-up">
@@ -145,19 +107,7 @@ function SettingsContent() {
       <h1 className="text-3xl font-display font-bold mb-2">설정</h1>
       <p className="text-text-secondary mb-6">포스팅 모드와 자동화 설정을 관리합니다</p>
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-border-subtle mb-6">
-        <button onClick={() => setActiveTab("settings")} className={`px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === "settings" ? "text-text-primary border-b-2 border-accent" : "text-text-tertiary hover:text-text-secondary"}`}>
-          ⚙ 포스팅 설정
-        </button>
-        <button onClick={() => setActiveTab("drafts")} className={`px-4 py-2 text-sm font-medium transition-colors cursor-pointer flex items-center gap-2 ${activeTab === "drafts" ? "text-text-primary border-b-2 border-accent" : "text-text-tertiary hover:text-text-secondary"}`}>
-          📝 초안 관리
-          {drafts.length > 0 && <span className="px-1.5 py-0.5 bg-accent text-black text-xs rounded-full font-bold">{drafts.length}</span>}
-        </button>
-      </div>
-
-      {/* Settings Tab */}
-      {activeTab === "settings" && settings && (
+      {settings && (
         <div className="space-y-6">
           {/* Posting Mode */}
           <div className="border border-border-subtle rounded-xl p-6 space-y-4">
@@ -178,7 +128,7 @@ function SettingsContent() {
                 </div>
                 <div className="text-xs text-text-secondary whitespace-pre-line">
                   {settings.posting_mode === "auto"
-                    ? "새 커밋이 감지되면 AI가 자동으로 초안을 생성합니다.\n초안 관리 탭에서 게시 여부를 선택하세요."
+                    ? "새 커밋이 감지되면 AI가 자동으로 초안을 생성합니다.\n작업 현황에서 게시 여부를 선택하세요."
                     : "직접 커밋을 선택하여 포스트를 생성합니다.\n원하는 시점에 수동으로 분석을 시작할 수 있습니다."}
                 </div>
               </div>
@@ -239,46 +189,6 @@ function SettingsContent() {
               {saving ? "저장 중..." : "설정 저장"}
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Drafts Tab */}
-      {activeTab === "drafts" && (
-        <div className="space-y-4">
-          {drafts.length === 0 ? (
-            <div className="border border-border-subtle rounded-xl p-12 text-center">
-              <div className="text-5xl opacity-50 mb-4">📝</div>
-              <h2 className="text-xl font-semibold mb-2">초안이 없습니다</h2>
-              <p className="text-text-secondary text-sm">자동 포스팅으로 생성된 초안이 여기에 표시됩니다</p>
-            </div>
-          ) : drafts.map((draft) => (
-            <div key={draft.id} className="border border-border-subtle rounded-xl p-6 space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2 text-xs">
-                  <span className="px-2 py-0.5 bg-accent text-black rounded-full font-semibold">초안</span>
-                  {draft.repo && <span className="px-2 py-0.5 border border-border-subtle rounded-full text-text-tertiary">{draft.repo}</span>}
-                  <span className="text-text-tertiary">{draft.date}</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-1">{draft.title}</h3>
-                <p className="text-sm text-text-secondary line-clamp-2">{draft.summary}</p>
-              </div>
-              {draft.tags?.length > 0 && (
-                <div className="flex gap-2 flex-wrap">
-                  {draft.tags.map((tag) => (<span key={tag} className="text-xs text-text-tertiary">#{tag}</span>))}
-                </div>
-              )}
-              <button onClick={() => setExpandedDraft(expandedDraft === draft.id ? null : draft.id)} className="text-sm text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer">
-                {expandedDraft === draft.id ? "내용 접기 ▲" : "내용 보기 ▼"}
-              </button>
-              {expandedDraft === draft.id && (
-                <div className="bg-elevated rounded-lg p-4"><PostContent content={draft.content} /></div>
-              )}
-              <div className="flex gap-2 justify-end">
-                <button onClick={() => handleDraftAction(draft.id, "delete")} className="px-4 py-2 text-sm border border-error/50 text-error rounded-lg hover:bg-error/10 transition-colors cursor-pointer">삭제</button>
-                <button onClick={() => handleDraftAction(draft.id, "publish")} className="px-4 py-2 text-sm bg-success text-black rounded-lg font-semibold hover:opacity-90 transition-all cursor-pointer">✓ 게시하기</button>
-              </div>
-            </div>
-          ))}
         </div>
       )}
     </div>

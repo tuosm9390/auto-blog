@@ -18,6 +18,7 @@ export default function GenerateForm() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [repo, setRepo] = useState("");
   const [commits, setCommits] = useState<CommitInfo[]>([]);
+  const [processedShas, setProcessedShas] = useState<string[]>([]);
   const [selectedShas, setSelectedShas] = useState<string[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
@@ -52,7 +53,13 @@ export default function GenerateForm() {
       const res = await fetch(`/api/github?${new URLSearchParams({ owner, repo })}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setCommits(data.commits); setSelectedShas(data.commits.map((c: CommitInfo) => c.sha)); setStatus("selecting"); setStatusMessage("");
+      
+      const used = data.processedShas || [];
+      setCommits(data.commits); 
+      setProcessedShas(used);
+      setSelectedShas(data.commits.map((c: CommitInfo) => c.sha).filter((sha: string) => !used.includes(sha))); 
+      setStatus("selecting"); 
+      setStatusMessage("");
     } catch (err) { setError(err instanceof Error ? err.message : "커밋 조회 실패"); setStatus("error"); setStatusMessage(""); }
   };
 
@@ -101,14 +108,14 @@ export default function GenerateForm() {
         throw new Error(result.error);
       }
       
-      window.location.href = "/settings"; // 초안 관리 탭으로 이동
+      window.location.href = "/jobs?tab=drafts"; // 초안 관리 탭으로 이동
     } catch (err) {
       setError(err instanceof Error ? err.message : "게시 실패");
       setStatus("error");
     }
   };
 
-  const reset = () => { setCommits([]); setSelectedShas([]); setResult(null); setStatus("idle"); setError(""); setStatusMessage(""); };
+  const reset = () => { setCommits([]); setSelectedShas([]); setProcessedShas([]); setResult(null); setStatus("idle"); setError(""); setStatusMessage(""); };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
@@ -162,16 +169,18 @@ export default function GenerateForm() {
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {commits.map(commit => {
               const selected = selectedShas.includes(commit.sha);
+              const isProcessed = processedShas.includes(commit.sha);
               const dateStr = commit.date ? format(new Date(commit.date), "M/d HH:mm", { locale: ko }) : "";
               return (
-                <div key={commit.sha} onClick={() => toggleCommit(commit.sha)} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${selected ? "border-border-strong bg-elevated" : "border-border-subtle hover:border-border-strong"}`}>
+                <div key={commit.sha} onClick={() => toggleCommit(commit.sha)} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${selected ? "border-border-strong bg-elevated" : "border-border-subtle hover:border-border-strong"} ${isProcessed ? "opacity-75" : ""}`}>
                   <div className={`w-5 h-5 mt-0.5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${selected ? "border-accent bg-accent" : "border-border-strong"}`}>
                     {selected && <span className="text-black text-xs font-bold">✓</span>}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className={`text-sm font-medium truncate ${selected ? "text-text-primary" : "text-text-secondary"}`}>{commit.message.split("\n")[0]}</div>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-text-tertiary">
+                    <div className="flex items-center gap-2 mt-1 text-xs text-text-tertiary flex-wrap">
                       <span className="px-1.5 py-0.5 bg-surface rounded font-mono">{commit.sha.substring(0, 7)}</span>
+                      {isProcessed && <span className="px-1.5 py-0.5 bg-border-subtle text-text-secondary rounded">이미 사용됨</span>}
                       <span>{commit.author}</span>
                       <span>{dateStr}</span>
                     </div>

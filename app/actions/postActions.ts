@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { updatePost, publishDraft, deletePost, createPost } from "@/lib/posts";
 import { deleteJob } from "@/lib/jobs";
+import { recordProcessedCommits } from "@/lib/settings";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -50,6 +51,10 @@ export async function createPostAction(formData: z.infer<typeof createSchema>) {
       author: session.user.username,
     });
 
+    if (repo && commits.length > 0) {
+      await recordProcessedCommits(session.user.username, repo, commits, id);
+    }
+
     if (jobId) {
       await deleteJob(jobId).catch(err => console.error("Job cleanup error:", err));
     }
@@ -93,7 +98,7 @@ export async function publishDraftAction(postId: string) {
 
   const success = await publishDraft(postId);
   if (success) {
-    revalidatePath("/settings"); // Draft 목록 갱신
+    revalidatePath("/jobs"); // Draft 목록 갱신
     return { success: true };
   }
   return { error: "게시에 실패했습니다." };

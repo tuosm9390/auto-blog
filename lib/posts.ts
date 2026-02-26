@@ -24,7 +24,7 @@ interface DbPost {
   status: PostStatus | null;
   author: string | null;
   createdAt: string;
-  deleted_at?: string | null;
+  deletedAt?: string | null;
   deleted_by?: string | null;
 }
 
@@ -38,7 +38,7 @@ export async function getAllPosts(options?: {
   let queryBuilder = supabase
     .from("posts")
     .select("*")
-    .is("deleted_at", null)
+    .is("deletedAt", null)
     .order("createdAt", { ascending: false });
 
   if (options?.query) {
@@ -94,7 +94,7 @@ export async function getPostById(id: string): Promise<Post | null> {
     .from("posts")
     .select("*")
     .eq("id", id)
-    .is("deleted_at", null)
+    .is("deletedAt", null)
     .single();
 
   if (error || !post) {
@@ -119,7 +119,7 @@ export async function getPostByUsernameAndSlug(username: string, slug: string): 
     .from("posts")
     .select("*")
     .eq("author", username)
-    .is("deleted_at", null);
+    .is("deletedAt", null);
 
   if (isUuid) {
     query = query.eq("id", slug);
@@ -208,7 +208,7 @@ export async function deletePost(id: string, username: string): Promise<boolean>
   const { error } = await supabase
     .from("posts")
     .update({
-      deleted_at: new Date().toISOString(),
+      deletedAt: new Date().toISOString(),
       deleted_by: username
     })
     .eq("id", id);
@@ -260,7 +260,7 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
     .select("*")
     .eq("author", author)
     .eq("status", "draft")
-    .is("deleted_at", null)
+    .is("deletedAt", null)
     .order("createdAt", { ascending: false });
 
   if (error || !posts) return [];
@@ -284,7 +284,7 @@ export async function getAllTags(options?: { repo?: string }): Promise<string[]>
     .from("posts")
     .select("tags")
     .eq("status", "published")
-    .is("deleted_at", null);
+    .is("deletedAt", null);
 
   if (options?.repo) {
     queryBuilder = queryBuilder.eq("repo", options.repo);
@@ -309,7 +309,7 @@ export async function getAllRepos(): Promise<string[]> {
     .from("posts")
     .select("repo")
     .eq("status", "published")
-    .is("deleted_at", null);
+    .is("deletedAt", null);
 
   if (error || !data) {
     return [];

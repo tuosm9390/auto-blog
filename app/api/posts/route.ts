@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllPosts, createPost, deletePost } from "@/lib/posts";
 import { deleteJob } from "@/lib/jobs";
+import { recordProcessedCommits } from "@/lib/settings";
 import { auth } from "@/auth";
 import { z } from "zod";
 
@@ -59,6 +60,10 @@ export async function POST(request: NextRequest) {
       status,
       author,
     });
+
+    if (repo && commits.length > 0) {
+      await recordProcessedCommits(author, repo, commits, id);
+    }
 
     if (jobId) {
       await deleteJob(jobId).catch(err => console.error("Job cleanup error:", err));

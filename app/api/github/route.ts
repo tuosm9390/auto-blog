@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRecentCommits } from "@/lib/github";
+import { getProcessedCommitShas } from "@/lib/settings";
 import { auth } from "@/auth";
 
 export async function GET(request: NextRequest) {
@@ -26,7 +27,11 @@ export async function GET(request: NextRequest) {
     // 사용자 OAuth 토큰 우선 사용 (private repo 접근 + 개인 rate limit)
     const token = session.accessToken;
     const commits = await getRecentCommits(owner, repo, since, until, 30, token);
-    return NextResponse.json({ commits });
+    
+    // 이미 분석에 사용된 커밋 목록도 가져옴
+    const processedShas = await getProcessedCommitShas(session.user.username, `${owner}/${repo}`);
+    
+    return NextResponse.json({ commits, processedShas });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "알 수 없는 오류";

@@ -215,12 +215,43 @@ export async function analyzeCommits(
       });
 
       const result = await model.generateContent(prompt);
-      return result.response.text();
+      const text = result.response.text();
+      
+      // JSON 파싱 시도하여 content 내용 확인
+      let cleanText = text.trim();
+      const jsonBlockMatch = cleanText.match(/^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/);
+      if (jsonBlockMatch) {
+        cleanText = jsonBlockMatch[1];
+      }
+      const start = cleanText.indexOf("{");
+      const end = cleanText.lastIndexOf("}");
+      if (start !== -1 && end !== -1 && start < end) {
+        cleanText = cleanText.substring(start, end + 1);
+      }
+      
+      const parsed = JSON.parse(cleanText);
+      const content = parsed.content || "";
+      
+      // Section 1 ~ 4 가 모두 포함되어 있는지 확인
+      const hasSection1 = content.includes("Section 1") || content.includes("도입");
+      const hasSection2 = content.includes("Section 2") || content.includes("변경 사항 분석");
+      const hasSection3 = content.includes("Section 3") || content.includes("영향 분석");
+      const hasSection4 = content.includes("Section 4") || content.includes("핵심 교훈");
+      
+      if (!hasSection1 || !hasSection2 || !hasSection3 || !hasSection4) {
+        throw new Error("Generated content is missing required sections (Section 1~4).");
+      }
+      
+      return text;
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
-      if (retryCount < 3 && (err.status === 429 || err.message?.includes("429"))) {
+      // 429 에러이거나 필수 섹션 누락 에러일 경우 재시도
+      const isRateLimit = err.status === 429 || err.message?.includes("429");
+      const isMissingSection = err.message?.includes("missing required sections");
+      
+      if (retryCount < 3 && (isRateLimit || isMissingSection)) {
         const delay = Math.pow(2, retryCount) * 2000;
-        console.log(`API Rate Limited. Retrying in ${delay}ms...`);
+        console.log(`Generation error or incomplete output: ${err.message}. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/3)`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return generateWithRetry(retryCount + 1);
       }

@@ -51,14 +51,25 @@ export async function GET(request: NextRequest) {
           );
 
           // Gemini 분석
-          const analysisResult = await analyzeCommits(commitDiffs, repo);
+          let analysisResult;
+          try {
+            analysisResult = await analyzeCommits(commitDiffs, repo);
+          } catch (aiError) {
+            console.error(`AI 분석 실패 (또는 포맷 불량) [${repo}]:`, aiError);
+            results.push({ username: user.github_username, repo, status: "ai_analysis_failed" });
+            // AI 분석에 실패했으므로 커밋을 '사용됨'으로 기록하지 않고 다음 레포로 넘어갑니다.
+            continue; 
+          }
+
+          // 자동 포스팅 뱃지를 위해 태그 추가
+          const tags = [...(analysisResult.tags || []), "자동 포스팅"];
 
           const created = await createPost(analysisResult.title, analysisResult.content, {
             summary: analysisResult.summary,
             repo,
             commits: shas,
-            tags: analysisResult.tags,
-            status: "draft",
+            tags,
+            status: "published",
             author: user.github_username,
           });
 
