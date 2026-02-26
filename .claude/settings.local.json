@@ -9,5 +9,6 @@
       "Bash(tail:*)",
       "Bash(grep:*)"
     ]
-  }
+  },
+  "spinnerTipsEnabled": false
 }
