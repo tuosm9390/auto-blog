@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import DOMPurify from "isomorphic-dompurify";
 import "highlight.js/styles/github-dark.css";
 
 interface PostContentProps {
@@ -27,6 +28,10 @@ function normalizeContent(content: string): string {
 
 export default function PostContent({ content }: PostContentProps) {
   const normalizedContent = normalizeContent(content);
+  // DOMPurify를 사용해 혹시 모를 악성 태그 필터링 (이중 보안)
+  const sanitizedContent = DOMPurify.sanitize(normalizedContent, {
+    USE_PROFILES: { html: true }, // 기본 HTML 마크다운 허용
+  });
 
   return (
     <div className="markdown-content">
@@ -34,7 +39,7 @@ export default function PostContent({ content }: PostContentProps) {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
       >
-        {normalizedContent}
+        {sanitizedContent}
       </ReactMarkdown>
     </div>
   );

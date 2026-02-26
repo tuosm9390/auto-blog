@@ -86,13 +86,21 @@ export default function GenerateForm() {
   const publishPostFromJob = async (jobResult: GenerateResult) => {
     setStatus("publishing"); setStatusMessage("포스트 게시 중...");
     try {
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...jobResult, status: "draft" })
+      const { createPostAction } = await import("@/app/actions/postActions");
+      const result = await createPostAction({
+        title: jobResult.title,
+        content: jobResult.content,
+        summary: jobResult.summary,
+        repo: jobResult.repo,
+        commits: jobResult.commits,
+        tags: jobResult.tags,
+        status: "draft"
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
       window.location.href = "/settings"; // 초안 관리 탭으로 이동
     } catch (err) {
       setError(err instanceof Error ? err.message : "게시 실패");

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Post } from "@/lib/types";
 import { toast } from "sonner";
+import { updatePostAction } from "@/app/actions/postActions";
 
 export default function EditForm({ post }: { post: Post }) {
   const router = useRouter();
@@ -27,27 +28,27 @@ export default function EditForm({ post }: { post: Post }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/posts/${post.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          repo: post.repo,
-          commits: post.commits,
-          tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean),
-        }),
+      const result = await updatePostAction({
+        id: post.id,
+        title: formData.title,
+        content: formData.content,
+        summary: formData.summary,
+        repo: post.repo,
+        commits: post.commits,
+        tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean),
       });
 
-      if (!res.ok) throw new Error("수정 실패");
+      if (result.error) {
+        throw new Error(result.error);
+      }
 
       toast.success("🎉 포스트가 성공적으로 수정되었습니다!");
-      const targetSlug = post.id; // slug 인코딩 오류를 방지하기 위해 UUID 경로로 고정
+      const targetSlug = post.id;
       const targetAuthor = post.author || "unknown";
       router.push(`/@${targetAuthor}/${targetSlug}`);
-      router.refresh();
     } catch (error) {
       console.error(error);
-      toast.error("❌ 수정 중 오류가 발생했습니다.");
+      toast.error(error instanceof Error ? error.message : "❌ 수정 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }

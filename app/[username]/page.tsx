@@ -6,7 +6,7 @@ import UserProfileBox from "@/components/UserProfileBox";
 import { Metadata } from "next";
 import { auth } from "@/auth";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -46,9 +46,14 @@ export default async function UserProfilePage({ params }: PageProps) {
     };
   }
 
-  // 해당 유저의 글만 가져오기
-  const posts = await getAllPosts({ query: "", repo: "", tag: "", status: "published" });
-  const userPosts = posts.filter(p => p.author === plainUsername);
+  // 해당 유저의 글만 DB에서 바로 가져오기
+  const userPosts = await getAllPosts({ 
+    query: "", 
+    repo: "", 
+    tag: "", 
+    status: "published",
+    author: plainUsername 
+  });
 
   // 현재 유저가 사용한 태그 및 레포지토리 추출
   const userTags = Array.from(new Set(userPosts.flatMap(p => p.tags || [])));

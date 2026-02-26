@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAllPosts, createPost, deletePost } from "@/lib/posts";
 import { deleteJob } from "@/lib/jobs";
 import { auth } from "@/auth";
+import { z } from "zod";
+
+const createPostSchema = z.object({
+  title: z.string().min(1, "제목은 필수입니다."),
+  content: z.string().min(1, "내용은 필수입니다."),
+  summary: z.string().optional().default(""),
+  repo: z.string().optional().default(""),
+  commits: z.array(z.string()).optional().default([]),
+  tags: z.array(z.string()).optional().default([]),
+  status: z.enum(["draft", "published"]).optional().default("published"),
+  jobId: z.string().optional(),
+});
 
 export async function GET() {
   try {
@@ -22,27 +34,29 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, content, summary, repo, commits, tags, status, jobId } = body;
+    const parsedData = createPostSchema.safeParse(body);
 
-    if (!title || !content) {
+    if (!parsedData.success) {
       return NextResponse.json(
-        { error: "title과 content가 필요합니다." },
+        { error: "잘못된 입력값입니다.", details: parsedData.error.format() },
         { status: 400 }
       );
     }
 
-    // author는 반드시 세션의 GitHub username만 사용 (name 폴백 제거)
+    const { title, content, summary, repo, commits, tags, status, jobId } = parsedData.data;
+
+    // author는 반드시 세션의 GitHub username만 사용
     const author = session.user.username;
     if (!author) {
       return NextResponse.json({ error: "사용자 정보를 확인할 수 없습니다." }, { status: 401 });
     }
 
     const { id, slug } = await createPost(title, content, {
-      summary: summary || "",
-      repo: repo || "",
-      commits: commits || [],
-      tags: tags || [],
-      status: status || "published",
+      summary,
+      repo,
+      commits,
+      tags,
+      status,
       author,
     });
 
@@ -61,7 +75,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   // 인증 확인
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.username) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -75,10 +89,10 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  const deleted = await deletePost(slug);
+  const deleted = await deletePost(slug, session.user.username);
   if (!deleted) {
     return NextResponse.json(
-      { error: "포스트를 찾을 수 없습니다." },
+      { error: "포스트를 찾을 수 없거나 삭제에 실패했습니다." },
       { status: 404 }
     );
   }

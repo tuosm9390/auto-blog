@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getDraftsByAuthor, getPostById, publishDraft, deletePost } from "@/lib/posts";
+import { z } from "zod";
+
+const draftActionSchema = z.object({
+  action: z.enum(["publish", "delete"], {
+    errorMap: () => ({ message: "액션은 'publish' 또는 'delete' 여야 합니다." }),
+  }),
+  postId: z.string().min(1, "postId가 필요합니다."),
+});
 
 export async function GET() {
   const session = await auth();
@@ -19,12 +27,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { action, postId } = body;
-
-    if (!postId) {
-      return NextResponse.json({ error: "postId가 필요합니다." }, { status: 400 });
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "잘못된 요청 본문입니다." }, { status: 400 });
     }
+
+    const parsedData = draftActionSchema.safeParse(body);
+    if (!parsedData.success) {
+      return NextResponse.json(
+        { error: "잘못된 입력값입니다.", details: parsedData.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const { action, postId } = parsedData.data;
 
     // 소유권 확인: postId의 작성자가 현재 사용자인지 검증
     const post = await getPostById(postId);
@@ -44,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "delete") {
-      const success = await deletePost(postId);
+      const success = await deletePost(postId, session.user.username);
       if (!success) {
         return NextResponse.json({ error: "삭제 실패" }, { status: 500 });
       }

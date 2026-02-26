@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPostById, deletePost, updatePost } from "@/lib/posts";
 import { auth } from "@/auth";
+import { z } from "zod";
+
+const updatePostSchema = z.object({
+  title: z.string().min(1, "제목은 필수입니다."),
+  content: z.string().min(1, "내용은 필수입니다."),
+  summary: z.string().optional().default(""),
+  repo: z.string().optional().default(""),
+  commits: z.array(z.string()).optional().default([]),
+  tags: z.array(z.string()).optional().default([]),
+});
 
 interface RouteProps {
   params: Promise<{ id: string }>;
@@ -26,7 +36,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const success = await deletePost(id);
+  const success = await deletePost(id, session.user.username);
   if (success) {
     return NextResponse.json({ success: true });
   } else {
@@ -54,18 +64,28 @@ export async function PUT(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  let body: { title: string; content: string; summary: string; repo: string; commits: string[]; tags: string[] };
+  let body;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "요청 본문이 올바르지 않습니다." }, { status: 400 });
   }
 
-  const success = await updatePost(id, body.title, body.content, {
-    summary: body.summary,
-    repo: body.repo,
-    commits: body.commits,
-    tags: body.tags,
+  const parsedData = updatePostSchema.safeParse(body);
+  if (!parsedData.success) {
+    return NextResponse.json(
+      { error: "잘못된 입력값입니다.", details: parsedData.error.format() },
+      { status: 400 }
+    );
+  }
+
+  const { title, content, summary, repo, commits, tags } = parsedData.data;
+
+  const success = await updatePost(id, title, content, {
+    summary,
+    repo,
+    commits,
+    tags,
   });
 
   if (success) {

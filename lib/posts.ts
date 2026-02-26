@@ -24,17 +24,21 @@ interface DbPost {
   status: PostStatus | null;
   author: string | null;
   createdAt: string;
+  deleted_at?: string | null;
+  deleted_by?: string | null;
 }
 
 export async function getAllPosts(options?: {
   query?: string;
   tag?: string;
   repo?: string;
+  author?: string;
   status?: PostStatus;
 }): Promise<Post[]> {
   let queryBuilder = supabase
     .from("posts")
     .select("*")
+    .is("deleted_at", null)
     .order("createdAt", { ascending: false });
 
   if (options?.query) {
@@ -51,6 +55,10 @@ export async function getAllPosts(options?: {
 
   if (options?.repo) {
     queryBuilder = queryBuilder.eq("repo", options.repo);
+  }
+
+  if (options?.author) {
+    queryBuilder = queryBuilder.eq("author", options.author);
   }
 
   if (options?.status) {
@@ -86,6 +94,7 @@ export async function getPostById(id: string): Promise<Post | null> {
     .from("posts")
     .select("*")
     .eq("id", id)
+    .is("deleted_at", null)
     .single();
 
   if (error || !post) {
@@ -109,7 +118,8 @@ export async function getPostByUsernameAndSlug(username: string, slug: string): 
   let query = supabase
     .from("posts")
     .select("*")
-    .eq("author", username);
+    .eq("author", username)
+    .is("deleted_at", null);
 
   if (isUuid) {
     query = query.eq("id", slug);
@@ -149,26 +159,25 @@ export async function createPost(
 ): Promise<{ id: string; slug: string }> {
   const slug = slugify(title);
 
-  // slug 중복 처리 (최대 100회 시도)
+  // slug 중복 처리 최적화 (N+1 방지를 위해 LIKE 쿼리로 한 번에 조회)
   let uniqueSlug = slug;
-  let counter = 1;
-  const MAX_SLUG_ATTEMPTS = 100;
+  const { data: existingSlugs } = await supabase
+    .from("posts")
+    .select("slug")
+    .like("slug", `${slug}%`);
 
-  while (counter <= MAX_SLUG_ATTEMPTS) {
-    const { data } = await supabase
-      .from("posts")
-      .select("slug")
-      .eq("slug", uniqueSlug)
-      .single();
-
-    if (!data) break;
-
-    uniqueSlug = `${slug}-${counter}`;
-    counter++;
-  }
-
-  if (counter > MAX_SLUG_ATTEMPTS) {
-    throw new Error("slug 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+  if (existingSlugs && existingSlugs.length > 0) {
+    const slugSet = new Set(existingSlugs.map(s => s.slug));
+    if (slugSet.has(slug)) {
+      let counter = 1;
+      while (slugSet.has(`${slug}-${counter}`)) {
+        counter++;
+        if (counter > 100) {
+          throw new Error("slug 생성에 실패했습니다. (중복 과다)");
+        }
+      }
+      uniqueSlug = `${slug}-${counter}`;
+    }
   }
 
   const { data, error } = await supabase
@@ -195,8 +204,14 @@ export async function createPost(
   return { id: data.id, slug: data.slug };
 }
 
-export async function deletePost(id: string): Promise<boolean> {
-  const { error } = await supabase.from("posts").delete().eq("id", id);
+export async function deletePost(id: string, username: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      deleted_at: new Date().toISOString(),
+      deleted_by: username
+    })
+    .eq("id", id);
   return !error;
 }
 
@@ -245,6 +260,7 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
     .select("*")
     .eq("author", author)
     .eq("status", "draft")
+    .is("deleted_at", null)
     .order("createdAt", { ascending: false });
 
   if (error || !posts) return [];
@@ -264,7 +280,11 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
 }
 
 export async function getAllTags(options?: { repo?: string }): Promise<string[]> {
-  let queryBuilder = supabase.from("posts").select("tags").eq("status", "published");
+  let queryBuilder = supabase
+    .from("posts")
+    .select("tags")
+    .eq("status", "published")
+    .is("deleted_at", null);
 
   if (options?.repo) {
     queryBuilder = queryBuilder.eq("repo", options.repo);
@@ -288,7 +308,8 @@ export async function getAllRepos(): Promise<string[]> {
   const { data, error } = await supabase
     .from("posts")
     .select("repo")
-    .eq("status", "published");
+    .eq("status", "published")
+    .is("deleted_at", null);
 
   if (error || !data) {
     return [];

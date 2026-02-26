@@ -1,7 +1,7 @@
 import { getAllPosts, getAllTags, getAllRepos } from "@/lib/posts";
 import PostsClient from "@/components/PostsClient";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
 export default async function HomePage() {
   const posts = await getAllPosts({ query: "", tag: "", repo: "", status: "published" });
