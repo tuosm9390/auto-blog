@@ -6,40 +6,60 @@ import { ko } from "date-fns/locale";
 interface PostCardProps {
   post: Post;
   index: number;
+  href?: string;
 }
 
-export default function PostCard({ post, index }: PostCardProps) {
-  const formattedDate = post.date
-    ? format(new Date(post.date), "yyyy년 M월 d일", { locale: ko })
-    : "";
+export default function PostCard({ post, index, href }: PostCardProps) {
+  const dateObj = new Date(post.date || new Date());
+  const formattedDate = format(dateObj, "yyyy.MM.dd", { locale: ko });
+  const formattedTime = format(dateObj, "HH:mm", { locale: ko });
+
+  const finalHref = href || `/posts/${post.id}`;
+  
+  // 저장소 이름에서 유저명 부분 제거 (예: owner/repo -> repo)
+  const displayRepo = post.repo ? post.repo.split("/").pop() : null;
 
   return (
     <Link
-      href={`/posts/${post.id}`}
-      className="block border border-border-subtle rounded-xl p-6 hover:bg-surface hover:border-border-strong transition-all duration-300 group animate-fade-in-up"
+      href={finalHref}
+      className="flex flex-col h-full border border-border-subtle rounded-2xl p-6 bg-surface/50 hover:bg-surface hover:border-border-strong hover:shadow-lg hover:shadow-accent/5 transition-all duration-300 group animate-fade-in-up cursor-pointer"
       style={{ animationDelay: `${Math.min(index * 0.08, 0.3)}s` }}
     >
-      <div className="flex items-center justify-between mb-3 text-xs">
-        <span className="text-text-tertiary">{formattedDate}</span>
-        {post.repo && (
-          <span className="px-2 py-0.5 border border-border-subtle rounded-full text-text-tertiary">
-            {post.repo}
+      <div className="flex items-start justify-between mb-5 text-[11px] font-medium tracking-tight">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-accent font-bold">@{post.author || "unknown"}</span>
+          <span className="text-text-tertiary">{formattedDate} {formattedTime}</span>
+        </div>
+        {displayRepo && (
+          <span className="px-2 py-0.5 bg-surface-subtle border border-border-subtle rounded text-text-tertiary font-semibold">
+            {displayRepo}
           </span>
         )}
       </div>
-      <h2 className="text-lg font-semibold mb-2 text-text-primary group-hover:text-accent transition-colors line-clamp-2">
-        {post.title}
-      </h2>
-      <p className="text-sm text-text-secondary mb-4 line-clamp-2">
-        {post.summary}
-      </p>
-      {post.tags.length > 0 && (
-        <div className="flex gap-2 flex-wrap">
-          {post.tags.map((tag) => (
-            <span key={tag} className="text-xs text-text-tertiary">
+      
+      <div className="flex-1">
+        <h2 className="text-xl font-bold mb-3 text-text-primary group-hover:text-accent transition-colors line-clamp-2 leading-tight">
+          {post.title}
+        </h2>
+        {post.summary && (
+          <p className="text-sm text-text-secondary line-clamp-3 mb-4 leading-relaxed">
+            {post.summary}
+          </p>
+        )}
+      </div>
+
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex gap-2 flex-wrap mt-auto pt-4 border-t border-border-subtle/50">
+          {post.tags.slice(0, 3).map((tag) => (
+            <span key={tag} className="text-xs text-text-tertiary bg-surface-subtle px-1.5 py-0.5 rounded">
               #{tag}
             </span>
           ))}
+          {post.tags.length > 3 && (
+            <span className="text-xs text-text-tertiary/60 py-0.5">
+              +{post.tags.length - 3}
+            </span>
+          )}
         </div>
       )}
     </Link>

@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import PostCard from "./PostCard";
 import type { Post } from "@/lib/types";
 
 interface PostsClientProps {
@@ -13,7 +11,12 @@ interface PostsClientProps {
   basePath?: string; // 특정 유저 프로필 페이지일 경우 해당 유저 경로 (예: /@username)
 }
 
-export default function PostsClient({ initialPosts, tags, repos, basePath }: PostsClientProps) {
+export default function PostsClient({
+  initialPosts,
+  tags,
+  repos,
+  basePath,
+}: PostsClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRepo, setSelectedRepo] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
@@ -21,7 +24,8 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
   const filteredPosts = initialPosts.filter((post) => {
     const matchQuery =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.summary.toLowerCase().includes(searchQuery.toLowerCase());
+      (post.summary &&
+        post.summary.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchRepo = selectedRepo ? post.repo === selectedRepo : true;
     const matchTag = selectedTag ? post.tags.includes(selectedTag) : true;
     return matchQuery && matchRepo && matchTag;
@@ -45,7 +49,9 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
         >
           <option value="">전체 저장소</option>
           {repos.map((repo) => (
-            <option key={repo} value={repo}>{repo}</option>
+            <option key={repo} value={repo}>
+              {repo}
+            </option>
           ))}
         </select>
         <select
@@ -55,57 +61,36 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
         >
           <option value="">전체 태그</option>
           {tags.map((tag) => (
-            <option key={tag} value={tag}>#{tag}</option>
+            <option key={tag} value={tag}>
+              #{tag}
+            </option>
           ))}
         </select>
       </div>
 
-      {/* 포스트 리스트 (1열) */}
-      <div className="flex flex-col gap-4">
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map((post, idx) => {
+      {/* 포스트 리스트 (그리드 레이아웃) */}
+      {filteredPosts.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPosts.map((post, idx) => {
             const authorPart = post.author || "unknown";
-            const slugPart = post.id; // slug 인코딩 에러 방지 및 고유 식별을 위해 UUID 채택
-            const postHref = basePath ? `${basePath}/${slugPart}` : `/@${authorPart}/${slugPart}`;
+            const slugPart = post.id;
+            const postHref = basePath
+              ? `${basePath}/${slugPart}`
+              : `/@${authorPart}/${slugPart}`;
+
             return (
-              <Link
-                key={post.id}
-                href={postHref}
-                className="block border border-border-subtle rounded-xl p-6 hover:bg-surface hover:border-border-strong transition-all duration-300 group animate-fade-in-up"
-                style={{ animationDelay: `${Math.min(idx * 0.05, 0.3)}s` }}
-              >
-                <div className="flex items-center justify-between mb-3 text-xs">
-                  <div className="flex items-center gap-2">
-                    {!basePath && (
-                      <span className="font-semibold text-accent hover:underline">@{authorPart}</span>
-                    )}
-                    <span className="text-text-tertiary">
-                      {format(new Date(post.date || new Date()), "yyyy.MM.dd", { locale: ko })}
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 border border-border-subtle rounded-full text-text-tertiary">
-                    {post.repo || "Unknown"}
-                  </span>
-                </div>
-                <h2 className="text-lg font-semibold mb-2 text-text-primary group-hover:text-accent transition-colors line-clamp-2">
-                  {post.title}
-                </h2>
-                <p className="text-sm text-text-secondary mb-3 line-clamp-2">{post.summary}</p>
-                <div className="flex gap-2 flex-wrap">
-                  {post.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="text-xs text-text-tertiary">#{tag}</span>
-                  ))}
-                  {post.tags.length > 3 && <span className="text-xs text-text-tertiary">+{post.tags.length - 3}</span>}
-                </div>
-              </Link>
+              <PostCard key={post.id} post={post} index={idx} href={postHref} />
             );
-          })
-        ) : (
-          <div className="text-center py-16 text-text-secondary whitespace-pre-line">
-            <p>조건에 맞는 포스트가 발견되지 않았습니다.{"\n"}다른 검색어나 태그를 선택해 보세요.</p>
-          </div>
-        )}
-      </div>
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-16 text-text-secondary whitespace-pre-line border border-dashed border-border-subtle rounded-xl bg-surface/30">
+          <p>
+            조건에 맞는 포스트가 발견되지 않았습니다.{"\n"}다른 검색어나 태그를
+            선택해 보세요.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
