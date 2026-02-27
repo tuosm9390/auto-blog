@@ -243,11 +243,23 @@ export async function analyzeCommits(
       }
       
       return text;
-    } catch (error: unknown) {
+    } catch (error: any) {
       const err = error as { status?: number; message?: string };
-      // 429 에러이거나 필수 섹션 누락 에러일 경우 재시도
-      const isRateLimit = err.status === 429 || err.message?.includes("429");
+      
+      // 429 에러(Rate Limit 또는 Quota Exceeded) 추출
+      const isRateLimit = err.status === 429 || 
+                          err.message?.includes("429") || 
+                          err.message?.includes("Too Many Requests") ||
+                          err.message?.includes("Quota exceeded");
+      
       const isMissingSection = err.message?.includes("missing required sections");
+      
+      // 429 에러 중 'Daily Quota Exceeded'인 경우 즉시 중단 (재시도 무의미)
+      const isDailyQuotaExceeded = err.message?.includes("quota") && err.message?.includes("limit");
+
+      if (isDailyQuotaExceeded) {
+        throw new Error("Gemini API의 일일 사용량(20회)을 모두 소진했습니다. 내일 다시 시도하거나 API 플랜을 확인해주세요.");
+      }
       
       if (retryCount < 3 && (isRateLimit || isMissingSection)) {
         const delay = Math.pow(2, retryCount) * 2000;
@@ -255,6 +267,12 @@ export async function analyzeCommits(
         await new Promise((resolve) => setTimeout(resolve, delay));
         return generateWithRetry(retryCount + 1);
       }
+      
+      // 재시도 횟수 초과 또는 기타 429 에러
+      if (isRateLimit) {
+        throw new Error("AI 분석 요청이 너무 많습니다. 잠시 후(약 1분 뒤) 다시 시도해 주세요.");
+      }
+
       throw error;
     }
   };

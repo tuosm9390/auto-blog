@@ -111,8 +111,24 @@ export async function runAIAnalysisBackground(
 
   try {
     await Promise.race([run(), timeout]);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "AI 분석 중 오류 발생";
+  } catch (error: any) {
+    let message = "AI 분석 중 오류가 발생했습니다.";
+    
+    if (error instanceof Error) {
+      message = error.message;
+    } else if (typeof error === 'string') {
+      message = error;
+    }
+
+    // 구체적인 에러 타입에 따른 사용자 친화적 문구 보강 (Fallback)
+    if (message.includes("429") || message.includes("quota") || message.includes("limit")) {
+      if (message.includes("20")) {
+        message = "Gemini API 일일 할당량(20회)을 초과했습니다. 내일 다시 시도해주세요.";
+      } else {
+        message = "AI 서비스 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
+      }
+    }
+
     console.error(`Job ${jobId} failed:`, error);
     await updateJobStatus(jobId, "failed", undefined, message);
   }
