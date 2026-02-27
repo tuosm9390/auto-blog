@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { checkAndGetUsage, TIER_LIMITS } from "@/lib/subscription";
+import { supabase } from "@/lib/supabase";
 
 export async function GET() {
   try {
@@ -26,4 +27,28 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+// [테스트 전용] 구독 취소 — Free 티어로 즉시 다운그레이드
+export async function DELETE() {
+  const session = await auth();
+  if (!session?.user?.username) {
+    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      subscription_tier: "free",
+      subscription_status: "canceled",
+      stripe_customer_id: null,
+    })
+    .eq("username", session.user.username);
+
+  if (error) {
+    console.error("구독 취소 실패:", error);
+    return NextResponse.json({ error: "구독 취소에 실패했습니다." }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }

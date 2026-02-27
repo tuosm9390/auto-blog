@@ -37,6 +37,7 @@ function SettingsContent() {
   const [saving, setSaving] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   const username = session?.user?.username;
 
@@ -48,10 +49,28 @@ function SettingsContent() {
   }, [username]);
 
   useEffect(() => {
-    if (searchParams.get("billing") === "success") {
-      toast.success("Pro 구독이 활성화되었습니다! 월 30회 AI 포스트 생성을 즐기세요.");
-    }
-  }, [searchParams]);
+    if (searchParams.get("billing") !== "success") return;
+    const sessionId = searchParams.get("session_id");
+    if (!sessionId) return;
+
+    fetch("/api/subscription/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success || data.alreadyUpdated) {
+          toast.success("Pro 구독이 활성화되었습니다! 월 30회 AI 포스트 생성을 즐기세요.");
+          // 구독 정보 갱신
+          fetch("/api/subscription").then(r => r.ok ? r.json() : null).then(d => { if (d) setSubscription(d); });
+        }
+      })
+      .catch(() => {
+        toast.success("결제가 완료되었습니다. 잠시 후 새로고침해주세요.");
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -87,6 +106,22 @@ function SettingsContent() {
       toast.error(err.message || "구독 관리 포털을 여는 데 실패했습니다.");
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const cancelSubscription = async () => {
+    if (!confirm("구독을 취소하고 Free 플랜으로 전환하시겠습니까?")) return;
+    setCancelLoading(true);
+    try {
+      const res = await fetch("/api/subscription", { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success("구독이 취소되었습니다. Free 플랜으로 전환되었습니다.");
+      setSubscription(prev => prev ? { ...prev, tier: "free", monthlyLimit: 3, remaining: 3 } : null);
+    } catch (err: any) {
+      toast.error(err.message || "구독 취소에 실패했습니다.");
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -178,7 +213,7 @@ function SettingsContent() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-1">
+              <div className="flex gap-3 pt-1 flex-wrap">
                 {subscription.tier === "free" ? (
                   <a
                     href="/pricing"
@@ -187,13 +222,22 @@ function SettingsContent() {
                     Pro로 업그레이드 ✦
                   </a>
                 ) : (
-                  <button
-                    onClick={openPortal}
-                    disabled={portalLoading}
-                    className="px-5 py-2.5 border border-border-strong rounded-lg text-sm font-medium hover:bg-elevated transition-colors disabled:opacity-50"
-                  >
-                    {portalLoading ? "포털 여는 중..." : "구독 관리"}
-                  </button>
+                  <>
+                    <button
+                      onClick={openPortal}
+                      disabled={portalLoading}
+                      className="px-5 py-2.5 border border-border-strong rounded-lg text-sm font-medium hover:bg-elevated transition-colors disabled:opacity-50"
+                    >
+                      {portalLoading ? "포털 여는 중..." : "구독 관리"}
+                    </button>
+                    <button
+                      onClick={cancelSubscription}
+                      disabled={cancelLoading}
+                      className="px-5 py-2.5 border border-error/40 text-error rounded-lg text-sm font-medium hover:bg-error/5 transition-colors disabled:opacity-50"
+                    >
+                      {cancelLoading ? "처리 중..." : "구독 취소 [테스트]"}
+                    </button>
+                  </>
                 )}
               </div>
             </div>

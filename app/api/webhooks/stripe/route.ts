@@ -26,27 +26,33 @@ export async function POST(req: Request) {
       case "checkout.session.completed": {
         const session = event.data.object;
 
-        const userId = session.client_reference_id || session.metadata?.userId;
+        // username은 metadata에 반드시 존재 — id 의존성 제거
+        const username = session.metadata?.username;
         const customerId = session.customer as string;
 
-        if (userId) {
-          const nextResetDate = new Date();
-          nextResetDate.setMonth(nextResetDate.getMonth() + 1);
+        if (!username) {
+          console.error("checkout.session.completed: metadata.username 없음", session.id);
+          break;
+        }
 
-          const { error } = await supabase
-            .from("profiles")
-            .update({
-              stripe_customer_id: customerId,
-              subscription_tier: "pro",
-              subscription_status: "active",
-              usage_count_month: 0,
-              usage_reset_date: nextResetDate.toISOString(),
-            })
-            .eq("id", userId);
+        const nextResetDate = new Date();
+        nextResetDate.setMonth(nextResetDate.getMonth() + 1);
 
-          if (error) {
-            console.error("Supabase Profile update error after checkout:", error);
-          }
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            stripe_customer_id: customerId,
+            subscription_tier: "pro",
+            subscription_status: "active",
+            usage_count_month: 0,
+            usage_reset_date: nextResetDate.toISOString(),
+          })
+          .eq("username", username);
+
+        if (error) {
+          console.error("Supabase Profile update error after checkout:", error);
+        } else {
+          console.log(`checkout.session.completed: ${username} → Pro 승격 완료 (customerId: ${customerId})`);
         }
         break;
       }
