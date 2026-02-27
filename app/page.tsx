@@ -1,12 +1,11 @@
-import { getAllPosts, getAllTags, getAllRepos } from "@/lib/posts";
+import { getAllPosts, getAllTags } from "@/lib/posts";
 import PostsClient from "@/components/PostsClient";
 
 export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
 export default async function HomePage() {
-  const posts = await getAllPosts({ query: "", tag: "", repo: "", status: "published" });
+  const posts = await getAllPosts({ query: "", tag: "", status: "published" });
   const tags = await getAllTags();
-  const repos = await getAllRepos();
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
@@ -18,7 +17,7 @@ export default async function HomePage() {
       </section>
 
       {/* 포스트 리스트 (PostsClient 재사용) */}
-      <PostsClient initialPosts={posts} tags={tags} repos={repos} />
+      <PostsClient initialPosts={posts} tags={tags} />
     </div>
   );
 }

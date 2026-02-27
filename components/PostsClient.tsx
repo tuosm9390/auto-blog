@@ -7,7 +7,7 @@ import type { Post } from "@/lib/types";
 interface PostsClientProps {
   initialPosts: Post[];
   tags: string[];
-  repos: string[];
+  repos?: string[]; // 선택적으로 저장소 필터 지원
   basePath?: string; // 특정 유저 프로필 페이지일 경우 해당 유저 경로 (예: /@username)
 }
 
@@ -42,18 +42,23 @@ export default function PostsClient({
           onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1 bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-strong transition-colors"
         />
-        <select
-          value={selectedRepo}
-          onChange={(e) => setSelectedRepo(e.target.value)}
-          className="bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-secondary focus:outline-none focus:border-border-strong transition-colors cursor-pointer"
-        >
-          <option value="">전체 저장소</option>
-          {repos.map((repo) => (
-            <option key={repo} value={repo}>
-              {repo}
-            </option>
-          ))}
-        </select>
+        
+        {/* repos 데이터가 있을 때만 저장소 필터 표시 */}
+        {repos && repos.length > 0 && (
+          <select
+            value={selectedRepo}
+            onChange={(e) => setSelectedRepo(e.target.value)}
+            className="bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-secondary focus:outline-none focus:border-border-strong transition-colors cursor-pointer"
+          >
+            <option value="">전체 저장소</option>
+            {repos.map((repo) => (
+              <option key={repo} value={repo}>
+                {repo}
+              </option>
+            ))}
+          </select>
+        )}
+
         <select
           value={selectedTag}
           onChange={(e) => setSelectedTag(e.target.value)}
