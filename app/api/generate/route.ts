@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getRecentCommits } from "@/lib/github";
 import { createJob, runAIAnalysisBackground } from "@/lib/jobs";
+import { checkAndGetUsage, incrementUsage } from "@/lib/subscription";
 import { z } from "zod";
 
 const generateSchema = z.object({
@@ -44,6 +45,22 @@ export async function POST(request: NextRequest) {
     }
     // --- Rate Limiting 끝 ---
 
+    // --- 구독 Quota 체크 ---
+    const usage = await checkAndGetUsage(username);
+    if (usage.remaining <= 0) {
+      return NextResponse.json(
+        {
+          error: `이번 달 AI 생성 횟수(${usage.monthlyLimit === 999999 ? "무제한" : usage.monthlyLimit}회)를 모두 사용했습니다. Pro 플랜으로 업그레이드하면 월 30회까지 사용할 수 있습니다.`,
+          quota_exceeded: true,
+          tier: usage.tier,
+          used: usage.usageCount,
+          limit: usage.monthlyLimit,
+        },
+        { status: 403 }
+      );
+    }
+    // --- Quota 체크 끝 ---
+
     let body;
     try {
       body = await request.json();
@@ -78,14 +95,18 @@ export async function POST(request: NextRequest) {
     // 2. Job 생성
     const job = await createJob(username, `${owner}/${repo}`, shas);
 
-    // 3. 백그라운드 분석 시작 (await 하지 않음)
-    runAIAnalysisBackground(job.id, owner, repo, shas).catch(console.error);
+    // 3. 사용량 증가
+    await incrementUsage(username);
 
-    // 4. 즉시 Job ID 반환
+    // 4. 백그라운드 분석 시작 (await 하지 않음, 티어 정보 전달)
+    runAIAnalysisBackground(job.id, owner, repo, shas, usage.tier).catch(console.error);
+
+    // 5. 즉시 Job ID 반환 (남은 사용량 포함)
     return NextResponse.json({
       success: true,
       jobId: job.id,
-      message: "AI 분석 작업이 백그라운드에서 시작되었습니다."
+      message: "AI 분석 작업이 백그라운드에서 시작되었습니다.",
+      remaining: usage.remaining - 1,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "알 수 없는 오류";

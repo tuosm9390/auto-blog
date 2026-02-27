@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function Footer() {
   const [isVisible, setIsVisible] = useState(false);
@@ -86,6 +87,15 @@ export default function Footer() {
               </svg>
               devcraft0416@gmail.com
             </a>
+            <div className="flex items-center gap-4 mt-1">
+              <Link href="/terms" className="text-text-tertiary hover:text-text-secondary text-xs transition-colors">
+                이용약관
+              </Link>
+              <span className="text-border-strong text-xs">·</span>
+              <Link href="/pricing" className="text-text-tertiary hover:text-text-secondary text-xs transition-colors">
+                요금제
+              </Link>
+            </div>
           </div>
         </div>
       </div>

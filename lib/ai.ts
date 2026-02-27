@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
-import { CommitDiff, GenerateResult } from "./types";
+import { CommitDiff, GenerateResult, SubscriptionTier } from "./types";
+import { TIER_LIMITS } from "./subscription";
 
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -186,7 +187,8 @@ export async function analyzeCommits(
 
 export async function analyzeCommits(
   commitDiffs: CommitDiff[],
-  repoFullName: string
+  repoFullName: string,
+  tier: SubscriptionTier = "free"
 ): Promise<GenerateResult> {
   const genAI = getGeminiClient();
   const prompt = buildPrompt(commitDiffs, repoFullName);
@@ -205,7 +207,7 @@ export async function analyzeCommits(
 
   const generateWithRetry = async (retryCount = 0): Promise<string> => {
     try {
-      const modelName = "gemini-2.5-flash-lite"; // flash-lite often stable for high throughput
+      const modelName = TIER_LIMITS[tier].aiModel; // 티어별 AI 모델 동적 선택
       const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig: {

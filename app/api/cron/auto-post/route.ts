@@ -3,6 +3,8 @@ import { getAutoModeUsers, getUnprocessedCommits, recordProcessedCommits } from 
 import { getCommitDiff } from "@/lib/github";
 import { analyzeCommits } from "@/lib/ai";
 import { createPost } from "@/lib/posts";
+import { checkAndGetUsage, incrementUsage, TIER_LIMITS } from "@/lib/subscription";
+import { SubscriptionTier } from "@/lib/types";
 
 export async function GET(request: NextRequest) {
   // CRON_SECRET이 없으면 엔드포인트 자체를 비활성화
@@ -30,8 +32,31 @@ export async function GET(request: NextRequest) {
     const results: { username: string; repo: string; status: string; postId?: string }[] = [];
 
     for (const user of autoUsers) {
-      for (const repo of user.auto_repos) {
+      // 사용자의 구독 상태 및 사용량 확인
+      const usage = await checkAndGetUsage(user.github_username);
+      const tier = usage.tier as SubscriptionTier;
+      const tierLimits = TIER_LIMITS[tier];
+
+      // 사용량 초과 시 해당 사용자 건너뜀
+      if (usage.remaining <= 0) {
+        results.push({ username: user.github_username, repo: "all", status: "quota_exceeded" });
+        continue;
+      }
+
+      // Free 티어: auto_repos 최대 1개만 허용
+      const eligibleRepos = tier === "free"
+        ? user.auto_repos.slice(0, tierLimits.maxAutoRepos)
+        : user.auto_repos;
+
+      for (const repo of eligibleRepos) {
         try {
+          // 레포 처리 전 다시 사용량 체크 (반복 실행 중 초과 방지)
+          const currentUsage = await checkAndGetUsage(user.github_username);
+          if (currentUsage.remaining <= 0) {
+            results.push({ username: user.github_username, repo, status: "quota_exceeded" });
+            break;
+          }
+
           const unprocessed = await getUnprocessedCommits(
             user.github_username,
             repo,
@@ -50,16 +75,18 @@ export async function GET(request: NextRequest) {
             shas.map((sha) => getCommitDiff(owner, repoName, sha))
           );
 
-          // Gemini 분석
+          // Gemini 분석 (티어별 모델 사용)
           let analysisResult;
           try {
-            analysisResult = await analyzeCommits(commitDiffs, repo);
+            analysisResult = await analyzeCommits(commitDiffs, repo, tier);
           } catch (aiError) {
             console.error(`AI 분석 실패 (또는 포맷 불량) [${repo}]:`, aiError);
             results.push({ username: user.github_username, repo, status: "ai_analysis_failed" });
-            // AI 분석에 실패했으므로 커밋을 '사용됨'으로 기록하지 않고 다음 레포로 넘어갑니다.
-            continue; 
+            continue;
           }
+
+          // 사용량 증가
+          await incrementUsage(user.github_username);
 
           // 자동 포스팅 뱃지를 위해 태그 추가
           const tags = [...(analysisResult.tags || []), "자동 포스팅"];

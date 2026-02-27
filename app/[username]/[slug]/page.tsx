@@ -9,6 +9,7 @@ import { ko } from "date-fns/locale";
 import { Metadata } from "next";
 import { auth } from "@/auth";
 import PostControls from "@/components/PostControls";
+import { TIER_LIMITS } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,6 @@ export default async function PostPage({ params }: PageProps) {
   // 프로필 데이터도 함께 패치
   let profile = await getProfileByUsername(plainUsername);
   if (!profile) {
-    // 방문자 세션이 아닌 작성자 username 기반으로 폴백 프로필 생성
     profile = {
       id: "unknown",
       username: plainUsername,
@@ -57,6 +57,10 @@ export default async function PostPage({ params }: PageProps) {
       updated_at: new Date().toISOString()
     };
   }
+
+  // Free 티어 사용자 포스트에는 워터마크 표시
+  const authorTier = profile.subscription_tier || "free";
+  const showWatermark = TIER_LIMITS[authorTier as keyof typeof TIER_LIMITS]?.watermark ?? true;
 
   if (!post) {
     notFound();
@@ -113,6 +117,25 @@ export default async function PostPage({ params }: PageProps) {
       )}
 
       <PostContent content={post.content} />
+
+      {/* Free 티어 워터마크 */}
+      {showWatermark && (
+        <div className="mt-10 pt-6 border-t border-border-subtle flex items-center justify-between">
+          <p className="text-xs text-text-tertiary">
+            이 글은{" "}
+            <a href="/" className="text-accent hover:text-accent-hover transition-colors font-medium">
+              AutoBlog
+            </a>
+            로 자동 생성되었습니다.
+          </p>
+          <a
+            href="/pricing"
+            className="text-xs text-text-tertiary hover:text-text-secondary transition-colors"
+          >
+            워터마크 없애기 →
+          </a>
+        </div>
+      )}
 
       {/* 작성자 프로필 정보 (Compact) */}
       <UserProfileBox profile={profile} variant="compact" />

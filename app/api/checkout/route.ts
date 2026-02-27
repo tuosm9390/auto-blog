@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { auth } from "@/auth";
 import { getProfileByUsername } from "@/lib/profiles";
@@ -10,9 +11,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
     }
 
-    const { priceId } = await req.json();
+    const { tier, cycle } = await req.json();
+    if (!tier || !cycle) {
+      return NextResponse.json({ error: "Tier and cycle parameters are required." }, { status: 400 });
+    }
+
+    let priceId = "";
+    if (tier === "pro" && cycle === "monthly") priceId = process.env.STRIPE_PRO_MONTHLY_PRICE_ID!;
+    if (tier === "pro" && cycle === "yearly") priceId = process.env.STRIPE_PRO_YEARLY_PRICE_ID!;
+    if (tier === "business" && cycle === "monthly") priceId = process.env.STRIPE_BIZ_MONTHLY_PRICE_ID!;
+    if (tier === "business" && cycle === "yearly") priceId = process.env.STRIPE_BIZ_YEARLY_PRICE_ID!;
+
     if (!priceId) {
-      return NextResponse.json({ error: "Price ID가 필요합니다." }, { status: 400 });
+      return NextResponse.json({ error: "해당 요금제의 Price ID가 서버에 설정되어 있지 않습니다." }, { status: 500 });
     }
 
     const profile = await getProfileByUsername(session.user.username);
@@ -21,25 +32,25 @@ export async function POST(req: Request) {
     }
 
     // Stripe Checkout Session 생성
-    const checkoutSession = await stripe.checkout.sessions.create({
+    const checkoutParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
-      payment_method_types: ["card"],
-      customer: profile.stripe_customer_id || undefined,
-      client_reference_id: session.user.id,
-      customer_email: profile.stripe_customer_id ? undefined : (session.user.email || undefined),
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+      client_reference_id: session.user.id ?? undefined,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?billing=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       metadata: {
-        userId: session.user.id,
+        userId: session.user.id ?? "",
         username: session.user.username,
       },
-    });
+    };
+
+    if (profile.stripe_customer_id) {
+      checkoutParams.customer = profile.stripe_customer_id;
+    } else if (session.user.email) {
+      checkoutParams.customer_email = session.user.email;
+    }
+
+    const checkoutSession = await stripe.checkout.sessions.create(checkoutParams);
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error: any) {

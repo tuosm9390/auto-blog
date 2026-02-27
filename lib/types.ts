@@ -27,6 +27,7 @@ export interface CommitDiff {
 export type PostingMode = "auto" | "manual";
 export type PostStatus = "draft" | "published";
 export type AutoSchedule = "daily" | "weekly";
+export type SubscriptionTier = "free" | "pro" | "business";
 
 export interface Post {
   id: string;

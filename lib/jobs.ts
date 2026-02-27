@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { AIJob, JobStatus, GenerateResult } from "./types";
+import { AIJob, JobStatus, GenerateResult, SubscriptionTier } from "./types";
 
 export async function createJob(
   githubUsername: string,
@@ -82,7 +82,8 @@ export async function runAIAnalysisBackground(
   jobId: string,
   owner: string,
   repo: string,
-  shas: string[]
+  shas: string[],
+  tier: SubscriptionTier = "free"
 ): Promise<void> {
   const { getCommitDiff } = await import("./github");
   const { analyzeCommits } = await import("./ai");
@@ -96,9 +97,9 @@ export async function runAIAnalysisBackground(
       shas.slice(0, 5).map((sha) => getCommitDiff(owner, repo, sha))
     );
 
-    // 3. AI 분석 (Gemini)
+    // 3. AI 분석 (Gemini) — 티어별 모델 사용
     const repoFullName = `${owner}/${repo}`;
-    const result = await analyzeCommits(commitDiffs, repoFullName);
+    const result = await analyzeCommits(commitDiffs, repoFullName, tier);
 
     // 4. 분석 결과와 함께 Job 완료
     await updateJobStatus(jobId, "completed", result);

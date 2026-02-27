@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { supabase } from "@/lib/supabase"; // Webhook은 서버 환경이므로 서비스 워커 등 백그라운드에서 접근 가능해야 합니다.
+import { supabase } from "@/lib/supabase";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -25,26 +25,43 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
-        
-        // Checkout 세션 성공 시 유저 프로필 업데이트
+
         const userId = session.client_reference_id || session.metadata?.userId;
         const customerId = session.customer as string;
-        
+
         if (userId) {
-          // 결제가 완료되면 구독 티어를 'pro'로 승격
+          const nextResetDate = new Date();
+          nextResetDate.setMonth(nextResetDate.getMonth() + 1);
+
           const { error } = await supabase
             .from("profiles")
-            .update({ 
+            .update({
               stripe_customer_id: customerId,
-              subscription_tier: "pro", 
+              subscription_tier: "pro",
               subscription_status: "active",
-              // 예: 1개월 후로 초기화 일자 변경 로직 등 추가 가능
+              usage_count_month: 0,
+              usage_reset_date: nextResetDate.toISOString(),
             })
             .eq("id", userId);
 
           if (error) {
             console.error("Supabase Profile update error after checkout:", error);
           }
+        }
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as any;
+        const customerId = invoice.customer as string;
+
+        const { error } = await supabase
+          .from("profiles")
+          .update({ subscription_status: "past_due" })
+          .eq("stripe_customer_id", customerId);
+
+        if (error) {
+          console.error("Supabase update error on payment_failed:", error);
         }
         break;
       }

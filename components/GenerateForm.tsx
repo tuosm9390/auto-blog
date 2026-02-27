@@ -12,6 +12,13 @@ type Status = "idle" | "loading-commits" | "selecting" | "generating" | "preview
 
 interface Repo { name: string; full_name: string; private: boolean; }
 
+interface UsageInfo {
+  tier: string;
+  usageCount: number;
+  monthlyLimit: number;
+  remaining: number;
+}
+
 export default function GenerateForm() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -24,10 +31,12 @@ export default function GenerateForm() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
+  const [usage, setUsage] = useState<UsageInfo | null>(null);
 
   useEffect(() => {
     if (session?.accessToken) {
       fetch("/api/github/repos").then(r => r.json()).then(d => { if (d.repos) setRepos(d.repos); }).catch(console.error);
+      fetch("/api/subscription").then(r => r.ok ? r.json() : null).then(d => { if (d) setUsage(d); }).catch(console.error);
     }
   }, [session]);
 
@@ -119,8 +128,31 @@ export default function GenerateForm() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
-      <h1 className="text-3xl font-display font-bold mb-2">새 포스트 생성</h1>
+      <div className="flex items-start justify-between mb-2">
+        <h1 className="text-3xl font-display font-bold">새 포스트 생성</h1>
+        {usage && (
+          <div className="text-right">
+            <div className="text-xs text-text-tertiary mb-1">이번 달 사용량</div>
+            <div className={`text-sm font-mono font-semibold ${usage.remaining === 0 ? "text-error" : usage.remaining <= 1 ? "text-yellow-500" : "text-text-primary"}`}>
+              {usage.usageCount} / {usage.monthlyLimit === 999999 ? "∞" : usage.monthlyLimit}
+            </div>
+            {usage.remaining === 0 && (
+              <a href="/pricing" className="text-xs text-accent hover:text-accent-hover transition-colors">
+                업그레이드 →
+              </a>
+            )}
+          </div>
+        )}
+      </div>
       <p className="text-text-secondary mb-8">GitHub 레포지토리의 커밋을 AI가 분석하여 블로그 글을 자동으로 작성합니다</p>
+
+      {usage?.remaining === 0 && (
+        <div className="border border-accent/30 bg-accent/5 rounded-xl p-4 mb-6 text-sm">
+          <p className="font-semibold text-text-primary mb-1">이번 달 한도를 모두 사용했습니다</p>
+          <p className="text-text-secondary">Pro 플랜으로 업그레이드하면 월 30회까지 AI 포스트를 생성할 수 있습니다.</p>
+          <a href="/pricing" className="inline-block mt-3 px-4 py-2 bg-accent text-black text-xs font-semibold rounded-lg hover:bg-accent-hover transition-colors">Pro로 업그레이드 ✦</a>
+        </div>
+      )}
 
       {error && <div className="border border-error/50 bg-error/10 rounded-xl p-4 mb-6 text-sm text-error">⚠ {error}</div>}
       {statusMessage && <div className="border border-border-subtle rounded-xl p-4 mb-6 text-sm text-text-secondary text-center">{statusMessage}</div>}

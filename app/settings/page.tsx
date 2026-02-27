@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Suspense } from "react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 interface Repo {
   name: string;
@@ -18,13 +19,24 @@ interface UserSettingsData {
   auto_schedule: "daily" | "weekly";
 }
 
+interface SubscriptionInfo {
+  tier: string;
+  usageCount: number;
+  monthlyLimit: number;
+  remaining: number;
+  resetDate: string | null;
+}
+
 function SettingsContent() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
 
   const [settings, setSettings] = useState<UserSettingsData | null>(null);
   const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const username = session?.user?.username;
 
@@ -35,12 +47,19 @@ function SettingsContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
+  useEffect(() => {
+    if (searchParams.get("billing") === "success") {
+      toast.success("Pro 구독이 활성화되었습니다! 월 30회 AI 포스트 생성을 즐기세요.");
+    }
+  }, [searchParams]);
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const [settingsResult, reposResult] = await Promise.allSettled([
+      const [settingsResult, reposResult, subscriptionResult] = await Promise.allSettled([
         fetch("/api/settings").then(r => r.ok ? r.json() : Promise.reject(`settings: ${r.status}`)),
         fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
+        fetch("/api/subscription").then(r => r.ok ? r.json() : Promise.reject(`subscription: ${r.status}`)),
       ]);
       if (settingsResult.status === "fulfilled" && settingsResult.value.settings) {
         setSettings(settingsResult.value.settings);
@@ -48,11 +67,26 @@ function SettingsContent() {
         setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
       }
       if (reposResult.status === "fulfilled" && reposResult.value.repos) setRepos(reposResult.value.repos);
+      if (subscriptionResult.status === "fulfilled") setSubscription(subscriptionResult.value);
     } catch (err) {
       console.error("데이터 로드 실패:", err);
       setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch (err: any) {
+      toast.error(err.message || "구독 관리 포털을 여는 데 실패했습니다.");
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -109,6 +143,62 @@ function SettingsContent() {
 
       {settings && (
         <div className="space-y-6">
+          {/* Billing Section */}
+          {subscription && (
+            <div className="border border-border-subtle rounded-xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold mb-1">구독 플랜</h2>
+                  <p className="text-sm text-text-secondary">현재 사용 중인 요금제와 이번 달 사용량을 확인합니다</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${subscription.tier === "pro" ? "bg-accent text-black" : subscription.tier === "business" ? "bg-purple-500 text-white" : "bg-elevated border border-border-strong text-text-secondary"}`}>
+                  {subscription.tier === "free" ? "Basic" : subscription.tier === "pro" ? "Pro" : "Business"}
+                </span>
+              </div>
+
+              {/* Usage Bar */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-secondary">이번 달 AI 생성 횟수</span>
+                  <span className="font-mono text-text-primary">
+                    {subscription.usageCount} / {subscription.monthlyLimit === 999999 ? "∞" : subscription.monthlyLimit}
+                  </span>
+                </div>
+                {subscription.monthlyLimit !== 999999 && (
+                  <div className="w-full h-2 bg-elevated rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${subscription.remaining === 0 ? "bg-error" : subscription.remaining <= 1 ? "bg-yellow-500" : "bg-accent"}`}
+                      style={{ width: `${Math.min(100, (subscription.usageCount / subscription.monthlyLimit) * 100)}%` }}
+                    />
+                  </div>
+                )}
+                {subscription.remaining === 0 && (
+                  <p className="text-xs text-error">이번 달 한도를 모두 사용했습니다. Pro 플랜으로 업그레이드하면 월 30회를 사용할 수 있습니다.</p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-1">
+                {subscription.tier === "free" ? (
+                  <a
+                    href="/pricing"
+                    className="px-5 py-2.5 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors text-sm"
+                  >
+                    Pro로 업그레이드 ✦
+                  </a>
+                ) : (
+                  <button
+                    onClick={openPortal}
+                    disabled={portalLoading}
+                    className="px-5 py-2.5 border border-border-strong rounded-lg text-sm font-medium hover:bg-elevated transition-colors disabled:opacity-50"
+                  >
+                    {portalLoading ? "포털 여는 중..." : "구독 관리"}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Posting Mode */}
           <div className="border border-border-subtle rounded-xl p-6 space-y-4">
             <div>

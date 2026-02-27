@@ -14,7 +14,7 @@ export default function PricingClient({ currentTier, isAuthenticated }: PricingC
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
-  const handleCheckout = async (tier: string, priceId: string) => {
+  const handleCheckout = async (tier: string) => {
     if (!isAuthenticated) {
       toast("로그인이 필요합니다", { description: "결제를 진행하려면 먼저 로그인해주세요." });
       router.push("/api/auth/signin");
@@ -31,7 +31,7 @@ export default function PricingClient({ currentTier, isAuthenticated }: PricingC
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ tier, cycle: billingCycle }),
       });
 
       const data = await res.json();
@@ -126,7 +126,7 @@ export default function PricingClient({ currentTier, isAuthenticated }: PricingC
             <li className="flex gap-3"><span className="text-accent">✓</span> 특정 기술 블로그 문체 커스텀</li>
           </ul>
           <button 
-            onClick={() => handleCheckout("pro", billingCycle === "yearly" ? "price_pro_yearly_dummy" : "price_pro_monthly_dummy")}
+            onClick={() => handleCheckout("pro")}
             disabled={isLoading === "pro" || currentTier === "pro"}
             className="w-full py-3 px-4 rounded-xl font-semibold bg-accent text-black hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
@@ -151,7 +151,7 @@ export default function PricingClient({ currentTier, isAuthenticated }: PricingC
             <li className="flex gap-3"><span className="text-accent">✓</span> Notion, Velog 자동 퍼블리싱</li>
           </ul>
           <button 
-            onClick={() => handleCheckout("business", billingCycle === "yearly" ? "price_biz_yearly_dummy" : "price_biz_monthly_dummy")}
+            onClick={() => handleCheckout("business")}
             disabled={isLoading === "business" || currentTier === "business"}
             className="w-full py-3 px-4 rounded-xl font-medium border border-border-strong hover:bg-elevated transition-colors text-text-primary disabled:opacity-50"
           >
