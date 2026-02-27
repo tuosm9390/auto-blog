@@ -20,6 +20,9 @@ export default async function Header() {
           <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium hidden sm:inline">
             서비스 소개
           </Link>
+          <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium hidden sm:inline">
+            요금제
+          </Link>
           {session?.user && (
             <>
               {/* <Link href={`/@${session.user.username}`} className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
