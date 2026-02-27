@@ -6,6 +6,11 @@ export interface Profile {
   name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  stripe_customer_id?: string | null;
+  subscription_tier?: 'free' | 'pro' | 'business';
+  subscription_status?: string;
+  usage_count_month?: number;
+  usage_reset_date?: string;
   updated_at: string;
 }
 
