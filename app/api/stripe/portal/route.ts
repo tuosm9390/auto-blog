@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { stripe } from "@/lib/stripe";
 import { getProfileByUsername } from "@/lib/profiles";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST() {
   try {
@@ -28,8 +28,30 @@ export async function POST() {
       if (customers.data.length > 0) {
         customerId = customers.data[0].id;
 
-        // DB에 저장하여 다음 번엔 바로 사용
-        await supabase
+        // 🔧 이슈 4 수정: Stripe 고객 메타데이터에 username 동기화
+        await stripe.customers.update(customerId, {
+          metadata: { username: session.user.username },
+        });
+
+        // DB에 저장하여 다음 번엔 바로 사용 (🔧 이슈 1: supabaseAdmin 사용)
+        await supabaseAdmin
+          .from("profiles")
+          .update({ stripe_customer_id: customerId })
+          .eq("username", session.user.username);
+      }
+    }
+
+    // 🔧 이슈 4 보강: 이메일 매칭 실패 시 metadata username으로 재시도
+    if (!customerId && session.user.username) {
+      const searchResult = await stripe.customers.search({
+        query: `metadata["username"]:"${session.user.username}"`,
+        limit: 1,
+      });
+
+      if (searchResult.data.length > 0) {
+        customerId = searchResult.data[0].id;
+
+        await supabaseAdmin
           .from("profiles")
           .update({ stripe_customer_id: customerId })
           .eq("username", session.user.username);
@@ -49,7 +71,7 @@ export async function POST() {
     });
 
     return NextResponse.json({ url: portalSession.url });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Stripe Portal Error:", error);
     return NextResponse.json(
       { error: "구독 관리 포털을 여는 중 오류가 발생했습니다." },

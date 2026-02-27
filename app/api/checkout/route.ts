@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { auth } from "@/auth";
 import { getProfileByUsername } from "@/lib/profiles";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(req: Request) {
   try {
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
       metadata: {
         userId: session.user.id ?? "",
         username: session.user.username,
+        tier: tier,
       },
     };
 
@@ -52,8 +54,23 @@ export async function POST(req: Request) {
 
     const checkoutSession = await stripe.checkout.sessions.create(checkoutParams);
 
+    // 🔧 이슈 4: Checkout 완료 후 Stripe Customer의 metadata에 username 동기화
+    if (checkoutSession.customer) {
+      const customerId = typeof checkoutSession.customer === 'string'
+        ? checkoutSession.customer
+        : checkoutSession.customer.id;
+      await stripe.customers.update(customerId, {
+        metadata: { username: session.user.username },
+      });
+      // DB에도 stripe_customer_id 저장
+      await supabaseAdmin
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("username", session.user.username);
+    }
+
     return NextResponse.json({ url: checkoutSession.url });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Stripe Checkout Error:", error);
     return NextResponse.json(
       { error: "결제 세션을 생성하는 중 오류가 발생했습니다." },
