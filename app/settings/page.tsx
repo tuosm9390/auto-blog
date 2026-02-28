@@ -267,6 +267,19 @@ function SettingsContent() {
                 </div>
               </div>
             </button>
+            {/* Auto 모드 활성화 시 사용량 차감 정책 안내 */}
+            {settings.posting_mode === "auto" && (
+              <div className="border border-yellow-500/30 bg-yellow-500/5 rounded-xl p-4 text-sm space-y-1">
+                <p className="font-semibold text-yellow-500">⚠ 자동 포스팅 모드 안내</p>
+                <p className="text-text-secondary leading-relaxed">
+                  자동 포스팅 설정 시 분석이 완료되면 분석 요청 횟수가 차감됩니다.{" "}
+                  <strong className="text-text-primary">
+                    Manual 모드로 진행하실 경우는 분석 완료 전 취소가 가능합니다.
+                  </strong>{" "}
+                  이 점 유의해 주세요.
+                </p>
+              </div>
+            )}
           </div>
 
           {settings.posting_mode === "auto" && (
