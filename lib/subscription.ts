@@ -113,6 +113,24 @@ export async function incrementUsage(username: string): Promise<void> {
   }
 }
 
+// 사용량 1 감소 (Manual 모드에서 분석 취소 시 롤백용)
+// usage_count_month가 0 이하로 내려가지 않도록 방어 처리
+export async function decrementUsage(username: string): Promise<void> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("usage_count_month")
+    .eq("username", username)
+    .single();
+
+  const currentCount = data?.usage_count_month ?? 0;
+  if (currentCount <= 0) return;
+
+  await supabase
+    .from("profiles")
+    .update({ usage_count_month: currentCount - 1 })
+    .eq("username", username);
+}
+
 // 사용량 초기화 (구독 결제 완료 시 호출)
 export async function resetUsage(username: string): Promise<void> {
   const nextResetDate = new Date();

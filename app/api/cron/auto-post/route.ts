@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAutoModeUsers, getUnprocessedCommits, recordProcessedCommits } from "@/lib/settings";
 import { getCommitDiff } from "@/lib/github";
 import { analyzeCommits } from "@/lib/ai";
-import { createPost } from "@/lib/posts";
+import { createPost, getLastPostDate } from "@/lib/posts";
 import { checkAndGetUsage, incrementUsage, TIER_LIMITS } from "@/lib/subscription";
+import { createJob, updateJobStatus } from "@/lib/jobs";
 import { SubscriptionTier } from "@/lib/types";
+
+const DAYS_7_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function GET(request: NextRequest) {
   // CRON_SECRET이 없으면 엔드포인트 자체를 비활성화
@@ -57,6 +60,16 @@ export async function GET(request: NextRequest) {
             break;
           }
 
+          // auto_schedule이 weekly인 경우 마지막 포스트 날짜 확인
+          // 크론은 매일 실행되지만 weekly 설정 사용자는 7일 이내 포스트가 있으면 건너뜀
+          if (user.auto_schedule === "weekly") {
+            const lastPostDate = await getLastPostDate(user.github_username, repo);
+            if (lastPostDate && Date.now() - lastPostDate.getTime() < DAYS_7_MS) {
+              results.push({ username: user.github_username, repo, status: "skipped_weekly_schedule" });
+              continue;
+            }
+          }
+
           const unprocessed = await getUnprocessedCommits(
             user.github_username,
             repo,
@@ -80,7 +93,15 @@ export async function GET(request: NextRequest) {
           try {
             analysisResult = await analyzeCommits(commitDiffs, repo, tier);
           } catch (aiError) {
+            const errorMsg = aiError instanceof Error ? aiError.message : "알 수 없는 오류";
             console.error(`AI 분석 실패 (또는 포맷 불량) [${repo}]:`, aiError);
+            // 실패 내역을 Jobs 테이블에 기록하여 사용자가 /jobs 페이지에서 확인 가능하게 함
+            try {
+              const failedJob = await createJob(user.github_username, repo, shas);
+              await updateJobStatus(failedJob.id, "failed", undefined, `[자동 포스팅] AI 분석 실패: ${errorMsg}`);
+            } catch (jobCreateError) {
+              console.error("실패 Job 기록 중 오류:", jobCreateError);
+            }
             results.push({ username: user.github_username, repo, status: "ai_analysis_failed" });
             continue;
           }
@@ -109,7 +130,15 @@ export async function GET(request: NextRequest) {
             postId: created.id,
           });
         } catch (repoError) {
+          const errorMsg = repoError instanceof Error ? repoError.message : "알 수 없는 오류";
           console.error(`자동 포스팅 실패 [${user.github_username}/${repo}]:`, repoError);
+          // 예상치 못한 오류도 Jobs 테이블에 기록
+          try {
+            const failedJob = await createJob(user.github_username, repo, []);
+            await updateJobStatus(failedJob.id, "failed", undefined, `[자동 포스팅] 처리 중 오류: ${errorMsg}`);
+          } catch (jobCreateError) {
+            console.error("실패 Job 기록 중 오류:", jobCreateError);
+          }
           results.push({ username: user.github_username, repo, status: "error" });
         }
       }
