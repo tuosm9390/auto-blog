@@ -412,4 +412,271 @@ export async function DELETE(request, { params }) {
 
 ---
 
-*문서 작성: Claude (claude-sonnet-4-6) | 브랜치: `claude/add-claude-documentation-efbBr`*
+## 5. P3 구현 상세 — Rate Limiter Redis 전환
+
+> **전제 조건**: Upstash Redis 계정 생성 및 데이터베이스 프로비저닝 필요.
+> 아래 "인프라 설정" 섹션을 먼저 완료한 뒤 코드를 적용해야 합니다.
+
+---
+
+### 5-1. 현재 문제 상세
+
+**파일**: `app/api/generate/route.ts` (line 18-20)
+
+```typescript
+// 현재 구현 — 단일 서버 인스턴스 프로세스 메모리에 저장
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 3;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+```
+
+**발생 가능한 문제:**
+
+| 시나리오 | 결과 |
+|---|---|
+| Vercel 콜드 스타트 (서버리스 인스턴스 재시작) | `rateLimitMap` 초기화 → Rate Limit 우회 가능 |
+| 동시 요청이 서로 다른 Vercel 인스턴스로 라우팅 | 각 인스턴스가 별도 Map → 사용자당 최대 `3 × N개 인스턴스` 요청 허용 |
+| 피크 트래픽 시 오토스케일 | 인스턴스 수 × 3회 요청 허용 — Rate Limit 실질적으로 무력화 |
+
+---
+
+### 5-2. 해결 방향 — Upstash Redis + Sliding Window
+
+**선택 이유:**
+- **Upstash Redis**: HTTP 기반 서버리스 Redis → Vercel Edge/Node.js 모두 호환
+- **Sliding Window 알고리즘**: Fixed Window 대비 경계 시간 버스팅 방지
+- **`@upstash/ratelimit`**: Sliding Window, Fixed Window, Token Bucket 지원 공식 라이브러리
+- **무료 플랜**: 1일 10,000 커맨드 무료 — 소규모 서비스 충분
+
+---
+
+### 5-3. 인프라 설정 (작업 전 선행 필수)
+
+#### Step 1 — Upstash Console에서 Redis 데이터베이스 생성
+
+1. [https://console.upstash.com](https://console.upstash.com) 접속 → 회원가입/로그인
+2. **"Create Database"** 클릭
+3. 설정값:
+   - **Name**: `auto-blog-ratelimit` (자유롭게 설정)
+   - **Type**: Regional (또는 Global — 글로벌이 레이턴시 유리)
+   - **Region**: `ap-northeast-1` (서울 또는 서비스 메인 리전 선택)
+4. 생성 완료 후 **"REST API"** 탭에서 두 값 복사:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+
+#### Step 2 — 환경변수 등록
+
+**.env.local (로컬 개발용):**
+```bash
+UPSTASH_REDIS_REST_URL=https://your-db.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token_here
+```
+
+**Vercel 프로젝트 설정 (프로덕션용):**
+1. Vercel Dashboard → 해당 프로젝트 → Settings → Environment Variables
+2. 위 두 변수를 `Production` / `Preview` / `Development` 모두 등록
+
+또는 **Vercel × Upstash 통합** 사용:
+1. Vercel Dashboard → Integrations → "Upstash" 검색 → Add Integration
+2. Upstash 계정 연결 → 생성한 Redis DB 선택 → 자동으로 환경변수 주입됨
+
+---
+
+### 5-4. 패키지 설치
+
+```bash
+npm install @upstash/ratelimit @upstash/redis
+```
+
+**추가될 의존성:**
+- `@upstash/ratelimit`: Sliding Window / Token Bucket Rate Limiter 구현체
+- `@upstash/redis`: HTTP 기반 Upstash Redis 클라이언트 (서버리스 환경 최적화)
+
+---
+
+### 5-5. 코드 변경
+
+#### Step 1 — `lib/ratelimit.ts` 신규 생성
+
+```typescript
+// lib/ratelimit.ts
+// Upstash Redis 기반 분산 Rate Limiter
+// 다중 Vercel 인스턴스 환경에서도 정확한 Rate Limit 보장
+
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+// Upstash Redis 클라이언트 — 환경변수 미설정 시 null 반환 (빌드 오류 방지)
+function getRedis(): Redis | null {
+  if (
+    !process.env.UPSTASH_REDIS_REST_URL ||
+    !process.env.UPSTASH_REDIS_REST_TOKEN
+  ) {
+    return null;
+  }
+  return new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+}
+
+// Sliding Window Rate Limiter: 1분 슬라이딩 윈도우 내 최대 3회 허용
+// Sliding Window = 요청 시점 기준 직전 60초를 실시간으로 계산 → Fixed Window 경계 버스팅 방지
+let _ratelimit: Ratelimit | null = null;
+
+export function getRatelimit(): Ratelimit | null {
+  if (_ratelimit) return _ratelimit;
+  const redis = getRedis();
+  if (!redis) return null;
+
+  _ratelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(3, "60 s"), // 60초 슬라이딩 윈도우, 최대 3회
+    analytics: true,       // Upstash Console에서 사용 통계 시각화
+    prefix: "auto_blog_rl", // Redis 키 네임스페이스 (다른 서비스와 충돌 방지)
+  });
+
+  return _ratelimit;
+}
+```
+
+#### Step 2 — `app/api/generate/route.ts` Rate Limiter 교체
+
+**변경 전 (인메모리):**
+```typescript
+// 간단한 인메모리 Rate Limiter (유저당 1분에 최대 3회 요청 허용)
+// 주의: 프로덕션 스케일아웃(다중 인스턴스) 환경에서는 Redis 기반(Upstash 등)으로 전환해야 합니다.
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 3;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+
+export async function POST(request: NextRequest) {
+  // ...
+  // --- Rate Limiting 시작 ---
+  const now = Date.now();
+  const userRate = rateLimitMap.get(username);
+
+  if (userRate && now < userRate.resetTime) {
+    if (userRate.count >= RATE_LIMIT_MAX) {
+      return NextResponse.json(
+        { error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." },
+        { status: 429 }
+      );
+    }
+    userRate.count += 1;
+  } else {
+    rateLimitMap.set(username, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+  }
+  // --- Rate Limiting 끝 ---
+```
+
+**변경 후 (Redis Sliding Window):**
+```typescript
+import { getRatelimit } from "@/lib/ratelimit";
+
+// 모듈 레벨 Map 전체 제거 (아래 3줄 삭제)
+// const rateLimitMap = ...
+// const RATE_LIMIT_MAX = ...
+// const RATE_LIMIT_WINDOW_MS = ...
+
+export async function POST(request: NextRequest) {
+  // ...
+  // --- Rate Limiting 시작 (Redis Sliding Window) ---
+  const ratelimit = getRatelimit();
+
+  if (ratelimit) {
+    // Redis 연결 가능한 경우: 분산 Rate Limit 적용
+    const { success, remaining, reset } = await ratelimit.limit(username);
+    if (!success) {
+      const retryAfterSec = Math.ceil((reset - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          error: `요청이 너무 많습니다. ${retryAfterSec}초 후 다시 시도해주세요.`,
+          retryAfter: retryAfterSec,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfterSec),   // 클라이언트 재시도 힌트
+            "X-RateLimit-Remaining": String(remaining),
+            "X-RateLimit-Reset": String(reset),
+          },
+        }
+      );
+    }
+  } else {
+    // Redis 미설정 시: 기존 인메모리 폴백 (로컬 개발 환경 등)
+    // ⚠ 프로덕션에서는 반드시 UPSTASH_REDIS_REST_URL/TOKEN 환경변수 설정 필요
+    console.warn("[RateLimit] Redis 미설정 — 인메모리 폴백 사용 중 (다중 인스턴스 환경에서 비효율)");
+    // 기존 인메모리 로직 유지 (폴백)
+    const now = Date.now();
+    const userRate = rateLimitMap.get(username);
+    if (userRate && now < userRate.resetTime) {
+      if (userRate.count >= RATE_LIMIT_MAX) {
+        return NextResponse.json(
+          { error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." },
+          { status: 429 }
+        );
+      }
+      userRate.count += 1;
+    } else {
+      rateLimitMap.set(username, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    }
+  }
+  // --- Rate Limiting 끝 ---
+```
+
+> **폴백 전략 이유:** `getRatelimit()`이 `null`을 반환하면(환경변수 미설정) 기존 인메모리 방식으로 자동 폴백합니다.
+> 로컬 개발 환경에서 Redis 없이도 서비스가 정상 동작하며, 프로덕션에서만 Redis를 사용합니다.
+
+---
+
+### 5-6. 추가할 환경변수 (`.env.local` 및 Vercel)
+
+```bash
+# Upstash Redis — Rate Limiter용
+# https://console.upstash.com 에서 발급
+UPSTASH_REDIS_REST_URL=https://xxxxx.upstash.io
+UPSTASH_REDIS_REST_TOKEN=AXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+> **CLAUDE.md `Environment Variables Required` 섹션에도 추가 필요:**
+> ```
+> UPSTASH_REDIS_REST_URL
+> UPSTASH_REDIS_REST_TOKEN
+> ```
+
+---
+
+### 5-7. 작업 체크리스트
+
+인프라 설정부터 배포까지 순서대로 진행:
+
+- [ ] **[인프라]** Upstash Console에서 Redis DB 생성
+- [ ] **[인프라]** `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` 발급
+- [ ] **[로컬]** `.env.local`에 환경변수 추가
+- [ ] **[코드]** `npm install @upstash/ratelimit @upstash/redis`
+- [ ] **[코드]** `lib/ratelimit.ts` 신규 생성
+- [ ] **[코드]** `app/api/generate/route.ts` Rate Limiter 교체 (인메모리 → Redis + 폴백)
+- [ ] **[코드]** `CLAUDE.md` 환경변수 목록 업데이트
+- [ ] **[배포]** Vercel Dashboard에 환경변수 등록 (또는 Upstash 통합 사용)
+- [ ] **[검증]** 로컬에서 1분 내 4회 요청 시 429 응답 확인
+- [ ] **[검증]** Upstash Console → Analytics에서 Rate Limit 히트 확인
+
+---
+
+### 5-8. 예상 Redis 사용량 (비용 추정)
+
+Upstash 무료 플랜 한도: **10,000 커맨드/일**
+
+| 사용자 수 | 일평균 생성 요청 | Redis 커맨드 수/일 | 무료 플랜 가능 여부 |
+|---|---|---|---|
+| 100명 | 1회/인 | 약 200 커맨드 | ✅ 가능 |
+| 1,000명 | 2회/인 | 약 4,000 커맨드 | ✅ 가능 |
+| 5,000명 | 3회/인 | 약 30,000 커맨드 | ❌ 유료 플랜 필요 ($0.2/10만 커맨드) |
+
+> Sliding Window는 요청당 Redis 커맨드를 약 2회 소비합니다.
+
+---
+
+*문서 작성: Claude (claude-sonnet-4-6) | 브랜치: `claude/mobile-hamburger-menu-efbBr`*
