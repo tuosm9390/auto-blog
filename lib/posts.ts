@@ -279,6 +279,20 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
   }));
 }
 
+// 특정 사용자/레포의 가장 최근 포스트 생성일 반환 (auto_schedule weekly 체크용)
+export async function getLastPostDate(author: string, repo: string): Promise<Date | null> {
+  const { data } = await supabase
+    .from("posts")
+    .select("createdAt")
+    .eq("author", author)
+    .eq("repo", repo)
+    .order("createdAt", { ascending: false })
+    .limit(1)
+    .single();
+
+  return data?.createdAt ? new Date(data.createdAt) : null;
+}
+
 export async function getAllTags(options?: { repo?: string }): Promise<string[]> {
   let queryBuilder = supabase
     .from("posts")

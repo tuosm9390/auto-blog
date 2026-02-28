@@ -146,6 +146,11 @@ function SettingsContent() {
   const toggleRepo = (fullName: string) => {
     if (!settings) return;
     const current = settings.auto_repos || [];
+    // Free 티어는 자동 포스팅 레포를 1개만 허용 (cron에서 slice(0,1)로 처리되므로 UI도 동일하게 제한)
+    if (!current.includes(fullName) && subscription?.tier === "free" && current.length >= 1) {
+      toast.error("Free 플랜은 자동 포스팅 레포를 1개만 선택할 수 있습니다. Pro로 업그레이드하면 무제한 선택 가능합니다.");
+      return;
+    }
     const updated = current.includes(fullName) ? current.filter((r) => r !== fullName) : [...current, fullName];
     setSettings({ ...settings, auto_repos: updated });
   };
@@ -306,6 +311,13 @@ function SettingsContent() {
                 <div>
                   <h2 className="text-lg font-semibold mb-1">자동 포스팅 대상 레포</h2>
                   <p className="text-sm text-text-secondary">자동으로 커밋을 분석할 레포지토리를 선택하세요</p>
+                  {/* Free 티어 제한 안내 */}
+                  {subscription?.tier === "free" && (
+                    <p className="text-xs text-text-tertiary mt-1">
+                      Free 플랜은 레포 <strong className="text-text-secondary">1개</strong>만 선택 가능합니다.{" "}
+                      <a href="/pricing" className="text-accent hover:text-accent-hover transition-colors">Pro로 업그레이드</a>하면 무제한 선택 가능합니다.
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                   {repos.length === 0 ? (
