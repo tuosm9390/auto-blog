@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { SignIn, SignOut } from "./auth-components";
+import MobileMenu from "./MobileMenu";
 
 export default async function Header() {
   const session = await auth();
@@ -13,25 +14,24 @@ export default async function Header() {
           </div>
           <span className="font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors">AutoBlog</span>
         </Link>
-        <nav className="flex items-center gap-4">
+
+        {/* 데스크탑 nav */}
+        <nav className="hidden sm:flex items-center gap-4">
           <Link href="/generate" className="text-sm text-accent hover:text-accent-hover transition-colors font-medium">
             ✦ 새 글 생성
           </Link>
-          <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium hidden sm:inline">
+          <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
             서비스 소개
           </Link>
-          <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium hidden sm:inline">
+          <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
             요금제
           </Link>
           {session?.user && (
             <>
-              {/* <Link href={`/@${session.user.username}`} className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
-                내 블로그
-              </Link> */}
-              <Link href="/jobs" className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline">
+              <Link href="/jobs" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
                 작업 현황
               </Link>
-              <Link href="/settings" className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline">
+              <Link href="/settings" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
                 설정
               </Link>
             </>
@@ -47,7 +47,7 @@ export default async function Header() {
                     className="w-7 h-7 rounded-full object-cover border border-border-subtle"
                   />
                 )}
-                <span className="text-sm font-medium text-text-primary hidden sm:inline">{session.user.username || session.user.name}</span>
+                <span className="text-sm font-medium text-text-primary">{session.user.username || session.user.name}</span>
               </Link>
               <SignOut />
             </div>
@@ -55,6 +55,16 @@ export default async function Header() {
             <SignIn />
           )}
         </nav>
+
+        {/* 모바일 햄버거 메뉴 */}
+        <div className="sm:hidden">
+          <MobileMenu
+            isLoggedIn={!!session?.user}
+            username={session?.user?.username}
+            userImage={session?.user?.image}
+            userName={session?.user?.name}
+          />
+        </div>
       </div>
     </header>
   );
