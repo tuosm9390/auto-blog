@@ -1,12 +1,9 @@
-import { signIn, signOut } from "@/auth"
+import { signInWithGithub, signOutAction } from "@/app/actions/authActions"
 
 export function SignIn() {
   return (
     <form
-      action={async () => {
-        "use server"
-        await signIn("github")
-      }}
+      action={signInWithGithub}
     >
       <button type="submit" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-elevated border border-border-subtle text-sm font-medium hover:bg-surface hover:border-border-strong transition-all cursor-pointer">
         <svg height="18" width="18" aria-hidden="true" viewBox="0 0 16 16" version="1.1" fill="currentColor">
@@ -21,10 +18,7 @@ export function SignIn() {
 export function SignOut() {
   return (
     <form
-      action={async () => {
-        "use server"
-        await signOut()
-      }}
+      action={signOutAction}
     >
       <button type="submit" className="text-xs text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer">로그아웃</button>
     </form>
