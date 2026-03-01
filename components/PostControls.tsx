@@ -6,7 +6,17 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/ConfirmProvider";
 
-export default function PostControls({ postId, username, slug }: { postId: string, username: string, slug: string }) {
+export default function PostControls({
+  postId,
+  username,
+  slug,
+  variant = "bottom",
+}: {
+  postId: string;
+  username: string;
+  slug: string;
+  variant?: "top" | "bottom";
+}) {
   const router = useRouter();
   const confirm = useConfirm();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -39,6 +49,28 @@ export default function PostControls({ postId, username, slug }: { postId: strin
     }
   };
 
+  // 상단 배치용 — 컴팩트 스타일
+  if (variant === "top") {
+    return (
+      <div className="flex items-center gap-2">
+        <Link
+          href={`/@${username}/${slug}/edit`}
+          className="px-3 py-1.5 border border-border-subtle rounded-lg text-xs font-medium text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+        >
+          수정
+        </Link>
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="px-3 py-1.5 bg-error/10 border border-error/20 text-error rounded-lg text-xs font-medium hover:bg-error/20 hover:border-error/30 transition-colors disabled:opacity-50 cursor-pointer"
+        >
+          {isDeleting ? "삭제 중..." : "삭제"}
+        </button>
+      </div>
+    );
+  }
+
+  // 하단 배치용 — 기존 스타일 유지
   return (
     <div className="mt-8 pt-6 border-t border-border-subtle flex gap-3">
       <Link href={`/@${username}/${slug}/edit`} className="px-5 py-2.5 border border-border-subtle rounded-lg text-sm font-medium text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors cursor-pointer">

@@ -9,6 +9,7 @@ import { ko } from "date-fns/locale";
 import { Metadata } from "next";
 import { auth } from "@/auth";
 import PostControls from "@/components/PostControls";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { TIER_LIMITS } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
@@ -70,11 +71,19 @@ export default async function PostPage({ params }: PageProps) {
     ? format(new Date(post.date), "yyyy년 M월 d일 HH:mm", { locale: ko })
     : "";
 
+  const isOwner = session?.user?.username === plainUsername;
+
   return (
     <article className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
-      <Link href={`/@${plainUsername}`} className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors mb-8">
-        ← @{plainUsername}의 블로그
-      </Link>
+      {/* 상단 네비게이션 행: 뒤로 가기 + 작성자 전용 수정/삭제 버튼 */}
+      <div className="flex items-center justify-between mb-8">
+        <Link href={`/@${plainUsername}`} className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors">
+          ← @{plainUsername}의 블로그
+        </Link>
+        {isOwner && (
+          <PostControls postId={post.id} username={plainUsername} slug={slug} variant="top" />
+        )}
+      </div>
 
       <div className="flex items-center gap-3 text-xs text-text-tertiary mb-4">
         <span>{formattedDate}</span>
@@ -140,8 +149,11 @@ export default async function PostPage({ params }: PageProps) {
       {/* 작성자 프로필 정보 (Compact) */}
       <UserProfileBox profile={profile} variant="compact" />
 
-      {/* 권한 판별: 로그인된 계정과 작성자가 같을 때만 컨트롤 노출 */}
-      {session?.user?.username === plainUsername && <PostControls postId={post.id} username={plainUsername} slug={slug} />}
+      {/* 권한 판별: 로그인된 계정과 작성자가 같을 때만 하단 컨트롤 노출 */}
+      {isOwner && <PostControls postId={post.id} username={plainUsername} slug={slug} />}
+
+      {/* 맨 위로 이동 버튼 (모바일/전체 화면) */}
+      <ScrollToTopButton />
     </article>
   );
 }
