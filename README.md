@@ -1,4 +1,4 @@
-# AutoBlog — AI-Powered Tech Blog Generator
+# synapso.dev — AI-Powered Tech Blog Generator
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)

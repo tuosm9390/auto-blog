@@ -1,4 +1,4 @@
-{
+﻿{
   "Header": {
     "generate": "✦ New Post",
     "about": "About",
@@ -9,7 +9,7 @@
     "signOut": "Sign Out"
   },
   "Footer": {
-    "rights": "© {year} DevCraft. All rights reserved.",
+    "rights": "© {year} Synapso.dev. All rights reserved.",
     "terms": "Terms",
     "pricing": "Pricing",
     "top": "Top",

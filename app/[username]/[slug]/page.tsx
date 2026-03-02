@@ -18,7 +18,9 @@ interface PageProps {
   params: Promise<{ username: string; slug: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { username, slug } = await params;
   // URL 인코딩 처리된 username(예: @hong) 복원 로직 추가 (필요 없을 시 그대로 진행)
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
@@ -55,13 +57,14 @@ export default async function PostPage({ params }: PageProps) {
       name: plainUsername,
       avatar_url: null,
       bio: null,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
   }
 
   // Free 티어 사용자 포스트에는 워터마크 표시
   const authorTier = profile.subscription_tier || "free";
-  const showWatermark = TIER_LIMITS[authorTier as keyof typeof TIER_LIMITS]?.watermark ?? true;
+  const showWatermark =
+    TIER_LIMITS[authorTier as keyof typeof TIER_LIMITS]?.watermark ?? true;
 
   if (!post) {
     notFound();
@@ -77,29 +80,46 @@ export default async function PostPage({ params }: PageProps) {
     <article className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       {/* 상단 네비게이션 행: 뒤로 가기 + 작성자 전용 수정/삭제 버튼 */}
       <div className="flex items-center justify-between mb-8">
-        <Link href={`/@${plainUsername}`} className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors">
+        <Link
+          href={`/@${plainUsername}`}
+          className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors"
+        >
           ← @{plainUsername}의 블로그
         </Link>
         {isOwner && (
-          <PostControls postId={post.id} username={plainUsername} slug={slug} variant="top" />
+          <PostControls
+            postId={post.id}
+            username={plainUsername}
+            slug={slug}
+            variant="top"
+          />
         )}
       </div>
 
       <div className="flex items-center gap-3 text-xs text-text-tertiary mb-4">
         <span>{formattedDate}</span>
         {post.repo && (
-          <span className="px-2 py-0.5 border border-border-subtle rounded-full">{post.repo}</span>
+          <span className="px-2 py-0.5 border border-border-subtle rounded-full">
+            {post.repo}
+          </span>
         )}
       </div>
 
-      <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-4">{post.title}</h1>
+      <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-4">
+        {post.title}
+      </h1>
 
-      <p className="text-lg text-text-secondary mb-6 leading-relaxed">{post.summary}</p>
+      <p className="text-lg text-text-secondary mb-6 leading-relaxed">
+        {post.summary}
+      </p>
 
       {post.tags.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-8">
           {post.tags.map((tag) => (
-            <span key={tag} className="px-2 py-1 border border-border-subtle rounded-full text-xs text-text-tertiary">
+            <span
+              key={tag}
+              className="px-2 py-1 border border-border-subtle rounded-full text-xs text-text-tertiary"
+            >
               #{tag}
             </span>
           ))}
@@ -108,7 +128,9 @@ export default async function PostPage({ params }: PageProps) {
 
       {post.commits.length > 0 && post.repo && (
         <div className="border border-border-subtle rounded-xl p-4 mb-8 bg-surface/50">
-          <div className="text-xs text-text-tertiary uppercase tracking-wider mb-3">관련 커밋</div>
+          <div className="text-xs text-text-tertiary uppercase tracking-wider mb-3">
+            관련 커밋
+          </div>
           <div className="flex gap-2 flex-wrap">
             {post.commits.map((sha) => (
               <a
@@ -132,8 +154,11 @@ export default async function PostPage({ params }: PageProps) {
         <div className="mt-10 pt-6 border-t border-border-subtle flex items-center justify-between">
           <p className="text-xs text-text-tertiary">
             이 글은{" "}
-            <a href="/" className="text-accent hover:text-accent-hover transition-colors font-medium">
-              AutoBlog
+            <a
+              href="/"
+              className="text-accent hover:text-accent-hover transition-colors font-medium"
+            >
+              Synapso.dev
             </a>
             로 자동 생성되었습니다.
           </p>
@@ -150,7 +175,9 @@ export default async function PostPage({ params }: PageProps) {
       <UserProfileBox profile={profile} variant="compact" />
 
       {/* 권한 판별: 로그인된 계정과 작성자가 같을 때만 하단 컨트롤 노출 */}
-      {isOwner && <PostControls postId={post.id} username={plainUsername} slug={slug} />}
+      {isOwner && (
+        <PostControls postId={post.id} username={plainUsername} slug={slug} />
+      )}
 
       {/* 맨 위로 이동 버튼 (모바일/전체 화면) */}
       <ScrollToTopButton />

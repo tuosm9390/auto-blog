@@ -1,4 +1,4 @@
-# AutoBlog 마케팅 콘텐츠 (Marketing Content)
+# synapso.dev 마케팅 콘텐츠 (Marketing Content)
 
 플랫폼별로 바로 사용할 수 있는 마케팅 문구 모음입니다. 한국어 콘텐츠는 상단에, 영어 콘텐츠는 하단에 위치해 있습니다.
 
@@ -19,7 +19,7 @@
 **태그라인**
 
 ```
-AutoBlog — GitHub 커밋을 AI가 기술 블로그 포스트로 자동 변환
+synapso.dev — GitHub 커밋을 AI가 기술 블로그 포스트로 자동 변환
 ```
 
 **소개 문구**
@@ -71,7 +71,7 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 
 ### 4. Twitter / X 스레드 (한국어)
 
-- **스레드 요약**: 매일 커밋은 하지만 글 쓸 시간이 없는 개발자를 위한 서비스 AutoBlog 소개.
+- **스레드 요약**: 매일 커밋은 하지만 글 쓸 시간이 없는 개발자를 위한 서비스 synapso.dev 소개.
 - **핵심 특징**: GitHub OAuth 연동, 60초 내 포스트 생성, 자동 포스팅 모드 지원.
 - **저작권 강조**: 내 코드, 내 글. AI 학습에 사용하지 않음.
 
@@ -84,7 +84,7 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 
 코딩 자체도 바쁜데, 그 내용을 다시 글로 정리하는 건 현실적으로 쉽지 않습니다.
 
-그래서 만들었습니다. GitHub 커밋을 AI가 분석해서 자동으로 기술 블로그 포스트를 완성해주는 서비스, AutoBlog.
+그래서 만들었습니다. GitHub 커밋을 AI가 분석해서 자동으로 기술 블로그 포스트를 완성해주는 서비스, synapso.dev.
 
 단순 커밋 요약이 아닙니다. 코드 변경의 의도와 맥락, 기술적 판단을 시니어 엔지니어의 관점으로 풀어냅니다.
 
@@ -103,7 +103,7 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 
 **본문 주요 내용**:
 
-- 코딩과 글쓰기의 간극을 메우는 AutoBlog 소개.
+- 코딩과 글쓰기의 간극을 메우는 synapso.dev 소개.
 - 완전 자동화 기능 및 Zero Data Retention 정책 안내.
 - 무료 플랜 시작하기 안내.
 
@@ -136,18 +136,18 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 **Tagline**
 
 ```
-AutoBlog — Turn GitHub commits into polished tech blog posts with AI
+synapso.dev — Turn GitHub commits into polished tech blog posts with AI
 ```
 
 **Description**
 
 ```
-AutoBlog analyzes your GitHub commit diffs using Google Gemini and
+synapso.dev analyzes your GitHub commit diffs using Google Gemini and
 automatically generates professional tech blog posts.
 
 🔗 Connect GitHub once → ✍️ AI writes your posts → 🚀 Publish instantly
 
-Instead of just summarizing commits, AutoBlog interprets the *intent*,
+Instead of just summarizing commits, synapso.dev interprets the *intent*,
 *context*, and *impact* of your code changes — the way a senior engineer
 would explain them to their team.
 
@@ -166,7 +166,7 @@ Free tier available. No credit card required.
 
 ### 3. Twitter / X Thread (English)
 
-- **Thread Summary**: Sharing the journey of building AutoBlog to bridge the gap between git history and a readable technical blog.
+- **Thread Summary**: Sharing the journey of building synapso.dev to bridge the gap between git history and a readable technical blog.
 - **Key Advantage**: Not a commit summarizer; it's a technical writer in your pocket.
 - **Data Policy**: 100% ownership, zero retention.
 
@@ -182,16 +182,16 @@ AI-powered tech blog generator. Connect GitHub → select commits → Gemini wri
 
 ### 5. Reddit Post (Showcase & Feedback)
 
-**Title**: [Showcase] AutoBlog(Working title) - Turn your GitHub commits into polished tech blog posts with AI
+**Title**: [Showcase] synapso.dev(Working title) - Turn your GitHub commits into polished tech blog posts with AI
 
 **Body**:
 
 ```
-Hey everyone! I’m the developer behind AutoBlog(Working title).
+Hey everyone! I’m the developer behind synapso.dev(Working title).
 
 Like most of you, I commit code every day, but I always found it hard to find the time to write meaningful technical blog posts. My best work was often buried in Git history, never shared with the world.
 
-So I built **AutoBlog(Working title)**. It connects to your GitHub, analyzes your commit diffs using Google Gemini, and generates a full technical post in under 60 seconds.
+So I built **synapso.dev(Working title)**. It connects to your GitHub, analyzes your commit diffs using Google Gemini, and generates a full technical post in under 60 seconds.
 
 **Why it’s different:**
 - It’s not a commit summarizer. It interprets the *intent* and *context* like a senior engineer would.
