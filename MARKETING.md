@@ -17,15 +17,13 @@
 ### 2. Product Hunt 소개 (한국어 버전)
 
 **태그라인**
-
 ```
 synapso.dev — GitHub 커밋을 AI가 기술 블로그 포스트로 자동 변환
 ```
 
 **소개 문구**
-
 ```
-AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
+synapso.dev는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 기술 블로그 포스트를 자동으로 완성하는 서비스입니다.
 
 🔗 GitHub 연결 → ✍️ AI가 포스트 작성 → 🚀 즉시 발행
@@ -49,21 +47,18 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 ### 3. Dev.to / Hashnode 블로그 포스트 (한국어)
 
 **제목**
-
 ```
 개발자가 기술 블로그를 자동화한 방법: GitHub 커밋 → AI 포스트 자동 생성
 ```
 
 **태그**
-
 ```
 #개발 #AI #자동화 #블로그 #GitHub #Gemini
 ```
 
 **본문 요약**
-
-- **개발자에게 블로그는 왜 항상 미뤄질까?**: 시간이 없기 때문입니다. 모든 노하우가 커밋 로그에만 남고 사라지는 것을 막기 위해 AutoBlog를 만들었습니다.
-- **AutoBlog가 하는 일**: GitHub 연결, 커밋 선택, AI 분석 및 생성(의도 및 트레이드오프 분석), 편집 및 발행의 4단계로 동작합니다.
+- **개발자에게 블로그는 왜 항상 미뤄질까?**: 시간이 없기 때문입니다. 모든 노하우가 커밋 로그에만 남고 사라지는 것을 막기 위해 synapso.dev를 만들었습니다.
+- **synapso.dev가 하는 일**: GitHub 연결, 커밋 선택, AI 분석 및 생성(의도 및 트레이드오프 분석), 편집 및 발행의 4단계로 동작합니다.
 - **단순 요약이 아닌 이유**: 시니어 엔지니어의 관점에서 맥락을 파악하여 읽기 좋은 기술 글로 변환합니다.
 - **저작권 및 보안**: Zero Data Retention 정책으로 코드는 즉시 파기되며 저작권은 100% 사용자에게 있습니다.
 
@@ -102,7 +97,6 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 **제목**: 커밋하면 블로그가 써지는 서비스를 만들었습니다
 
 **본문 주요 내용**:
-
 - 코딩과 글쓰기의 간극을 메우는 synapso.dev 소개.
 - 완전 자동화 기능 및 Zero Data Retention 정책 안내.
 - 무료 플랜 시작하기 안내.
@@ -114,7 +108,6 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 **제목**: GitHub 커밋으로 기술 블로그 자동 생성하는 서비스 만들었습니다 (무료 체험 가능)
 
 **본문**:
-
 - 개발자 본인이 겪은 "시간 부족" 문제를 해결하기 위한 개발기.
 - Gemini AI를 통한 전문적인 분석 기능 강조.
 - 보안과 저작권 귀속에 대한 강력한 약속.
@@ -134,13 +127,11 @@ AutoBlog는 GitHub 커밋 diff를 Google Gemini AI가 분석하여 전문적인
 ### 2. Product Hunt Launch Post (English)
 
 **Tagline**
-
 ```
 synapso.dev — Turn GitHub commits into polished tech blog posts with AI
 ```
 
 **Description**
-
 ```
 synapso.dev analyzes your GitHub commit diffs using Google Gemini and
 automatically generates professional tech blog posts.
@@ -182,16 +173,15 @@ AI-powered tech blog generator. Connect GitHub → select commits → Gemini wri
 
 ### 5. Reddit Post (Showcase & Feedback)
 
-**Title**: [Showcase] synapso.dev(Working title) - Turn your GitHub commits into polished tech blog posts with AI
+**Title**: [Showcase] synapso.dev - Turn your GitHub commits into polished tech blog posts with AI
 
 **Body**:
-
 ```
-Hey everyone! I’m the developer behind synapso.dev(Working title).
+Hey everyone! I’m the developer behind synapso.dev.
 
 Like most of you, I commit code every day, but I always found it hard to find the time to write meaningful technical blog posts. My best work was often buried in Git history, never shared with the world.
 
-So I built **synapso.dev(Working title)**. It connects to your GitHub, analyzes your commit diffs using Google Gemini, and generates a full technical post in under 60 seconds.
+So I built **synapso.dev**. It connects to your GitHub, analyzes your commit diffs using Google Gemini, and generates a full technical post in under 60 seconds.
 
 **Why it’s different:**
 - It’s not a commit summarizer. It interprets the *intent* and *context* like a senior engineer would.
@@ -216,4 +206,4 @@ Looking forward to hearing from you and building a better tool for developers to
 
 ---
 
-_Last Updated: 2026-03-02_
+*Last Updated: 2026-03-02*
