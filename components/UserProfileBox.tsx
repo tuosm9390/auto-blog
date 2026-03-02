@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Profile } from "@/lib/profiles";
 import BioEditor from "./BioEditor";
+import { getTranslations } from "next-intl/server";
 
 interface UserProfileBoxProps {
   profile: Profile;
@@ -8,11 +9,12 @@ interface UserProfileBoxProps {
   isOwner?: boolean;
 }
 
-export default function UserProfileBox({ profile, variant = "large", isOwner = false }: UserProfileBoxProps) {
+export default async function UserProfileBox({ profile, variant = "large", isOwner = false }: UserProfileBoxProps) {
   const isLarge = variant === "large";
   const avatarSize = isLarge ? "w-24 h-24 md:w-32 md:h-32" : "w-16 h-16 md:w-20 md:h-20";
   const titleSize = isLarge ? "text-3xl" : "text-xl md:text-2xl";
   const padding = isLarge ? "pb-10 border-b border-border-subtle" : "py-8 mt-12 border-t border-border-subtle";
+  const t = await getTranslations("Profile");
 
   return (
     <section className={`flex flex-col md:flex-row items-center md:items-start gap-6 ${padding}`}>
@@ -44,7 +46,7 @@ export default function UserProfileBox({ profile, variant = "large", isOwner = f
           <BioEditor initialBio={profile.bio || ""} username={profile.username} />
         ) : (
           <p className="text-text-secondary max-w-2xl leading-relaxed whitespace-pre-wrap">
-            {profile.bio || "작성자 소개글이 없습니다."}
+            {profile.bio || t("noBio")}
           </p>
         )}
       </div>

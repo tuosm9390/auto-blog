@@ -1,99 +1,81 @@
 "use client";
 
 import { useState } from "react";
+import { Post } from "@/lib/types";
 import PostCard from "./PostCard";
-import type { Post } from "@/lib/types";
+import SearchInput from "./SearchInput";
+import TagFilter from "./TagFilter";
+import RepoFilter from "./RepoFilter";
+import { useTranslations } from "next-intl";
 
 interface PostsClientProps {
   initialPosts: Post[];
   tags: string[];
-  repos?: string[]; // 선택적으로 저장소 필터 지원
-  basePath?: string; // 특정 유저 프로필 페이지일 경우 해당 유저 경로 (예: /@username)
+  repos?: string[];
+  basePath?: string;
 }
 
-export default function PostsClient({
-  initialPosts,
-  tags,
-  repos,
-  basePath,
-}: PostsClientProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRepo, setSelectedRepo] = useState("");
-  const [selectedTag, setSelectedTag] = useState("");
+export default function PostsClient({ initialPosts, tags, repos, basePath }: PostsClientProps) {
+  const [query, setValue] = useState("");
+  const [activeTag, setActiveTag] = useState("");
+  const [activeRepo, setActiveRepo] = useState("");
+  const t = useTranslations("Search");
 
   const filteredPosts = initialPosts.filter((post) => {
-    const matchQuery =
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.summary &&
-        post.summary.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchRepo = selectedRepo ? post.repo === selectedRepo : true;
-    const matchTag = selectedTag ? post.tags.includes(selectedTag) : true;
-    return matchQuery && matchRepo && matchTag;
+    const matchesQuery =
+      post.title.toLowerCase().includes(query.toLowerCase()) ||
+      post.summary.toLowerCase().includes(query.toLowerCase());
+    const matchesTag = activeTag === "" || post.tags.includes(activeTag);
+    const matchesRepo = activeRepo === "" || post.repo === activeRepo;
+    return matchesQuery && matchesTag && matchesRepo;
   });
 
   return (
-    <div>
-      {/* 필터 바 */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-8">
-        <input
-          type="text"
-          placeholder="검색어를 입력하세요..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-strong transition-colors"
-        />
-        
-        {/* repos 데이터가 있을 때만 저장소 필터 표시 */}
-        {repos && repos.length > 0 && (
-          <select
-            value={selectedRepo}
-            onChange={(e) => setSelectedRepo(e.target.value)}
-            className="bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-secondary focus:outline-none focus:border-border-strong transition-colors cursor-pointer"
-          >
-            <option value="">전체 저장소</option>
-            {repos.map((repo) => (
-              <option key={repo} value={repo}>
-                {repo}
-              </option>
-            ))}
-          </select>
-        )}
-
-        <select
-          value={selectedTag}
-          onChange={(e) => setSelectedTag(e.target.value)}
-          className="bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-secondary focus:outline-none focus:border-border-strong transition-colors cursor-pointer"
-        >
-          <option value="">전체 태그</option>
-          {tags.map((tag) => (
-            <option key={tag} value={tag}>
-              #{tag}
-            </option>
-          ))}
-        </select>
+    <div className="space-y-8">
+      {/* 필터 섹션 */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+          <SearchInput initialValue={query} onSearch={setValue} />
+          
+          <div className="flex gap-3 w-full md:w-auto">
+            {repos && repos.length > 0 && (
+              <RepoFilter
+                repos={repos}
+                activeRepo={activeRepo}
+                onRepoChange={setActiveRepo}
+                labelAll={t("allRepos")}
+              />
+            )}
+            <TagFilter
+              tags={tags}
+              activeTag={activeTag}
+              onTagChange={setActiveTag}
+              labelAll={t("allTags")}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* 포스트 리스트 (그리드 레이아웃) */}
+      {/* 결과 수 */}
+      <div className="text-xs text-text-tertiary font-medium">
+        {t("totalCount", { count: filteredPosts.length })}
+      </div>
+
+      {/* 그리드 레이아웃 */}
       {filteredPosts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPosts.map((post, idx) => {
-            const authorPart = post.author || "unknown";
-            const slugPart = post.id;
-            const postHref = basePath
-              ? `${basePath}/${slugPart}`
-              : `/@${authorPart}/${slugPart}`;
-
-            return (
-              <PostCard key={post.id} post={post} index={idx} href={postHref} />
-            );
-          })}
+          {filteredPosts.map((post, idx) => (
+            <PostCard 
+              key={post.id} 
+              post={post} 
+              index={idx} 
+              href={basePath ? `${basePath}/${post.slug}` : undefined}
+            />
+          ))}
         </div>
       ) : (
-        <div className="text-center py-16 text-text-secondary whitespace-pre-line border border-dashed border-border-subtle rounded-xl bg-surface/30">
-          <p>
-            조건에 맞는 포스트가 발견되지 않았습니다.{"\n"}다른 검색어나 태그를
-            선택해 보세요.
-          </p>
+        <div className="py-20 text-center border border-dashed border-border-subtle rounded-3xl bg-surface/30">
+          <p className="text-text-tertiary">{t("noResults")}</p>
         </div>
       )}
     </div>

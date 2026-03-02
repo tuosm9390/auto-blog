@@ -79,7 +79,7 @@ export default async function Header() {
                   {session.user.username || session.user.name}
                 </span>
               </Link>
-              <SignOut />
+              <SignOut label={t("signOut")} />
             </div>
           ) : (
             <SignIn />

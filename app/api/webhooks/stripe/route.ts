@@ -6,6 +6,17 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// Price ID 기반 티어 역산 함수 (보완책)
+function getTierFromPriceId(priceId: string): string {
+  if (priceId === process.env.STRIPE_PRO_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PRO_YEARLY_PRICE_ID) {
+    return "pro";
+  }
+  if (priceId === process.env.STRIPE_BIZ_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_BIZ_YEARLY_PRICE_ID) {
+    return "business";
+  }
+  return "free";
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.text();
@@ -26,12 +37,9 @@ export async function POST(req: Request) {
 
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object;
-
-        // username은 metadata에 반드시 존재 — id 의존성 제거
+        const session = event.data.object as Stripe.Checkout.Session;
         const username = session.metadata?.username;
         const customerId = session.customer as string;
-        // 🔧 이슈 2 수정: metadata에서 tier 읽기 (하드코딩 제거)
         const purchasedTier = session.metadata?.tier || "pro";
 
         if (!username) {
@@ -42,7 +50,6 @@ export async function POST(req: Request) {
         const nextResetDate = new Date();
         nextResetDate.setMonth(nextResetDate.getMonth() + 1);
 
-        // 🔧 이슈 1 수정: supabaseAdmin 사용 (RLS 우회)
         const { error } = await supabaseAdmin
           .from("profiles")
           .update({
@@ -56,8 +63,6 @@ export async function POST(req: Request) {
 
         if (error) {
           console.error("Supabase Profile update error after checkout:", error);
-        } else {
-          console.log(`checkout.session.completed: ${username} → ${purchasedTier} 승격 완료 (customerId: ${customerId})`);
         }
         break;
       }
@@ -66,14 +71,10 @@ export async function POST(req: Request) {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
 
-        const { error } = await supabaseAdmin
+        await supabaseAdmin
           .from("profiles")
           .update({ subscription_status: "past_due" })
           .eq("stripe_customer_id", customerId);
-
-        if (error) {
-          console.error("Supabase update error on payment_failed:", error);
-        }
         break;
       }
       
@@ -81,13 +82,14 @@ export async function POST(req: Request) {
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
-        
-        // 구독 상태가 변경(취소, 미납 등)되었을 때 반영
         const status = subscription.status;
-        // 🔧 이슈 2 수정: metadata에서 tier 확인, 없으면 active 여부로 판단
-        const tier = status === "active"
-          ? (subscription.metadata?.tier || "pro")
-          : "free";
+        
+        // 🔧 개선: metadata뿐만 아니라 Price ID를 직접 대조하여 티어 결정
+        let tier = "free";
+        if (status === "active") {
+          const priceId = subscription.items.data[0].price.id;
+          tier = subscription.metadata?.tier || getTierFromPriceId(priceId);
+        }
 
         const { error } = await supabaseAdmin
           .from("profiles")

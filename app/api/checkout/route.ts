@@ -44,6 +44,13 @@ export async function POST(req: Request) {
         username: session.user.username,
         tier: tier,
       },
+      // 🔧 중요: 생성되는 구독(Subscription) 객체에도 메타데이터 전파
+      subscription_data: {
+        metadata: {
+          username: session.user.username,
+          tier: tier,
+        }
+      }
     };
 
     if (profile.stripe_customer_id) {
@@ -54,15 +61,16 @@ export async function POST(req: Request) {
 
     const checkoutSession = await stripe.checkout.sessions.create(checkoutParams);
 
-    // 🔧 이슈 4: Checkout 완료 후 Stripe Customer의 metadata에 username 동기화
     if (checkoutSession.customer) {
       const customerId = typeof checkoutSession.customer === 'string'
         ? checkoutSession.customer
         : checkoutSession.customer.id;
+      
+      // Customer 객체에도 유저 정보 저장 (동기화 보장)
       await stripe.customers.update(customerId, {
         metadata: { username: session.user.username },
       });
-      // DB에도 stripe_customer_id 저장
+
       await supabaseAdmin
         .from("profiles")
         .update({ stripe_customer_id: customerId })

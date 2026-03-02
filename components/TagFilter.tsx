@@ -1,47 +1,32 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+interface TagFilterProps {
+  tags: string[];
+  activeTag: string;
+  onTagChange: (tag: string) => void;
+  labelAll?: string;
+}
 
-export default function TagFilter({ tags }: { tags: string[] }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentTag = searchParams.get("tag");
-
-  const toggleTag = (tag: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (currentTag === tag) {
-      params.delete("tag");
-    } else {
-      params.set("tag", tag);
-    }
-    router.push(`/posts?${params.toString()}`);
-  };
-
+export default function TagFilter({ 
+  tags, 
+  activeTag, 
+  onTagChange, 
+  labelAll = "All Tags" 
+}: TagFilterProps) {
   if (tags.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-xs text-text-tertiary font-medium">Tags:</span>
+    <select
+      className="bg-surface border border-border-subtle rounded-lg px-4 py-2 text-sm text-text-secondary focus:outline-none focus:border-border-strong transition-colors cursor-pointer min-w-32"
+      value={activeTag}
+      onChange={(e) => onTagChange(e.target.value)}
+    >
+      <option value="">{labelAll}</option>
       {tags.map((tag) => (
-        <button
-          key={tag}
-          onClick={() => toggleTag(tag)}
-          className={`px-2.5 py-1 rounded-full text-xs transition-all cursor-pointer ${currentTag === tag
-              ? "bg-accent text-black font-semibold"
-              : "border border-border-subtle text-text-secondary hover:border-border-strong"
-            }`}
-        >
+        <option key={tag} value={tag}>
           #{tag}
-        </button>
+        </option>
       ))}
-      {currentTag && (
-        <button
-          onClick={() => router.push("/posts")}
-          className="px-2.5 py-1 rounded-full text-xs text-error border border-error/50 hover:bg-error/10 transition-colors cursor-pointer"
-        >
-          ✕ 초기화
-        </button>
-      )}
-    </div>
+    </select>
   );
 }

@@ -21,7 +21,9 @@
   },
   "About": {
     "heroTag": "Automated Tech Blogging",
-    "heroTitle": "Just ship code.\nAI writes your {ai} tech blog.",
+    "heroTitle1": "Just ship code.",
+    "heroTitle2Prefix": "AI writes your",
+    "heroTitle2Suffix": "tech blog.",
     "heroDesc": "Analyze GitHub commits and automatically generate professional tech blog posts.\nFocus on coding — AI handles the rest.",
     "ctaPosts": "View Posts",
     "ctaStart": "Get Started",
@@ -67,7 +69,9 @@
     "featureWatermark": "Synapso.dev watermark included",
     "feature30": "30 AI post generations per month",
     "featureUnlimited": "Unlimited post generations",
-    "popular": "MOST POPULAR"
+    "popular": "MOST POPULAR",
+    "loginRequired": "Login required",
+    "loginRequiredDesc": "Please sign in to proceed with payment."
   },
   "Generate": {
     "title": "New Post",
@@ -89,6 +93,96 @@
     "publish": "Publish",
     "viewPost": "View Post →"
   },
+  "Jobs": {
+    "title": "Jobs",
+    "desc": "Track ongoing AI analysis and managed generated drafts",
+    "newPost": "+ Create New Post",
+    "tabJobs": "⚙️ Analysis Status",
+    "tabDrafts": "📝 Draft Inbox",
+    "loading": "Loading jobs...",
+    "empty": "No jobs yet",
+    "emptyDesc": "Select a GitHub commit to start analyzing.",
+    "startBtn": "Start Analyzing",
+    "statusCompleted": "Completed",
+    "statusFailed": "Failed",
+    "statusProcessing": "Analyzing",
+    "statusPending": "Pending",
+    "expand": "Preview ▼",
+    "collapse": "Collapse ▲",
+    "createDraft": "✓ Create Draft",
+    "creating": "Creating...",
+    "deleteJob": "Delete Record",
+    "noDrafts": "No drafts found",
+    "noDraftsDesc": "Generated drafts will appear here",
+    "publish": "✓ Publish",
+    "delete": "Delete"
+  },
+  "Settings": {
+    "title": "Settings",
+    "desc": "Manage your posting mode and automation preferences",
+    "loginRequired": "Sign in is required to access settings.",
+    "loading": "Loading settings...",
+    "planTitle": "Subscription Plan",
+    "planDesc": "Check your current plan and monthly usage",
+    "usageCount": "AI Generations This Month",
+    "limitReached": "You've reached your monthly limit. Upgrade to Pro for 30 generations/month.",
+    "upgradeBtn": "Upgrade to Pro ✦",
+    "manageSub": "Manage Subscription",
+    "cancelSub": "Cancel Subscription [Test]",
+    "modeTitle": "Posting Mode",
+    "modeDesc": "Enable Auto Mode to automatically analyze new commits and create drafts.\nYou decide when to publish.",
+    "modeAuto": "Auto Mode Enabled",
+    "modeManual": "Manual Mode",
+    "modeAutoDesc": "AI generates drafts automatically when new commits are detected.\nPublish them from the Jobs page.",
+    "modeManualDesc": "Select commits manually to generate posts.\nYou can start analysis whenever you want.",
+    "autoNoticeTitle": "Automated Posting Notice",
+    "autoNoticeDesc": "In Auto Mode, analysis counts are deducted once completed.\nIn Manual Mode, you can cancel before analysis finishes.",
+    "scheduleTitle": "Automation Schedule",
+    "scheduleDaily": "Daily",
+    "scheduleDailyDesc": "Check for new commits once a day",
+    "scheduleWeekly": "Weekly",
+    "scheduleWeeklyDesc": "Check for new commits once a week",
+    "repoTitle": "Target Repositories",
+    "repoDesc": "Select repositories for automatic commit analysis",
+    "repoLimit": "Free plan allows only 1 repository. Upgrade to Pro for unlimited selection.",
+    "saveBtn": "Save Settings",
+    "saving": "Saving..."
+  },
+  "Search": {
+    "placeholder": "Search...",
+    "allRepos": "All Repositories",
+    "allTags": "All Tags",
+    "totalCount": "{count} posts found",
+    "noResults": "No results found."
+  },
+  "HowItWorks": {
+    "title": "Keep the developer's workflow.\nZero-friction automation.",
+    "step1Title": "GitHub Connect",
+    "step1Desc": "Seamlessly sync with your GitHub account via secure OAuth.",
+    "step2Title": "Commit Analysis",
+    "step2Desc": "Gemini AI deeply understands the intent and context of your code changes.",
+    "step3Title": "Post Generation",
+    "step3Desc": "Generates professional markdown posts covering problems and solutions.",
+    "step4Title": "Publish & Manage",
+    "step4Desc": "Publish instantly with one click. SEO and social metadata applied automatically.",
+    "ctaManage": "Manage Posts →",
+    "ctaStart": "Start Now →"
+  },
+  "Terms": {
+    "title": "Terms of Service",
+    "updated": "Last updated: Feb 27, 2026",
+    "section1": "1. Overview",
+    "section1Desc": "Synapso.dev (\"Service\") is a platform that automatically generates blog posts from GitHub commits.",
+    "section2": "2. Intellectual Property",
+    "section2Point1": "Copyright: 100% of generated content belongs to the user.",
+    "section2Point2": "Zero Data Retention: Source code is destroyed after analysis.",
+    "section8": "8. Contact",
+    "contact": "For inquiries regarding terms, please contact us via email."
+  },
+  "Edit": {
+    "title": "Edit Post",
+    "desc": "Editing {title}."
+  },
   "Profile": {
     "blogSuffix": "'s Blog",
     "noBio": "No bio written yet.",
@@ -105,6 +199,13 @@
   "PostCard": {
     "autoPost": "🤖 Auto-Posted",
     "unknown": "anonymous"
+  },
+  "BioEditor": {
+    "empty": "No bio written yet. Click to add a bio.",
+    "placeholder": "Write a short bio about yourself...",
+    "updateSuccess": "Bio updated successfully.",
+    "updateError": "An error occurred while updating bio.",
+    "editAria": "Edit bio"
   },
   "Common": {
     "loading": "Loading...",

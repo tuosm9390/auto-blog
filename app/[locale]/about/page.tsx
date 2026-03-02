@@ -43,9 +43,9 @@ export default async function LandingPage({ params }: { params: { locale: string
           {t("heroTag")}
         </span>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight leading-tight mb-6 whitespace-pre-line">
-          {t.rich("heroTitle", {
-            ai: (chunks) => <span className="text-text-secondary">{chunks}</span>
-          })}
+          {t("heroTitle1")}
+          <br />
+          {t("heroTitle2Prefix")} <span className="text-text-secondary">AI</span>{t("heroTitle2Suffix")}
         </h1>
         <p className="max-w-2xl text-text-secondary text-lg md:text-xl mb-10 leading-relaxed font-body whitespace-pre-line">
           {t("heroDesc")}
@@ -118,7 +118,6 @@ export default async function LandingPage({ params }: { params: { locale: string
         </div>
 
         <div className="relative space-y-6 pause-on-hover">
-          {/* Marquee rows use localized reviews */}
           <div className="flex select-none gap-6 animate-marquee whitespace-nowrap">
             {[...reviews, ...reviews].map(
               (review, idx) => (
@@ -142,7 +141,6 @@ export default async function LandingPage({ params }: { params: { locale: string
             )}
           </div>
           
-          {/* Row 2: Reverse */}
           <div className="flex select-none gap-6 animate-marquee-reverse whitespace-nowrap">
             {[...reviews, ...reviews].map(
               (review, idx) => (
