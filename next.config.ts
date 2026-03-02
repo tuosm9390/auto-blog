@@ -1,4 +1,9 @@
+import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from "next";
+
+const withNextIntl = createNextIntlPlugin(
+  './i18n/request.ts'
+);
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -19,11 +24,6 @@ const nextConfig: NextConfig = {
         // 불필요한 브라우저 기능 비활성화
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
         // Content Security Policy
-        // - self: 자신의 오리진만 허용
-        // - github.com: 커밋 링크 이동
-        // - avatars.githubusercontent.com: GitHub 아바타 이미지
-        // - supabase: DB API 호출
-        // - unsafe-inline: Tailwind CSS 인라인 스타일 필요
         {
           key: "Content-Security-Policy",
           value: [
@@ -49,4 +49,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

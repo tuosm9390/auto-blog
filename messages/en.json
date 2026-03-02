@@ -1,0 +1,27 @@
+{
+  "Header": {
+    "generate": "✦ New Post",
+    "about": "About",
+    "pricing": "Pricing",
+    "jobs": "Jobs",
+    "settings": "Settings",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "Footer": {
+    "rights": "© {year} DevCraft. All rights reserved.",
+    "terms": "Terms",
+    "pricing": "Pricing",
+    "top": "Top",
+    "topAria": "Scroll to top"
+  },
+  "HomePage": {
+    "trending": "Trending",
+    "description": "Discover newly generated tech blog posts."
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred.",
+    "language": "Language"
+  }
+}

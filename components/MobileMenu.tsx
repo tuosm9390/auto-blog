@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { SignIn, SignOut } from "./auth-components";
+import { useTranslations } from "next-intl";
 
 interface MobileMenuProps {
   isLoggedIn: boolean;
@@ -14,6 +15,7 @@ interface MobileMenuProps {
 export default function MobileMenu({ isLoggedIn, username, userImage, userName }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("Header");
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -36,7 +38,7 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
       {/* 햄버거 버튼 */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-label={isOpen ? "메뉴 닫기" : "메뉴 열기"}
+        aria-label={isOpen ? "Menu Close" : "Menu Open"}
         aria-expanded={isOpen}
         className="flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-md hover:bg-elevated transition-colors cursor-pointer"
       >
@@ -90,35 +92,35 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-medium"
                 >
-                  ✦ 새 글 생성
+                  {t("generate")}
                 </Link>
                 <Link
                   href="/about"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
-                  서비스 소개
+                  {t("about")}
                 </Link>
                 <Link
                   href="/pricing"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
-                  요금제
+                  {t("pricing")}
                 </Link>
                 <Link
                   href="/jobs"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
-                  작업 현황
+                  {t("jobs")}
                 </Link>
                 <Link
                   href="/settings"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
-                  설정
+                  {t("settings")}
                 </Link>
 
                 {/* 로그아웃 */}
@@ -133,14 +135,14 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
-                  서비스 소개
+                  {t("about")}
                 </Link>
                 <Link
                   href="/pricing"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
-                  요금제
+                  {t("pricing")}
                 </Link>
                 <div className="px-4 py-2.5 border-t border-border-subtle mt-1">
                   <SignIn />

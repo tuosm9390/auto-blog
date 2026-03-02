@@ -1,6 +1,6 @@
 # AutoBlog — AI-Powered Tech Blog Generator
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini-4285F4?style=flat-square&logo=google)](https://deepmind.google/technologies/gemini/)
 [![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=flat-square&logo=stripe)](https://stripe.com)
@@ -39,27 +39,27 @@ GitHub OAuth   →   커밋 diff 선택     →   Gemini AI 분석     →   편
 
 ## 💳 구독 플랜
 
-| 플랜 | 월 생성 횟수 | AI 모델 | 자동 저장소 | 워터마크 |
-|------|:-----------:|---------|:-----------:|:--------:|
-| **Free** | 3회 | Gemini 2.5 Flash Lite | 1개 | ✅ |
-| **Pro** | 30회 | Gemini 2.5 Flash | 무제한 | ❌ |
-| **Business** | 무제한 | Gemini 2.5 Pro | 무제한 | ❌ |
+| 플랜         | 월 생성 횟수 | AI 모델               | 자동 저장소 | 워터마크 |
+| ------------ | :----------: | --------------------- | :---------: | :------: |
+| **Free**     |     3회      | Gemini 2.5 Flash Lite |     1개     |    ✅    |
+| **Pro**      |     30회     | Gemini 2.5 Flash      |   무제한    |    ❌    |
+| **Business** |    무제한    | Gemini 2.5 Pro        |   무제한    |    ❌    |
 
 ---
 
 ## 🛠 기술 스택
 
-| 영역 | 기술 |
-|------|------|
-| **Framework** | Next.js 15 App Router, React 19 |
-| **Auth** | NextAuth v5 beta (GitHub OAuth) |
-| **Database** | Supabase (PostgreSQL) |
-| **AI** | Google Gemini 2.5 (Flash Lite / Flash / Pro) |
-| **Payments** | Stripe (구독 + Billing Portal) |
-| **Styling** | Tailwind CSS v4, 다크 테마, CSS Variables |
-| **Deployment** | Vercel (ISR + Cron Jobs) |
-| **Markdown** | react-markdown + rehype-highlight + remark-gfm |
-| **Validation** | Zod |
+| 영역           | 기술                                           |
+| -------------- | ---------------------------------------------- |
+| **Framework**  | Next.js 15 App Router, React 19                |
+| **Auth**       | NextAuth v5 beta (GitHub OAuth)                |
+| **Database**   | Supabase (PostgreSQL)                          |
+| **AI**         | Google Gemini 2.5 (Flash Lite / Flash / Pro)   |
+| **Payments**   | Stripe (구독 + Billing Portal)                 |
+| **Styling**    | Tailwind CSS v4, 다크 테마, CSS Variables      |
+| **Deployment** | Vercel (ISR + Cron Jobs)                       |
+| **Markdown**   | react-markdown + rehype-highlight + remark-gfm |
+| **Validation** | Zod                                            |
 
 ---
 
@@ -189,27 +189,27 @@ POST /api/generate
 
 ### 주요 설계 패턴
 
-| 패턴 | 설명 |
-|------|------|
-| **Fire-and-forget** | AI 생성 작업을 백그라운드 실행, 클라이언트가 폴링으로 상태 확인 |
-| **Lazy Stripe Init** | Proxy 패턴으로 빌드 시 모듈 레벨 throw 방지 |
-| **Supabase RLS Split** | anon key (일반 API) vs Service Role (webhook/cron RLS 우회) |
-| **Soft Delete** | 포스트 삭제 시 `deleted_at` 타임스탬프 기록, 물리 삭제 없음 |
-| **Lazy Usage Reset** | 월 첫 요청 시 사용량 리셋 (매달 1일 크론 불필요) |
+| 패턴                   | 설명                                                            |
+| ---------------------- | --------------------------------------------------------------- |
+| **Fire-and-forget**    | AI 생성 작업을 백그라운드 실행, 클라이언트가 폴링으로 상태 확인 |
+| **Lazy Stripe Init**   | Proxy 패턴으로 빌드 시 모듈 레벨 throw 방지                     |
+| **Supabase RLS Split** | anon key (일반 API) vs Service Role (webhook/cron RLS 우회)     |
+| **Soft Delete**        | 포스트 삭제 시 `deleted_at` 타임스탬프 기록, 물리 삭제 없음     |
+| **Lazy Usage Reset**   | 월 첫 요청 시 사용량 리셋 (매달 1일 크론 불필요)                |
 
 ---
 
 ## 📁 `lib/` 주요 모듈
 
-| 모듈 | 역할 |
-|------|------|
-| `lib/ai.ts` | Gemini 호출, 구조화 JSON 응답, 429 재시도 |
-| `lib/github.ts` | 커밋/diff 조회, lock 파일·바이너리·.env 자동 제외 |
-| `lib/posts.ts` | 포스트 CRUD, slug 생성, soft delete |
-| `lib/jobs.ts` | Job 상태 관리, 5분 타임아웃 백그라운드 실행 |
-| `lib/subscription.ts` | 티어 제한 상수, 사용량 조회/증가/리셋 |
-| `lib/stripe.ts` | Stripe 클라이언트 (Proxy 패턴 지연 초기화) |
-| `lib/settings.ts` | 자동 포스팅 설정, 미처리 커밋 필터링 |
+| 모듈                  | 역할                                              |
+| --------------------- | ------------------------------------------------- |
+| `lib/ai.ts`           | Gemini 호출, 구조화 JSON 응답, 429 재시도         |
+| `lib/github.ts`       | 커밋/diff 조회, lock 파일·바이너리·.env 자동 제외 |
+| `lib/posts.ts`        | 포스트 CRUD, slug 생성, soft delete               |
+| `lib/jobs.ts`         | Job 상태 관리, 5분 타임아웃 백그라운드 실행       |
+| `lib/subscription.ts` | 티어 제한 상수, 사용량 조회/증가/리셋             |
+| `lib/stripe.ts`       | Stripe 클라이언트 (Proxy 패턴 지연 초기화)        |
+| `lib/settings.ts`     | 자동 포스팅 설정, 미처리 커밋 필터링              |
 
 ---
 

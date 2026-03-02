@@ -1,18 +1,20 @@
 import { getAllPosts, getAllTags } from "@/lib/posts";
 import PostsClient from "@/components/PostsClient";
+import { getTranslations } from "next-intl/server";
 
 export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
 export default async function HomePage() {
   const posts = await getAllPosts({ query: "", tag: "", status: "published" });
   const tags = await getAllTags();
+  const t = await getTranslations("HomePage");
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       <section className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-2">트렌딩</h1>
-          <p className="text-text-secondary max-w-lg">새롭게 작성된 기술 블로그 포스트를 만나보세요.</p>
+          <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-2">{t("trending")}</h1>
+          <p className="text-text-secondary max-w-lg">{t("description")}</p>
         </div>
       </section>
 

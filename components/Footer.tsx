@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
   const [isVisible, setIsVisible] = useState(false);
+  const t = useTranslations("Footer");
 
   // 스크롤 위치에 따라 버튼 표시 여부 결정
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function Footer() {
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4 pointer-events-none"
         }`}
-        aria-label="최상단으로 이동"
+        aria-label={t("topAria")}
       >
         <div className="p-3 rounded-full border border-border-strong group-hover:border-accent transition-colors bg-elevated shadow-2xl backdrop-blur-sm">
           <svg
@@ -53,16 +55,14 @@ export default function Footer() {
           </svg>
         </div>
         <span className="text-[10px] uppercase tracking-widest font-mono bg-canvas/80 px-2 py-0.5 rounded shadow-sm border border-border-subtle">
-          Top
+          {t("top")}
         </span>
       </button>
 
       <div className="max-w-6xl mx-auto px-4 flex flex-col items-center">
         <div className="text-center space-y-4">
           <p className="text-text-secondary text-sm font-medium tracking-tight">
-            © {new Date().getFullYear()}{" "}
-            <span className="text-text-primary">DevCraft</span>. All rights
-            reserved.
+            {t("rights", { year: new Date().getFullYear() })}
           </p>
 
           <div className="flex flex-col items-center gap-2">
@@ -89,11 +89,11 @@ export default function Footer() {
             </a>
             <div className="flex items-center gap-4 mt-1">
               <Link href="/terms" className="text-text-tertiary hover:text-text-secondary text-xs transition-colors">
-                이용약관
+                {t("terms")}
               </Link>
               <span className="text-border-strong text-xs">·</span>
               <Link href="/pricing" className="text-text-tertiary hover:text-text-secondary text-xs transition-colors">
-                요금제
+                {t("pricing")}
               </Link>
             </div>
           </div>

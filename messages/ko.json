@@ -1,0 +1,27 @@
+{
+  "Header": {
+    "generate": "✦ 새 글 생성",
+    "about": "서비스 소개",
+    "pricing": "요금제",
+    "jobs": "작업 현황",
+    "settings": "설정",
+    "signIn": "로그인",
+    "signOut": "로그아웃"
+  },
+  "Footer": {
+    "rights": "© {year} DevCraft. All rights reserved.",
+    "terms": "이용약관",
+    "pricing": "요금제",
+    "top": "Top",
+    "topAria": "최상단으로 이동"
+  },
+  "HomePage": {
+    "trending": "트렌딩",
+    "description": "새롭게 작성된 기술 블로그 포스트를 만나보세요."
+  },
+  "Common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다.",
+    "language": "언어"
+  }
+}
