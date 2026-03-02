@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { CommitInfo, GenerateResult } from "@/lib/types";
 import PostContent from "./PostContent";
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
 
 type Status = "idle" | "loading-commits" | "selecting" | "generating" | "preview" | "publishing" | "done" | "error";
 
@@ -21,7 +22,11 @@ interface UsageInfo {
 
 export default function GenerateForm() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("Generate");
+  const commonT = useTranslations("Common");
   const { data: session } = useSession();
+  
   const [repos, setRepos] = useState<Repo[]>([]);
   const [repo, setRepo] = useState("");
   const [commits, setCommits] = useState<CommitInfo[]>([]);
@@ -33,6 +38,8 @@ export default function GenerateForm() {
   const [statusMessage, setStatusMessage] = useState("");
   const [usage, setUsage] = useState<UsageInfo | null>(null);
 
+  const dateLocale = locale === 'ko' ? ko : enUS;
+
   useEffect(() => {
     if (session?.accessToken) {
       fetch("/api/github/repos").then(r => r.json()).then(d => { if (d.repos) setRepos(d.repos); }).catch(console.error);
@@ -43,21 +50,21 @@ export default function GenerateForm() {
   if (!session) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 animate-fade-in-up">
-        <h1 className="text-3xl font-display font-bold mb-2">새 포스트 생성</h1>
-        <p className="text-text-secondary mb-8">GitHub 레포지토리의 커밋을 AI가 분석하여 블로그 글을 자동으로 작성합니다</p>
+        <h1 className="text-3xl font-display font-bold mb-2">{t("title")}</h1>
+        <p className="text-text-secondary mb-8">{t("desc")}</p>
         <div className="border border-border-subtle rounded-xl p-8 text-center">
-          <p className="text-text-secondary mb-4">글 생성 기능을 이용하려면 로그인이 필요합니다.</p>
-          <a href="/api/auth/signin" className="inline-block px-6 py-3 bg-accent text-black font-semibold rounded-lg">로그인하기</a>
+          <p className="text-text-secondary mb-4">{t("loginRequired")}</p>
+          <a href="/api/auth/signin" className="inline-block px-6 py-3 bg-accent text-black font-semibold rounded-lg">Sign In</a>
         </div>
       </div>
     );
   }
 
   const fetchCommits = async () => {
-    if (!repo) { setError("Repository를 선택해주세요."); return; }
+    if (!repo) { setError("Please select a repository."); return; }
     const selectedRepo = repos.find(r => r.name === repo);
     const owner = selectedRepo ? selectedRepo.full_name.split("/")[0] : session?.user?.name || "";
-    setStatus("loading-commits"); setError(""); setStatusMessage("커밋 목록을 불러오는 중...");
+    setStatus("loading-commits"); setError(""); setStatusMessage(t("loadingCommits"));
     try {
       const res = await fetch(`/api/github?${new URLSearchParams({ owner, repo })}`);
       const data = await res.json();
@@ -69,7 +76,7 @@ export default function GenerateForm() {
       setSelectedShas(data.commits.map((c: CommitInfo) => c.sha).filter((sha: string) => !used.includes(sha))); 
       setStatus("selecting"); 
       setStatusMessage("");
-    } catch (err) { setError(err instanceof Error ? err.message : "커밋 조회 실패"); setStatus("error"); setStatusMessage(""); }
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to fetch commits"); setStatus("error"); setStatusMessage(""); }
   };
 
   const toggleCommit = (sha: string) => setSelectedShas(prev => prev.includes(sha) ? prev.filter(s => s !== sha) : [...prev, sha]);
@@ -77,8 +84,8 @@ export default function GenerateForm() {
   const deselectAll = () => setSelectedShas([]);
 
   const generatePost = async () => {
-    if (selectedShas.length === 0) { setError("최소 1개의 커밋을 선택해주세요."); return; }
-    setStatus("generating"); setError(""); setStatusMessage("백그라운드에서 분석 작업을 시작하는 중...");
+    if (selectedShas.length === 0) { setError("Select at least 1 commit."); return; }
+    setStatus("generating"); setError(""); setStatusMessage(t("generating"));
     const selectedRepo = repos.find(r => r.name === repo);
     const owner = selectedRepo ? selectedRepo.full_name.split("/")[0] : session?.user?.name || "";
     try {
@@ -90,37 +97,11 @@ export default function GenerateForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      // 즉시 작업 관리 페이지로 이동
       router.push(`/jobs?new=${data.jobId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "작업 요청 실패");
+      setError(err instanceof Error ? err.message : "Request failed");
       setStatus("error");
       setStatusMessage("");
-    }
-  };
-
-  const publishPostFromJob = async (jobResult: GenerateResult) => {
-    setStatus("publishing"); setStatusMessage("포스트 게시 중...");
-    try {
-      const { createPostAction } = await import("@/app/actions/postActions");
-      const result = await createPostAction({
-        title: jobResult.title,
-        content: jobResult.content,
-        summary: jobResult.summary,
-        repo: jobResult.repo,
-        commits: jobResult.commits,
-        tags: jobResult.tags,
-        status: "draft"
-      });
-      
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      
-      window.location.href = "/jobs?tab=drafts"; // 초안 관리 탭으로 이동
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "게시 실패");
-      setStatus("error");
     }
   };
 
@@ -129,59 +110,40 @@ export default function GenerateForm() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       <div className="flex items-start justify-between mb-2">
-        <h1 className="text-3xl font-display font-bold">새 포스트 생성</h1>
+        <h1 className="text-3xl font-display font-bold">{t("title")}</h1>
         {usage && (
           <div className="text-right">
-            <div className="text-xs text-text-tertiary mb-1">이번 달 사용량</div>
+            <div className="text-xs text-text-tertiary mb-1">{t("usage")}</div>
             <div className={`text-sm font-mono font-semibold ${usage.remaining === 0 ? "text-error" : usage.remaining <= 1 ? "text-yellow-500" : "text-text-primary"}`}>
               {usage.usageCount} / {usage.monthlyLimit === 999999 ? "∞" : usage.monthlyLimit}
             </div>
-            {usage.remaining === 0 && (
-              <a href="/pricing" className="text-xs text-accent hover:text-accent-hover transition-colors">
-                업그레이드 →
-              </a>
-            )}
           </div>
         )}
       </div>
-      <p className="text-text-secondary mb-8">GitHub 레포지토리의 커밋을 AI가 분석하여 블로그 글을 자동으로 작성합니다</p>
-
-      {usage?.remaining === 0 && (
-        <div className="border border-accent/30 bg-accent/5 rounded-xl p-4 mb-6 text-sm">
-          <p className="font-semibold text-text-primary mb-1">이번 달 한도를 모두 사용했습니다</p>
-          <p className="text-text-secondary">Pro 플랜으로 업그레이드하면 월 30회까지 AI 포스트를 생성할 수 있습니다.</p>
-          <a href="/pricing" className="inline-block mt-3 px-4 py-2 bg-accent text-black text-xs font-semibold rounded-lg hover:bg-accent-hover transition-colors">Pro로 업그레이드 ✦</a>
-        </div>
-      )}
+      <p className="text-text-secondary mb-8">{t("desc")}</p>
 
       {error && <div className="border border-error/50 bg-error/10 rounded-xl p-4 mb-6 text-sm text-error">⚠ {error}</div>}
       {statusMessage && <div className="border border-border-subtle rounded-xl p-4 mb-6 text-sm text-text-secondary text-center">{statusMessage}</div>}
-      {status === "done" && result && (
-        <div className="border border-success/50 bg-success/10 rounded-xl p-4 mb-6 text-sm text-success flex items-center justify-between">
-          <span>✓ 포스트가 성공적으로 게시되었습니다!</span>
-          <a href={`/@${result.author}/${result.id}`} className="px-3 py-1 border border-success/50 rounded-lg text-xs font-medium hover:bg-success/20 transition-colors">글 보기 →</a>
-        </div>
-      )}
 
       {/* Step 1 */}
       {(status === "idle" || status === "loading-commits" || status === "error") && (
         <div className="border border-border-subtle rounded-xl p-6 space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Owner <span className="text-text-tertiary font-normal">(자동 감지)</span></label>
-              <input type="text" className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm" value={session?.user?.name || "로그인 필요"} readOnly disabled />
+              <label className="text-sm font-medium">{t("owner")} <span className="text-text-tertiary font-normal">{t("autoDetect")}</span></label>
+              <input type="text" className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm" value={session?.user?.name || ""} readOnly disabled />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Repository <span className="text-text-tertiary font-normal">(선택)</span></label>
+              <label className="text-sm font-medium">Repository</label>
               <select className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-secondary focus:outline-none focus:border-border-strong cursor-pointer" value={repo} onChange={e => setRepo(e.target.value)}>
-                <option value="">레포지토리 선택</option>
+                <option value="">{t("selectRepo")}</option>
                 {repos.map(r => <option key={r.name} value={r.name}>{r.name} ({r.private ? "Private" : "Public"})</option>)}
               </select>
             </div>
           </div>
           <div className="flex justify-end">
             <button onClick={fetchCommits} disabled={status === "loading-commits" || !repo} className="px-6 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer">
-              {status === "loading-commits" ? "로딩 중..." : "커밋 조회"}
+              {status === "loading-commits" ? commonT("loading") : t("fetchCommits")}
             </button>
           </div>
         </div>
@@ -191,18 +153,18 @@ export default function GenerateForm() {
       {(status === "selecting" || status === "generating") && (
         <div className="border border-border-subtle rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">커밋 목록</h2>
-            <span className="text-sm text-text-secondary">{selectedShas.length}/{commits.length} 선택됨</span>
+            <h2 className="text-lg font-semibold">{t("commitList")}</h2>
+            <span className="text-sm text-text-secondary">{selectedShas.length}/{commits.length} {t("selected")}</span>
           </div>
           <div className="flex gap-2">
-            <button onClick={selectAll} className="px-3 py-1.5 border border-border-subtle rounded-lg text-xs text-text-secondary hover:border-border-strong transition-colors cursor-pointer">전체 선택</button>
-            <button onClick={deselectAll} className="px-3 py-1.5 border border-border-subtle rounded-lg text-xs text-text-secondary hover:border-border-strong transition-colors cursor-pointer">전체 해제</button>
+            <button onClick={selectAll} className="px-3 py-1.5 border border-border-subtle rounded-lg text-xs text-text-secondary hover:border-border-strong transition-colors cursor-pointer">{t("selectAll")}</button>
+            <button onClick={deselectAll} className="px-3 py-1.5 border border-border-subtle rounded-lg text-xs text-text-secondary hover:border-border-strong transition-colors cursor-pointer">{t("deselectAll")}</button>
           </div>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {commits.map(commit => {
               const selected = selectedShas.includes(commit.sha);
               const isProcessed = processedShas.includes(commit.sha);
-              const dateStr = commit.date ? format(new Date(commit.date), "M/d HH:mm", { locale: ko }) : "";
+              const dateStr = commit.date ? format(new Date(commit.date), "M/d HH:mm", { locale: dateLocale }) : "";
               return (
                 <div key={commit.sha} onClick={() => toggleCommit(commit.sha)} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${selected ? "border-border-strong bg-elevated" : "border-border-subtle hover:border-border-strong"} ${isProcessed ? "opacity-75" : ""}`}>
                   <div className={`w-5 h-5 mt-0.5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${selected ? "border-accent bg-accent" : "border-border-strong"}`}>
@@ -212,7 +174,7 @@ export default function GenerateForm() {
                     <div className={`text-sm font-medium truncate ${selected ? "text-text-primary" : "text-text-secondary"}`}>{commit.message.split("\n")[0]}</div>
                     <div className="flex items-center gap-2 mt-1 text-xs text-text-tertiary flex-wrap">
                       <span className="px-1.5 py-0.5 bg-surface rounded font-mono">{commit.sha.substring(0, 7)}</span>
-                      {isProcessed && <span className="px-1.5 py-0.5 bg-border-subtle text-text-secondary rounded">이미 사용됨</span>}
+                      {isProcessed && <span className="px-1.5 py-0.5 bg-border-subtle text-text-secondary rounded">Used</span>}
                       <span>{commit.author}</span>
                       <span>{dateStr}</span>
                     </div>
@@ -222,42 +184,11 @@ export default function GenerateForm() {
             })}
           </div>
           <div className="flex gap-3 justify-end pt-2">
-            <button onClick={reset} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">처음으로</button>
+            <button onClick={reset} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">{commonT("cancel")}</button>
             <button onClick={generatePost} disabled={status === "generating" || selectedShas.length === 0} className="px-6 py-2 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer">
-              {status === "generating" ? "AI 분석 중..." : "✦ AI 글 생성"}
+              {status === "generating" ? t("generating") : t("generateBtn")}
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Step 3 */}
-      {(status === "preview" || status === "publishing" || status === "done") && result && (
-        <div className="border border-border-subtle rounded-xl p-6 space-y-6">
-          <div>
-            <span className="inline-block px-2 py-0.5 border border-border-subtle rounded-full text-xs text-text-tertiary mb-3">미리보기</span>
-            <h2 className="text-2xl md:text-3xl font-display font-bold mb-3">{result.title}</h2>
-            {result.tags.length > 0 && (
-              <div className="flex gap-2 flex-wrap mb-4">
-                {result.tags.map(tag => <span key={tag} className="text-xs text-text-tertiary">#{tag}</span>)}
-              </div>
-            )}
-          </div>
-          <div className="bg-elevated rounded-lg p-6"><PostContent content={result.content} /></div>
-          {status !== "done" && (
-            <div className="flex gap-3 justify-end">
-              <button onClick={reset} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">처음으로</button>
-              <button onClick={() => setStatus("selecting")} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">다시 생성</button>
-              <button onClick={() => result && publishPostFromJob(result)} disabled={status === "publishing"} className="px-6 py-2 bg-success text-black font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer">
-                {status === "publishing" ? "게시 중..." : "✓ 게시하기"}
-              </button>
-            </div>
-          )}
-          {status === "done" && result && (
-            <div className="flex gap-3 justify-end">
-              <button onClick={reset} className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong transition-colors cursor-pointer">새 글 생성</button>
-              <a href={`/@${result.author}/${result.id}`} className="px-6 py-2 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors">글 보기 →</a>
-            </div>
-          )}
         </div>
       )}
     </div>

@@ -1,7 +1,10 @@
-import Link from "next/link";
+"use client";
+
+import { Link } from "@/i18n/routing";
 import { Post } from "@/lib/types";
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
 
 interface PostCardProps {
   post: Post;
@@ -10,19 +13,21 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, index, href }: PostCardProps) {
+  const locale = useLocale();
+  const t = useTranslations("PostCard");
+  
   const dateObj = new Date(post.date || new Date());
-  const formattedDate = format(dateObj, "yyyy.MM.dd", { locale: ko });
-  const formattedTime = format(dateObj, "HH:mm", { locale: ko });
+  const dateLocale = locale === 'ko' ? ko : enUS;
+  const dateFormat = locale === 'ko' ? "yyyy.MM.dd HH:mm" : "MMM d, yyyy HH:mm";
+  
+  const formattedDate = format(dateObj, dateFormat, { locale: dateLocale });
 
   const finalHref = href || `/posts/${post.id}`;
-  
-  // 저장소 이름에서 유저명 부분 제거 (예: owner/repo -> repo)
   const displayRepo = post.repo ? post.repo.split("/").pop() : null;
 
-  // 자동 포스팅 태그 확인
-  const isAutoPost = post.tags?.includes("자동 포스팅");
-  // UI에 표시할 일반 태그 (자동 포스팅 제외)
-  const displayTags = post.tags?.filter(t => t !== "자동 포스팅") || [];
+  // 번역 키 확인용 태그 (영문/한글 공통)
+  const isAutoPost = post.tags?.includes("자동 포스팅") || post.tags?.includes("auto-posted");
+  const displayTags = post.tags?.filter(t => t !== "자동 포스팅" && t !== "auto-posted") || [];
 
   return (
     <Link
@@ -32,13 +37,13 @@ export default function PostCard({ post, index, href }: PostCardProps) {
     >
       {isAutoPost && (
         <div className="absolute top-0 right-0 bg-accent/20 text-accent text-[10px] font-bold px-3 py-1 rounded-bl-lg border-b border-l border-accent/30">
-          🤖 자동 포스팅
+          {t("autoPost")}
         </div>
       )}
       <div className="flex items-start justify-between mb-5 text-[11px] font-medium tracking-tight">
         <div className="flex flex-col gap-0.5 mt-1">
-          <span className="text-accent font-bold">@{post.author || "unknown"}</span>
-          <span className="text-text-tertiary">{formattedDate} {formattedTime}</span>
+          <span className="text-accent font-bold">@{post.author || t("unknown")}</span>
+          <span className="text-text-tertiary">{formattedDate}</span>
         </div>
         {displayRepo && (
           <span className={`px-2 py-0.5 bg-surface-subtle border border-border-subtle rounded text-text-tertiary font-semibold ${isAutoPost ? "mr-16" : ""}`}>

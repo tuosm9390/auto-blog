@@ -5,17 +5,16 @@ import PostsClient from "@/components/PostsClient";
 import UserProfileBox from "@/components/UserProfileBox";
 import { Metadata } from "next";
 import { auth } from "@/auth";
+import { getTranslations } from "next-intl/server";
 
 export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
 interface PageProps {
-  params: Promise<{ username: string }>;
+  params: Promise<{ locale: string; username: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
 
@@ -33,6 +32,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   const { username } = await params;
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
   const isOwner = session?.user?.username === plainUsername;
+  const t = await getTranslations("Profile");
 
   let profile = await getProfileByUsername(plainUsername);
 
@@ -42,27 +42,24 @@ export default async function UserProfilePage({ params }: PageProps) {
       id: "unknown",
       username: plainUsername,
       name: session?.user?.name || plainUsername,
-      avatar_url:
-        (session?.user as any)?.avatar_url || session?.user?.image || null,
+      avatar_url: (session?.user as any)?.avatar_url || session?.user?.image || null,
       bio: null,
-      updated_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
   }
 
   // 해당 유저의 글만 DB에서 바로 가져오기
-  const userPosts = await getAllPosts({
-    query: "",
-    repo: "",
-    tag: "",
+  const userPosts = await getAllPosts({ 
+    query: "", 
+    repo: "", 
+    tag: "", 
     status: "published",
-    author: plainUsername,
+    author: plainUsername 
   });
 
   // 현재 유저가 사용한 태그 및 레포지토리 추출
-  const userTags = Array.from(new Set(userPosts.flatMap((p) => p.tags || [])));
-  const userRepos = Array.from(
-    new Set(userPosts.map((p) => p.repo).filter(Boolean)),
-  );
+  const userTags = Array.from(new Set(userPosts.flatMap(p => p.tags || [])));
+  const userRepos = Array.from(new Set(userPosts.map(p => p.repo).filter(Boolean)));
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
@@ -70,11 +67,11 @@ export default async function UserProfilePage({ params }: PageProps) {
       <UserProfileBox profile={profile} variant="large" isOwner={isOwner} />
 
       {/* 포스트 리스트 */}
-      <PostsClient
-        initialPosts={userPosts}
-        tags={userTags}
-        repos={userRepos}
-        basePath={`/@${plainUsername}`}
+      <PostsClient 
+        initialPosts={userPosts} 
+        tags={userTags} 
+        repos={userRepos} 
+        basePath={`/@${plainUsername}`} 
       />
     </div>
   );
