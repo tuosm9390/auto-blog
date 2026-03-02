@@ -22,7 +22,7 @@ No test suite is configured in this project.
 
 ## Architecture
 
-**auto-blog** is a multi-user AI-powered blogging platform where users connect their GitHub account and auto-generate blog posts from commit diffs using Google Gemini.
+**Synapso.dev** is a multi-user AI-powered blogging platform where users connect their GitHub account and auto-generate blog posts from commit diffs using Google Gemini.
 
 ### Stack
 
@@ -70,17 +70,18 @@ No test suite is configured in this project.
 
 Defined in `lib/subscription.ts` as `TIER_LIMITS`:
 
-| Tier | Monthly Limit | AI Model | Watermark | Max Auto Repos |
-|---|---|---|---|---|
-| `free` | 3 | `gemini-2.5-flash-lite` | Yes | 1 |
-| `pro` | 30 | `gemini-2.5-flash` | No | Unlimited |
-| `business` | Unlimited | `gemini-2.5-pro` | No | Unlimited |
+| Tier       | Monthly Limit | AI Model                | Watermark | Max Auto Repos |
+| ---------- | ------------- | ----------------------- | --------- | -------------- |
+| `free`     | 3             | `gemini-2.5-flash-lite` | Yes       | 1              |
+| `pro`      | 30            | `gemini-2.5-flash`      | No        | Unlimited      |
+| `business` | Unlimited     | `gemini-2.5-pro`        | No        | Unlimited      |
 
 Usage tracking includes a **Lazy Reset**: usage is reset when the first request of a new month is made (checked against `usage_reset_date`).
 
 ### Routing Conventions
 
 **Public pages:**
+
 - `/` — home; lists all published posts (ISR, 60s revalidate)
 - `/[username]` — public user blog page
 - `/[username]/[slug]` — individual post
@@ -89,9 +90,11 @@ Usage tracking includes a **Lazy Reset**: usage is reset when the first request 
 - `/pricing` — subscription plans
 
 **App pages (auth required):**
+
 - `/generate`, `/jobs`, `/settings`, `/profile`, `/login`
 
 **API routes** under `/api/`:
+
 - Post CRUD: `/api/posts`, `/api/posts/[id]`, `/api/posts/drafts`
 - Jobs: `/api/jobs`, `/api/jobs/[id]`
 - GitHub: `/api/github`, `/api/github/repos`
@@ -120,27 +123,32 @@ Business logic lives entirely in `lib/`. Components and API routes import from h
 UI components — all presentational, import business logic from `lib/` only.
 
 **Layout:**
+
 - `Header.tsx` — top navigation bar
 - `Footer.tsx` — site footer
 - `Providers.tsx` — wraps app with SessionProvider and Toaster
 
 **Forms:**
+
 - `GenerateForm.tsx` — commit selection and AI generation trigger
 - `EditForm.tsx` — post editing interface
 - `BioEditor.tsx` — inline bio editing with PUT to `/api/profiles/[username]/bio`
 
 **Post display:**
+
 - `PostCard.tsx` — post summary card for list views
 - `PostContent.tsx` — renders Markdown post body (uses react-markdown + rehype-highlight)
 - `PostControls.tsx` — publish/delete/edit actions on a post
 - `PostsClient.tsx` — client-side wrapper for filtering/searching posts
 
 **Filtering UI:**
+
 - `SearchInput.tsx` — debounced text search
 - `TagFilter.tsx` — filter posts by tag
 - `RepoFilter.tsx` — filter posts by repository
 
 **Utilities:**
+
 - `UserProfileBox.tsx` — user avatar, username, bio display
 - `ConfirmProvider.tsx` — app-wide confirmation dialog context
 - `auth-components.tsx` — sign-in/sign-out buttons wrapping NextAuth
@@ -152,44 +160,55 @@ UI components — all presentational, import business logic from `lib/` only.
 ### Key Patterns & Conventions
 
 **Fire-and-forget async (job pattern)**
+
 ```typescript
 runAIAnalysisBackground(jobId, owner, repo, shas, tier).catch(console.error);
 // Not awaited — returns jobId immediately; client polls GET /api/jobs/[id]
 ```
 
 **Proxy pattern for lazy Stripe initialization**
+
 ```typescript
 export const stripe = new Proxy({} as Stripe, {
-  get(_target, prop) { return (getStripe() as any)[prop]; },
+  get(_target, prop) {
+    return (getStripe() as any)[prop];
+  },
 });
 // Prevents module-level throws during Next.js build when env vars absent
 ```
 
 **Supabase RLS split**
+
 - `supabase` (anon key) — used in client components and API routes where RLS should apply
 - `supabaseAdmin` (Service Role) — used only in webhook handlers and cron where RLS must be bypassed
 
 **Soft delete on posts**
+
 ```typescript
 // deletePost() sets deleted_at, never removes the row
-await supabase.from("posts").update({ deleted_at: new Date().toISOString() })
+await supabase.from("posts").update({ deleted_at: new Date().toISOString() });
 ```
 
 **Rate limiting on `/api/generate`**
+
 - 3 requests per minute per authenticated user (in-memory, resets on server restart)
 
 **ISR caching**
+
 - Home page (`/`) uses `export const revalidate = 60` (60-second ISR)
 
 **GitHub file exclusion**
+
 - `shouldExcludeFile()` in `lib/github.ts` skips: `*.lock`, `package-lock.json`, `.env*`, `node_modules/**`, binary extensions, and other noise files
 
 **GitHub OAuth scopes**
+
 - Requests `read:user user:email repo` to enable private repo access for commit fetching
 
 ### Security
 
 **HTTP Security Headers** (configured globally in `next.config.ts`):
+
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`
 - `X-XSS-Protection: 1; mode=block`

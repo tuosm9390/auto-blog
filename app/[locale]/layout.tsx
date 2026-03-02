@@ -32,11 +32,11 @@ export async function generateMetadata({
   const { locale } = await params;
   const isEn = locale === "en";
   return {
-    metadataBase: new URL("https://auto-blog-eta.vercel.app"),
+    metadataBase: new URL("https://synapso-dev.vercel.app"),
     title: {
       default: isEn
-        ? "AI Tech Blog | Development & Automation Insights"
-        : "AI Tech Blog | 개발 및 자동화 인사이트",
+        ? "Synapso.Dev | Development & Automation Insights"
+        : "Synapso.Dev | 개발 및 자동화 인사이트",
       template: "%s",
     },
     description: isEn
@@ -55,20 +55,20 @@ export async function generateMetadata({
     creator: "AI Tech Blogger",
     openGraph: {
       title: isEn
-        ? "AI Tech Blog | Development & Automation Insights"
-        : "AI Tech Blog | 개발 및 자동화 인사이트",
+        ? "Synapso.Dev | Development & Automation Insights"
+        : "Synapso.Dev | 개발 및 자동화 인사이트",
       description: isEn
         ? "Expert tech blog focusing on AI-powered code analysis, tech trends, automation architecture, and software engineering insights."
         : "AI 기반 코드 분석, 기술 트렌드, 자동화 아키텍처 및 소프트웨어 엔지니어링 인사이트를 다루는 전문가의 기술 블로그입니다.",
       type: "website",
       locale: locale === "ko" ? "ko_KR" : "en_US",
-      siteName: "AI Tech Blog",
+      siteName: "Synapso.Dev",
     },
     twitter: {
       card: "summary_large_image",
       title: isEn
-        ? "AI Tech Blog | Development & Automation Insights"
-        : "AI Tech Blog | 개발 및 자동화 인사이트",
+        ? "Synapso.Dev | Development & Automation Insights"
+        : "Synapso.Dev | 개발 및 자동화 인사이트",
       description: isEn
         ? "AI-powered tech and code insight automation blog."
         : "AI 기반 기술 및 코드 인사이트 자동화 블로그.",
@@ -110,6 +110,10 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      <meta
+        name="google-site-verification"
+        content="MDjk5WdTY8Pl_7kx3O84WmAebWeKmh2-1BK39ZzeGWA"
+      />
       <body
         className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} bg-canvas text-text-primary font-body min-h-screen flex flex-col`}
       >

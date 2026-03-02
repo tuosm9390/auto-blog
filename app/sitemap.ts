@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getAllPosts } from '@/lib/posts';
 
-const BASE_URL = 'https://auto-blog-eta.vercel.app';
+const BASE_URL = 'https://synapso-dev.vercel.app';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 정적 페이지

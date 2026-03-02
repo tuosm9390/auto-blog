@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/settings', '/jobs', '/generate', '/login', '/profile'],
     },
-    sitemap: 'https://auto-blog-eta.vercel.app/sitemap.xml',
+    sitemap: 'https://synapso-dev.vercel.app/sitemap.xml',
   };
 }

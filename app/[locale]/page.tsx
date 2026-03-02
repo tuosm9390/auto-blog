@@ -13,7 +13,9 @@ export default async function HomePage() {
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       <section className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-2">{t("trending")}</h1>
+          <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-2">
+            {t("trending")}
+          </h1>
           <p className="text-text-secondary max-w-lg">{t("description")}</p>
         </div>
       </section>

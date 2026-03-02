@@ -14,28 +14,45 @@ export default async function Header() {
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-md bg-accent flex items-center justify-center">
-            <span className="text-xs font-bold text-black">AB</span>
+            <span className="text-xs font-bold text-black">SD</span>
           </div>
-          <span className="font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors">AutoBlog</span>
+          <span className="font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors">
+            Synapso.dev
+          </span>
         </Link>
 
         {/* 데스크탑 nav */}
         <nav className="hidden sm:flex items-center gap-4">
-          <Link href="/generate" className="text-sm text-accent hover:text-accent-hover transition-colors font-medium">
+          <Link
+            href="/generate"
+            className="text-sm text-accent hover:text-accent-hover transition-colors font-medium"
+          >
             {t("generate")}
           </Link>
-          <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
+          <Link
+            href="/about"
+            className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
+          >
             {t("about")}
           </Link>
-          <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
+          <Link
+            href="/pricing"
+            className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
+          >
             {t("pricing")}
           </Link>
           {session?.user && (
             <>
-              <Link href="/jobs" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+              <Link
+                href="/jobs"
+                className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+              >
                 {t("jobs")}
               </Link>
-              <Link href="/settings" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+              <Link
+                href="/settings"
+                className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+              >
                 {t("settings")}
               </Link>
             </>
@@ -46,7 +63,10 @@ export default async function Header() {
 
           {session?.user ? (
             <div className="flex items-center gap-3 ml-2">
-              <Link href={`/@${session.user.username}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Link
+                href={`/@${session.user.username}`}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
                 {session.user.image && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -55,7 +75,9 @@ export default async function Header() {
                     className="w-7 h-7 rounded-full object-cover border border-border-subtle"
                   />
                 )}
-                <span className="text-sm font-medium text-text-primary">{session.user.username || session.user.name}</span>
+                <span className="text-sm font-medium text-text-primary">
+                  {session.user.username || session.user.name}
+                </span>
               </Link>
               <SignOut />
             </div>
