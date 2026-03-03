@@ -15,19 +15,22 @@ interface PostCardProps {
 export default function PostCard({ post, index, href }: PostCardProps) {
   const locale = useLocale();
   const t = useTranslations("PostCard");
-  
+
   const dateObj = new Date(post.date || new Date());
-  const dateLocale = locale === 'ko' ? ko : enUS;
-  const dateFormat = locale === 'ko' ? "yyyy.MM.dd HH:mm" : "MMM d, yyyy HH:mm";
-  
+  const dateLocale = locale === "ko" ? ko : enUS;
+  const dateFormat = locale === "ko" ? "yyyy.MM.dd HH:mm" : "MMM d, yyyy HH:mm";
+
   const formattedDate = format(dateObj, dateFormat, { locale: dateLocale });
 
-  const finalHref = href || `/posts/${post.id}`;
+  const finalHref =
+    href || `/@${post.author || "unknown"}/${post.slug || post.id}`;
   const displayRepo = post.repo ? post.repo.split("/").pop() : null;
 
   // 번역 키 확인용 태그 (영문/한글 공통)
-  const isAutoPost = post.tags?.includes("자동 포스팅") || post.tags?.includes("auto-posted");
-  const displayTags = post.tags?.filter(t => t !== "자동 포스팅" && t !== "auto-posted") || [];
+  const isAutoPost =
+    post.tags?.includes("자동 포스팅") || post.tags?.includes("auto-posted");
+  const displayTags =
+    post.tags?.filter((t) => t !== "자동 포스팅" && t !== "auto-posted") || [];
 
   return (
     <Link
@@ -42,16 +45,20 @@ export default function PostCard({ post, index, href }: PostCardProps) {
       )}
       <div className="flex items-start justify-between mb-5 text-[11px] font-medium tracking-tight">
         <div className="flex flex-col gap-0.5 mt-1">
-          <span className="text-accent font-bold">@{post.author || t("unknown")}</span>
+          <span className="text-accent font-bold">
+            @{post.author || t("unknown")}
+          </span>
           <span className="text-text-tertiary">{formattedDate}</span>
         </div>
         {displayRepo && (
-          <span className={`px-2 py-0.5 bg-surface-subtle border border-border-subtle rounded text-text-tertiary font-semibold ${isAutoPost ? "mr-16" : ""}`}>
+          <span
+            className={`px-2 py-0.5 bg-surface-subtle border border-border-subtle rounded text-text-tertiary font-semibold ${isAutoPost ? "mr-16" : ""}`}
+          >
             {displayRepo}
           </span>
         )}
       </div>
-      
+
       <div className="flex-1">
         <h2 className="text-xl font-bold mb-3 text-text-primary group-hover:text-accent transition-colors line-clamp-2 leading-tight">
           {post.title}
@@ -66,7 +73,10 @@ export default function PostCard({ post, index, href }: PostCardProps) {
       {displayTags.length > 0 && (
         <div className="flex gap-2 flex-wrap mt-auto pt-4 border-t border-border-subtle/50">
           {displayTags.slice(0, 3).map((tag) => (
-            <span key={tag} className="text-xs text-text-tertiary bg-surface-subtle px-1.5 py-0.5 rounded">
+            <span
+              key={tag}
+              className="text-xs text-text-tertiary bg-surface-subtle px-1.5 py-0.5 rounded"
+            >
               #{tag}
             </span>
           ))}
