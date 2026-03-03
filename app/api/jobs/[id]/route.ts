@@ -21,7 +21,7 @@ export async function GET(
     }
 
     return NextResponse.json({ job });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Fetch error" }, { status: 500 });
   }
 }
@@ -47,7 +47,7 @@ export async function DELETE(
 
     await deleteJob(id);
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Delete error" }, { status: 500 });
   }
 }

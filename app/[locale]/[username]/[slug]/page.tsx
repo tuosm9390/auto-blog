@@ -134,7 +134,7 @@ export default async function PostPage({ params }: PageProps) {
         <div className="mt-10 pt-6 border-t border-border-subtle flex items-center justify-between">
           <p className="text-xs text-text-tertiary">
             {t.rich("watermark", {
-              link: (chunks) => <a href="/" className="text-accent hover:text-accent-hover transition-colors font-medium">Synapso.dev</a>
+              link: (chunks: React.ReactNode) => <Link href="/" className="text-accent hover:text-accent-hover transition-colors font-medium">{chunks || "Synapso.dev"}</Link>
             })}
           </p>
           <Link

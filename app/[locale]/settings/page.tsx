@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Suspense } from "react";
 import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
@@ -31,7 +30,6 @@ interface SubscriptionInfo {
 
 function SettingsContent() {
   const { data: session } = useSession();
-  const searchParams = useSearchParams();
   const t = useTranslations("Settings");
   const pricingT = useTranslations("Pricing");
   const commonT = useTranslations("Common");
@@ -49,31 +47,41 @@ function SettingsContent() {
   useEffect(() => {
     if (!username) return;
     if (settings) return;
-    loadData();
-  }, [username]);
+    
+    let isMounted = true;
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [settingsResult, reposResult, subscriptionResult] = await Promise.allSettled([
-        fetch("/api/settings").then(r => r.ok ? r.json() : Promise.reject(`settings: ${r.status}`)),
-        fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
-        fetch("/api/subscription").then(r => r.ok ? r.json() : Promise.reject(`subscription: ${r.status}`)),
-      ]);
-      if (settingsResult.status === "fulfilled" && settingsResult.value.settings) {
-        setSettings(settingsResult.value.settings);
-      } else {
-        setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [settingsResult, reposResult, subscriptionResult] = await Promise.allSettled([
+          fetch("/api/settings").then(r => r.ok ? r.json() : Promise.reject(`settings: ${r.status}`)),
+          fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
+          fetch("/api/subscription").then(r => r.ok ? r.json() : Promise.reject(`subscription: ${r.status}`)),
+        ]);
+        
+        if (!isMounted) return;
+
+        if (settingsResult.status === "fulfilled" && settingsResult.value.settings) {
+          setSettings(settingsResult.value.settings);
+        } else {
+          setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
+        }
+        if (reposResult.status === "fulfilled" && reposResult.value.repos) setRepos(reposResult.value.repos);
+        if (subscriptionResult.status === "fulfilled") setSubscription(subscriptionResult.value);
+      } catch (err) {
+        console.error("Data load failed:", err);
+        if (isMounted) {
+          setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
+        }
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      if (reposResult.status === "fulfilled" && reposResult.value.repos) setRepos(reposResult.value.repos);
-      if (subscriptionResult.status === "fulfilled") setSubscription(subscriptionResult.value);
-    } catch (err) {
-      console.error("Data load failed:", err);
-      setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    loadData();
+    
+    return () => { isMounted = false; };
+  }, [username, settings]);
 
   const openPortal = async () => {
     setPortalLoading(true);
@@ -82,8 +90,9 @@ function SettingsContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       window.location.href = data.url;
-    } catch (err: any) {
-      toast.error(err.message || "Failed to open portal");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to open portal";
+      toast.error(message);
     } finally {
       setPortalLoading(false);
     }
@@ -98,8 +107,9 @@ function SettingsContent() {
       if (!res.ok) throw new Error(data.error);
       toast.success("Subscription cancelled. Switched to Free plan.");
       setSubscription(prev => prev ? { ...prev, tier: "free", monthlyLimit: 3, remaining: 3 } : null);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to cancel");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to cancel";
+      toast.error(message);
     } finally {
       setCancelLoading(false);
     }

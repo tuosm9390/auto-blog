@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { updatePost, publishDraft, deletePost, createPost } from "@/lib/posts";
+import { updatePost, publishDraft, createPost } from "@/lib/posts";
 import { deleteJob } from "@/lib/jobs";
 import { recordProcessedCommits } from "@/lib/settings";
 import { revalidatePath } from "next/cache";

@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabaseAdmin as supabase } from "./supabase-admin";
 import { UserSettings, PostingMode, AutoSchedule } from "./types";
 import { getRecentCommits } from "./github";
 

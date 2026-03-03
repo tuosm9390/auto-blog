@@ -126,7 +126,7 @@ export default async function LandingPage({ params }: { params: { locale: string
                   className="w-[400px] flex-shrink-0 border border-border-subtle rounded-2xl p-6 bg-surface/50 hover:bg-surface hover:border-border-strong transition-all duration-300"
                 >
                   <p className="text-text-primary text-sm leading-relaxed mb-4 whitespace-normal line-clamp-3">
-                    "{review.quote}"
+                    &quot;{review.quote}&quot;
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-elevated border border-border-subtle flex items-center justify-center">
@@ -149,7 +149,7 @@ export default async function LandingPage({ params }: { params: { locale: string
                   className="w-[400px] flex-shrink-0 border border-border-subtle rounded-2xl p-6 bg-surface/50 hover:bg-surface hover:border-border-strong transition-all duration-300"
                 >
                   <p className="text-text-primary text-sm leading-relaxed mb-4 whitespace-normal line-clamp-3">
-                    "{review.quote}"
+                    &quot;{review.quote}&quot;
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-elevated border border-border-subtle flex items-center justify-center">

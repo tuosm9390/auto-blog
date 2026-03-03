@@ -1,11 +1,9 @@
-import { notFound } from "next/navigation";
 import { getProfileByUsername } from "@/lib/profiles";
 import { getAllPosts } from "@/lib/posts";
 import PostsClient from "@/components/PostsClient";
 import UserProfileBox from "@/components/UserProfileBox";
 import { Metadata } from "next";
 import { auth } from "@/auth";
-import { getTranslations } from "next-intl/server";
 
 export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
@@ -32,7 +30,6 @@ export default async function UserProfilePage({ params }: PageProps) {
   const { username } = await params;
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
   const isOwner = session?.user?.username === plainUsername;
-  const t = await getTranslations("Profile");
 
   let profile = await getProfileByUsername(plainUsername);
 
@@ -42,7 +39,7 @@ export default async function UserProfilePage({ params }: PageProps) {
       id: "unknown",
       username: plainUsername,
       name: session?.user?.name || plainUsername,
-      avatar_url: (session?.user as any)?.avatar_url || session?.user?.image || null,
+      avatar_url: session?.user?.avatar_url || session?.user?.image || null,
       bio: null,
       updated_at: new Date().toISOString()
     };

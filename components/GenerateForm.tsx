@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "@/i18n/routing";
-import { CommitInfo, GenerateResult } from "@/lib/types";
-import PostContent from "./PostContent";
+import { CommitInfo } from "@/lib/types";
 import { format } from "date-fns";
 import { ko, enUS } from "date-fns/locale";
 import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 type Status = "idle" | "loading-commits" | "selecting" | "generating" | "preview" | "publishing" | "done" | "error";
 
@@ -34,14 +34,13 @@ export default function GenerateForm() {
   const [selectedShas, setSelectedShas] = useState<string[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<GenerateResult | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [usage, setUsage] = useState<UsageInfo | null>(null);
 
   const dateLocale = locale === 'ko' ? ko : enUS;
 
   useEffect(() => {
-    if (session?.accessToken) {
+    if (session?.user) {
       fetch("/api/github/repos").then(r => r.json()).then(d => { if (d.repos) setRepos(d.repos); }).catch(console.error);
       fetch("/api/subscription").then(r => r.ok ? r.json() : null).then(d => { if (d) setUsage(d); }).catch(console.error);
     }
@@ -54,7 +53,7 @@ export default function GenerateForm() {
         <p className="text-text-secondary mb-8">{t("desc")}</p>
         <div className="border border-border-subtle rounded-xl p-8 text-center">
           <p className="text-text-secondary mb-4">{t("loginRequired")}</p>
-          <a href="/api/auth/signin" className="inline-block px-6 py-3 bg-accent text-black font-semibold rounded-lg">Sign In</a>
+          <Link href="/api/auth/signin" className="inline-block px-6 py-3 bg-accent text-black font-semibold rounded-lg">Sign In</Link>
         </div>
       </div>
     );
@@ -105,7 +104,7 @@ export default function GenerateForm() {
     }
   };
 
-  const reset = () => { setCommits([]); setSelectedShas([]); setProcessedShas([]); setResult(null); setStatus("idle"); setError(""); setStatusMessage(""); };
+  const reset = () => { setCommits([]); setSelectedShas([]); setProcessedShas([]); setStatus("idle"); setError(""); setStatusMessage(""); };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">

@@ -54,9 +54,10 @@ export default function PricingClient({
       if (data.url) {
         window.location.href = data.url;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(commonT("error"), { description: error.message });
+      const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
+      toast.error(commonT("error"), { description: errorMessage });
     } finally {
       setIsLoading(null);
     }

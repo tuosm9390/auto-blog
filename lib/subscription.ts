@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabaseAdmin as supabase } from "./supabase-admin";
 import { SubscriptionTier } from "./types";
 
 // 티어별 제한 상수
@@ -55,8 +55,12 @@ export async function checkAndGetUsage(username: string): Promise<UsageInfo> {
     };
   }
 
-  const tier: SubscriptionTier =
-    (data.subscription_tier as SubscriptionTier) || "free";
+  const dbTier = data.subscription_tier as SubscriptionTier || "free";
+  const dbStatus = data.subscription_status || "canceled";
+  
+  const isActive = dbStatus === "active" || dbStatus === "trialing";
+  const tier: SubscriptionTier = isActive ? dbTier : "free";
+
   const limits = TIER_LIMITS[tier];
 
   // Lazy Reset: 리셋 날짜가 지났으면 카운터 초기화

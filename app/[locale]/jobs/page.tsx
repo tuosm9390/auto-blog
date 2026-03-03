@@ -37,6 +37,21 @@ export default function JobsPage() {
   const [publishing, setPublishing] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        if (activeTab === "jobs") {
+          await loadJobs();
+        } else {
+          await loadDrafts();
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     if (session?.user) {
       loadData();
       const interval = setInterval(() => {
@@ -44,20 +59,9 @@ export default function JobsPage() {
       }, 5000);
       return () => clearInterval(interval);
     }
+    
+    return () => { isMounted = false; };
   }, [session, activeTab]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      if (activeTab === "jobs") {
-        await loadJobs();
-      } else {
-        await loadDrafts();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadJobs = async () => {
     try {
@@ -114,7 +118,7 @@ export default function JobsPage() {
       await fetch(`/api/jobs/${job.id}`, { method: "DELETE" });
       setJobs(prev => prev.filter(j => j.id !== job.id));
       toast.success("🎉 Draft created successfully!");
-    } catch (err) {
+    } catch {
       toast.error("❌ Failed to create draft.");
     } finally {
       setPublishing(null);
@@ -136,7 +140,7 @@ export default function JobsPage() {
         setJobs(prev => prev.filter(j => j.id !== id));
         toast.success("🗑️ Deleted successfully.");
       }
-    } catch (err) {
+    } catch {
       toast.error(commonT("error"));
     }
   };

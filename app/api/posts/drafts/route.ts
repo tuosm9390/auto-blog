@@ -4,9 +4,7 @@ import { getDraftsByAuthor, getPostById, publishDraft, deletePost } from "@/lib/
 import { z } from "zod";
 
 const draftActionSchema = z.object({
-  action: z.enum(["publish", "delete"], {
-    errorMap: () => ({ message: "액션은 'publish' 또는 'delete' 여야 합니다." })
-  } as any),
+  action: z.enum(["publish", "delete"]),
   postId: z.string().min(1, "postId가 필요합니다."),
 });
 

@@ -25,7 +25,7 @@ export default function BioEditor({ initialBio, username }: { initialBio: string
       toast.success(t("updateSuccess"));
       setIsEditing(false);
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error(t("updateError"));
     } finally {
       setLoading(false);

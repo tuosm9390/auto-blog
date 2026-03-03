@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getJobsByAuthor } from "@/lib/jobs";
 
@@ -13,7 +13,7 @@ export async function GET() {
   try {
     const jobs = await getJobsByAuthor(username);
     return NextResponse.json({ jobs });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch jobs" }, { status: 500 });
   }
 }

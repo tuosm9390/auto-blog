@@ -4,6 +4,8 @@ import { getRecentCommits } from "@/lib/github";
 import { createJob, runAIAnalysisBackground } from "@/lib/jobs";
 import { checkAndGetUsage, incrementUsage } from "@/lib/subscription";
 import { z } from "zod";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const generateSchema = z.object({
   owner: z.string().min(1, "owner 파라미터가 필요합니다."),
@@ -13,11 +15,19 @@ const generateSchema = z.object({
   commitShas: z.array(z.string()).optional().default([]),
 });
 
-// 간단한 인메모리 Rate Limiter (유저당 1분에 최대 3회 요청 허용)
-// 주의: 프로덕션 스케일아웃(다중 인스턴스) 환경에서는 Redis 기반(Upstash 등)으로 전환해야 합니다.
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_MAX = 3;
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+// Upstash Redis 기반 Rate Limiter (유저당 1분에 최대 3회 요청 허용)
+// UPSTASH_REDIS_REST_URL과 UPSTASH_REDIS_REST_TOKEN 환경변수가 필요합니다.
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+let ratelimit: Ratelimit | null = null;
+if (redisUrl && redisToken) {
+  ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(3, "1 m"),
+    analytics: true,
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,19 +39,16 @@ export async function POST(request: NextRequest) {
     }
 
     // --- Rate Limiting 시작 ---
-    const now = Date.now();
-    const userRate = rateLimitMap.get(username);
-    
-    if (userRate && now < userRate.resetTime) {
-      if (userRate.count >= RATE_LIMIT_MAX) {
+    if (ratelimit) {
+      const { success } = await ratelimit.limit(`generate_${username}`);
+      if (!success) {
         return NextResponse.json(
           { error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." },
           { status: 429 }
         );
       }
-      userRate.count += 1;
     } else {
-      rateLimitMap.set(username, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+      console.warn("Upstash Redis is not configured. Rate limiting is disabled.");
     }
     // --- Rate Limiting 끝 ---
 
@@ -81,7 +88,9 @@ export async function POST(request: NextRequest) {
     // 1. 커밋 목록 확정
     let shas: string[] = commitShas || [];
     if (shas.length === 0) {
-      const commits = await getRecentCommits(owner, repo, since, until, 10, session?.accessToken);
+      const { getToken } = await import("next-auth/jwt");
+      const jwtToken = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+      const commits = await getRecentCommits(owner, repo, since, until, 10, jwtToken?.accessToken as string | undefined);
       shas = commits.map((c) => c.sha);
     }
 

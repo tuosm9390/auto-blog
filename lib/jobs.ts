@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabaseAdmin as supabase } from "./supabase-admin";
 import { AIJob, JobStatus, GenerateResult, SubscriptionTier } from "./types";
 
 export async function createJob(
@@ -112,7 +112,7 @@ export async function runAIAnalysisBackground(
 
   try {
     await Promise.race([run(), timeout]);
-  } catch (error: any) {
+  } catch (error: unknown) {
     let message = "AI 분석 중 오류가 발생했습니다.";
     
     if (error instanceof Error) {

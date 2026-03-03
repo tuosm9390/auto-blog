@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabaseAdmin as supabase } from "./supabase-admin";
 import { Post, PostStatus } from "./types";
 
 function slugify(title: string): string {

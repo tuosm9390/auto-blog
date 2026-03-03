@@ -245,7 +245,7 @@ export async function analyzeCommits(
       }
       
       return text;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
       
       // 429 에러(Rate Limit 또는 Quota Exceeded) 추출
