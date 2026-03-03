@@ -1,5 +1,6 @@
 import { supabaseAdmin as supabase } from "./supabase-admin";
 import { Post, PostStatus } from "./types";
+import { cache } from "react";
 
 function slugify(title: string): string {
   const date = new Date().toISOString().split("T")[0];
@@ -28,12 +29,15 @@ interface DbPost {
   deleted_by?: string | null;
 }
 
+// 리스트 페이지에서는 content를 클라이언트로 전달하지 않아 직렬화 크기 절감
+
 export async function getAllPosts(options?: {
   query?: string;
   tag?: string;
   repo?: string;
   author?: string;
   status?: PostStatus;
+  includeContent?: boolean;
 }): Promise<Post[]> {
   let queryBuilder = supabase
     .from("posts")
@@ -75,10 +79,13 @@ export async function getAllPosts(options?: {
     return [];
   }
 
+  const stripContent = !options?.includeContent;
+
   return posts.map((post: DbPost) => ({
     ...post,
     id: post.id,
     slug: post.slug || post.id, // slug가 없는 구형 데이터를 위해 id 대체
+    content: stripContent ? "" : post.content,
     summary: post.summary || "",
     repo: post.repo || "",
     commits: post.commits || [],
@@ -89,7 +96,7 @@ export async function getAllPosts(options?: {
   }));
 }
 
-export async function getPostById(id: string): Promise<Post | null> {
+export const getPostById = cache(async function getPostById(id: string): Promise<Post | null> {
   const { data: post, error } = await supabase
     .from("posts")
     .select("*")
@@ -111,9 +118,9 @@ export async function getPostById(id: string): Promise<Post | null> {
     author: post.author || "",
     date: post.createdAt,
   };
-}
+});
 
-export async function getPostByUsernameAndSlug(username: string, slug: string): Promise<Post | null> {
+export const getPostByUsernameAndSlug = cache(async function getPostByUsernameAndSlug(username: string, slug: string): Promise<Post | null> {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
   let query = supabase
     .from("posts")
@@ -143,7 +150,7 @@ export async function getPostByUsernameAndSlug(username: string, slug: string): 
     author: post.author || "",
     date: post.createdAt,
   };
-}
+});
 
 export async function createPost(
   title: string,

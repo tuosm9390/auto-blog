@@ -1,4 +1,5 @@
 ﻿import { supabaseAdmin as supabase } from "./supabase-admin";
+import { cache } from "react";
 
 export interface Profile {
   id: string; // NextAuth user.id (Text)
@@ -34,7 +35,7 @@ export async function upsertProfile(profile: Partial<Profile> & { id: string, us
   return data as Profile;
 }
 
-export async function getProfileByUsername(username: string): Promise<Profile | null> {
+export const getProfileByUsername = cache(async function getProfileByUsername(username: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
@@ -45,7 +46,7 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
     return null;
   }
   return data as Profile;
-}
+});
 
 export async function updateBio(username: string, bio: string): Promise<boolean> {
   const { error } = await supabase

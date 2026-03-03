@@ -18,7 +18,7 @@ export default function Footer() {
       }
     };
 
-    window.addEventListener("scroll", toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
@@ -88,11 +88,17 @@ export default function Footer() {
               devcraft0416@gmail.com
             </a>
             <div className="flex items-center gap-4 mt-1">
-              <Link href="/terms" className="text-text-tertiary hover:text-text-secondary text-xs transition-colors">
+              <Link
+                href="/terms"
+                className="text-text-tertiary hover:text-text-secondary text-xs transition-colors"
+              >
                 {t("terms")}
               </Link>
               <span className="text-border-strong text-xs">·</span>
-              <Link href="/pricing" className="text-text-tertiary hover:text-text-secondary text-xs transition-colors">
+              <Link
+                href="/pricing"
+                className="text-text-tertiary hover:text-text-secondary text-xs transition-colors"
+              >
                 {t("pricing")}
               </Link>
             </div>

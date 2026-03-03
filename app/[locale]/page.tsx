@@ -5,9 +5,11 @@ import { getTranslations } from "next-intl/server";
 export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
 export default async function HomePage() {
-  const posts = await getAllPosts({ query: "", tag: "", status: "published" });
-  const tags = await getAllTags();
-  const t = await getTranslations("HomePage");
+  const [posts, tags, t] = await Promise.all([
+    getAllPosts({ query: "", tag: "", status: "published" }),
+    getAllTags(),
+    getTranslations("HomePage"),
+  ]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">

@@ -18,7 +18,7 @@ const createPostSchema = z.object({
 
 export async function GET() {
   try {
-    const posts = await getAllPosts();
+    const posts = await getAllPosts({ includeContent: true });
     return NextResponse.json({ posts });
   } catch (error) {
     const message =
