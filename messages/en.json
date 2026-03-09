@@ -78,6 +78,8 @@
     "desc": "AI analyzes your GitHub repository commits and automatically writes blog posts",
     "usage": "Usage this month",
     "loginRequired": "Sign in is required to generate posts.",
+    "authError": "Authentication required. Please sign in again.",
+    "repoLoadError": "Failed to load repository list.",
     "selectRepo": "Select Repository",
     "fetchCommits": "Fetch Commits",
     "owner": "Owner",

@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRecentCommits } from "@/lib/github";
 import { getProcessedCommitShas } from "@/lib/settings";
 import { auth } from "@/auth";
-import { getToken } from "next-auth/jwt";
 
 export async function GET(request: NextRequest) {
   // 인증된 사용자만 커밋 조회 가능 — 서버 GITHUB_TOKEN의 rate limit 보호
   const session = await auth();
-  const jwtToken = await getToken({ req: request, secret: process.env.AUTH_SECRET });
-  
-  if (!session?.user?.username || !jwtToken?.accessToken) {
+
+  if (!session?.user?.username || !session?.user?.accessToken) {
     return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 });
   }
 
@@ -28,12 +26,11 @@ export async function GET(request: NextRequest) {
 
   try {
     // 사용자 OAuth 토큰 우선 사용 (private repo 접근 + 개인 rate limit)
-    const token = jwtToken.accessToken as string;
-    const commits = await getRecentCommits(owner, repo, since, until, 30, token);
-    
+    const commits = await getRecentCommits(owner, repo, since, until, 30, session.user.accessToken);
+
     // 이미 분석에 사용된 커밋 목록도 가져옴
     const processedShas = await getProcessedCommitShas(session.user.username, `${owner}/${repo}`);
-    
+
     return NextResponse.json({ commits, processedShas });
   } catch (error) {
     const message =
