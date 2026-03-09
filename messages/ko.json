@@ -78,6 +78,8 @@
     "desc": "GitHub 레포지토리의 커밋을 AI가 분석하여 블로그 글을 자동으로 작성합니다",
     "usage": "이번 달 사용량",
     "loginRequired": "글 생성 기능을 이용하려면 로그인이 필요합니다.",
+    "authError": "인증이 필요합니다. 다시 로그인해 주세요.",
+    "repoLoadError": "레포지토리 목록을 불러오지 못했습니다.",
     "selectRepo": "레포지토리 선택",
     "fetchCommits": "커밋 조회",
     "owner": "Owner",

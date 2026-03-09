@@ -184,6 +184,121 @@
       "keyFiles": []
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "",
+      "accessCount": 7,
+      "lastAccessed": 1773024199402,
+      "type": "directory"
+    },
+    {
+      "path": "app\\api\\github\\repos\\route.ts",
+      "accessCount": 6,
+      "lastAccessed": 1773024176270,
+      "type": "file"
+    },
+    {
+      "path": "components\\GenerateForm.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1773024194967,
+      "type": "file"
+    },
+    {
+      "path": "app\\api\\github\\route.ts",
+      "accessCount": 5,
+      "lastAccessed": 1773024189274,
+      "type": "file"
+    },
+    {
+      "path": "messages\\ko.json",
+      "accessCount": 4,
+      "lastAccessed": 1773024226377,
+      "type": "directory"
+    },
+    {
+      "path": "messages\\en.json",
+      "accessCount": 4,
+      "lastAccessed": 1773024227246,
+      "type": "directory"
+    },
+    {
+      "path": "auth.ts",
+      "accessCount": 3,
+      "lastAccessed": 1773023973253,
+      "type": "file"
+    },
+    {
+      "path": "app\\api",
+      "accessCount": 3,
+      "lastAccessed": 1773024018401,
+      "type": "directory"
+    },
+    {
+      "path": "middleware.ts",
+      "accessCount": 2,
+      "lastAccessed": 1773023973710,
+      "type": "file"
+    },
+    {
+      "path": "lib\\github.ts",
+      "accessCount": 2,
+      "lastAccessed": 1773023978063,
+      "type": "file"
+    },
+    {
+      "path": "components\\RepoFilter.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773023517239,
+      "type": "file"
+    },
+    {
+      "path": "components\\PostsClient.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773023535136,
+      "type": "file"
+    },
+    {
+      "path": "lib\\posts.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773023535303,
+      "type": "directory"
+    },
+    {
+      "path": "i18n\\routing.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773023761774,
+      "type": "file"
+    },
+    {
+      "path": "next.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773023762679,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\generate\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773023763562,
+      "type": "file"
+    },
+    {
+      "path": "i18n\\request.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773023771884,
+      "type": "file"
+    },
+    {
+      "path": "app\\api\\generate\\route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773024005266,
+      "type": "file"
+    },
+    {
+      "path": "messages",
+      "accessCount": 1,
+      "lastAccessed": 1773024204593,
+      "type": "directory"
+    }
+  ],
   "userDirectives": []
 }

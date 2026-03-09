@@ -41,7 +41,10 @@ export default function GenerateForm() {
 
   useEffect(() => {
     if (session?.user) {
-      fetch("/api/github/repos").then(r => r.json()).then(d => { if (d.repos) setRepos(d.repos); }).catch(console.error);
+      fetch("/api/github/repos")
+        .then(r => { if (!r.ok) throw new Error(r.status === 401 ? t("authError") : t("repoLoadError")); return r.json(); })
+        .then(d => { if (d.repos) setRepos(d.repos); })
+        .catch(err => { console.error("Failed to load repos:", err); setError(err.message); });
       fetch("/api/subscription").then(r => r.ok ? r.json() : null).then(d => { if (d) setUsage(d); }).catch(console.error);
     }
   }, [session]);
