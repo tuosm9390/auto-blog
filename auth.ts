@@ -15,7 +15,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     authorized: ({ auth }) => !!auth,
     async jwt({ token, account, profile, user }) {
       // 최초 로그인 시 (account, profile, user 모두 존재)
-      if (account && profile && user) {
+      if (account) {
         token.accessToken = account.access_token
         const githubProfile = profile as unknown as { login?: string; avatar_url?: string; name?: string };
         const githubUsername = githubProfile.login;

@@ -1,0 +1,189 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1773017610794,
+  "projectRoot": "C:\\Users\\tuosm\\.gemini\\antigravity\\scratch\\auto-blog",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "16.1.6",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.2.3",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.2.3",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "eslint"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase",
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "app",
+      "components",
+      "lib",
+      "public",
+      "scripts"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "app": {
+      "path": "app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1773017610750,
+      "keyFiles": [
+        "favicon.ico",
+        "globals.css",
+        "robots.ts",
+        "sitemap.ts"
+      ]
+    },
+    "components": {
+      "path": "components",
+      "purpose": "UI components",
+      "fileCount": 19,
+      "lastAccessed": 1773017610751,
+      "keyFiles": [
+        "auth-components.tsx",
+        "BioEditor.tsx",
+        "ConfirmProvider.tsx",
+        "EditForm.tsx",
+        "Footer.tsx"
+      ]
+    },
+    "i18n": {
+      "path": "i18n",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1773017610765,
+      "keyFiles": [
+        "request.ts",
+        "routing.ts"
+      ]
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "Library code",
+      "fileCount": 11,
+      "lastAccessed": 1773017610766,
+      "keyFiles": [
+        "ai.ts",
+        "github.ts",
+        "jobs.ts",
+        "posts.ts",
+        "profiles.ts"
+      ]
+    },
+    "messages": {
+      "path": "messages",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1773017610767,
+      "keyFiles": [
+        "en.json",
+        "ko.json"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1773017610767,
+      "keyFiles": []
+    },
+    "results": {
+      "path": "results",
+      "purpose": null,
+      "fileCount": 33,
+      "lastAccessed": 1773017610768,
+      "keyFiles": [
+        "260223_Task.md",
+        "260223_Task_알림개선.md",
+        "260223_구현계획.md",
+        "260223_워크스루.md",
+        "260223_워크스루_삭제오류패치.md"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 6,
+      "lastAccessed": 1773017610769,
+      "keyFiles": [
+        "add-jobs-table.sql",
+        "add-soft-delete-to-posts.sql",
+        "add-subscription-fields.sql",
+        "create-profiles-table.sql",
+        "fix-rls.sql"
+      ]
+    },
+    "types": {
+      "path": "types",
+      "purpose": "Type definitions",
+      "fileCount": 1,
+      "lastAccessed": 1773017610769,
+      "keyFiles": [
+        "next-auth.d.ts"
+      ]
+    },
+    "app\\api": {
+      "path": "app\\api",
+      "purpose": "API routes",
+      "fileCount": 0,
+      "lastAccessed": 1773017610770,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}
