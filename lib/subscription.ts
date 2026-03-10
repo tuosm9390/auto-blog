@@ -69,8 +69,7 @@ export async function checkAndGetUsage(username: string): Promise<UsageInfo> {
   let usageCount = data.usage_count_month ?? 0;
 
   if (resetDate && now >= resetDate) {
-    const nextResetDate = new Date(now);
-    nextResetDate.setMonth(nextResetDate.getMonth() + 1);
+    const nextResetDate = getNextResetDate(now);
 
     await supabase
       .from("profiles")
@@ -137,8 +136,7 @@ export async function decrementUsage(username: string): Promise<void> {
 
 // 사용량 초기화 (구독 결제 완료 시 호출)
 export async function resetUsage(username: string): Promise<void> {
-  const nextResetDate = new Date();
-  nextResetDate.setMonth(nextResetDate.getMonth() + 1);
+  const nextResetDate = getNextResetDate();
 
   await supabase
     .from("profiles")
@@ -147,4 +145,10 @@ export async function resetUsage(username: string): Promise<void> {
       usage_reset_date: nextResetDate.toISOString(),
     })
     .eq("username", username);
+}
+
+export function getNextResetDate(fromDate: Date = new Date()): Date {
+  const d = new Date(fromDate);
+  d.setMonth(d.getMonth() + 1);
+  return d;
 }

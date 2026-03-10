@@ -1,6 +1,6 @@
 ﻿import NextAuth from 'next-auth'
 import GitHub from 'next-auth/providers/github'
-import { upsertProfile } from '@/lib/profiles'
+
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -13,10 +13,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     authorized: ({ auth }) => !!auth,
-    async jwt({ token, account, profile, user }) {
+    async jwt({ token, account, profile }) {
       if (account) {
         token.accessToken = account.access_token;
-        const githubProfile = profile as any;
+        const githubProfile = profile as Record<string, string>;
         
         if (githubProfile?.login) {
           token.username = githubProfile.login;
@@ -25,6 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, token }: any) {
       if (session.user) {
         session.user.id = token.sub;

@@ -1,25 +1,14 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
 import { getUserRepos } from "@/lib/github";
 
 export async function GET() {
-  const session = await auth();
-
-  if (!session?.user?.accessToken) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
   try {
-    const repos = await getUserRepos(session.user.accessToken);
-    return NextResponse.json({ repos });
-  } catch (error) {
+    const { accessToken } = await requireAuth();
+    const repos = await getUserRepos(accessToken);
+    return apiSuccess({ repos });
+  } catch (error: unknown) {
     console.error("Error fetching repos:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch repositories" },
-      { status: 500 }
-    );
+    if (isAuthError(error)) return apiError(error.message, 401);
+    return apiError("서버 오류가 발생했습니다.", 500);
   }
 }

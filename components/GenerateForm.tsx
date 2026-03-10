@@ -1,24 +1,16 @@
 "use client";
+import { Checkbox } from "@/components/ui/Checkbox";
+
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "@/i18n/routing";
-import { CommitInfo } from "@/lib/types";
-import { format } from "date-fns";
-import { ko, enUS } from "date-fns/locale";
+import { CommitInfo, Repo, SubscriptionInfo as UsageInfo } from "@/lib/types";
+import { formatShortDate } from "@/lib/date";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { LoginRequired } from "@/components/ui/LoginRequired";
 
 type Status = "idle" | "loading-commits" | "selecting" | "generating" | "preview" | "publishing" | "done" | "error";
-
-interface Repo { name: string; full_name: string; private: boolean; }
-
-interface UsageInfo {
-  tier: string;
-  usageCount: number;
-  monthlyLimit: number;
-  remaining: number;
-}
 
 export default function GenerateForm() {
   const router = useRouter();
@@ -37,9 +29,7 @@ export default function GenerateForm() {
   const [statusMessage, setStatusMessage] = useState("");
   const [usage, setUsage] = useState<UsageInfo | null>(null);
 
-  const dateLocale = locale === 'ko' ? ko : enUS;
-
-  useEffect(() => {
+    useEffect(() => {
     if (session?.user) {
       fetch("/api/github/repos")
         .then(r => { if (!r.ok) throw new Error(r.status === 401 ? t("authError") : t("repoLoadError")); return r.json(); })
@@ -47,18 +37,11 @@ export default function GenerateForm() {
         .catch(err => { console.error("Failed to load repos:", err); setError(err.message); });
       fetch("/api/subscription").then(r => r.ok ? r.json() : null).then(d => { if (d) setUsage(d); }).catch(console.error);
     }
-  }, [session]);
+  }, [session, t]);
 
   if (!session) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 animate-fade-in-up">
-        <h1 className="text-3xl font-display font-bold mb-2">{t("title")}</h1>
-        <p className="text-text-secondary mb-8">{t("desc")}</p>
-        <div className="border border-border-subtle rounded-xl p-8 text-center">
-          <p className="text-text-secondary mb-4">{t("loginRequired")}</p>
-          <Link href="/api/auth/signin" className="inline-block px-6 py-3 bg-accent text-black font-semibold rounded-lg">Sign In</Link>
-        </div>
-      </div>
+      <LoginRequired />
     );
   }
 
@@ -166,12 +149,10 @@ export default function GenerateForm() {
             {commits.map(commit => {
               const selected = selectedShas.includes(commit.sha);
               const isProcessed = processedShas.includes(commit.sha);
-              const dateStr = commit.date ? format(new Date(commit.date), "M/d HH:mm", { locale: dateLocale }) : "";
+              const dateStr = commit.date ? formatShortDate(commit.date, locale) : "";
               return (
                 <div key={commit.sha} onClick={() => toggleCommit(commit.sha)} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${selected ? "border-border-strong bg-elevated" : "border-border-subtle hover:border-border-strong"} ${isProcessed ? "opacity-75" : ""}`}>
-                  <div className={`w-5 h-5 mt-0.5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${selected ? "border-accent bg-accent" : "border-border-strong"}`}>
-                    {selected && <span className="text-black text-xs font-bold">✓</span>}
-                  </div>
+                  <Checkbox checked={selected} />
                   <div className="min-w-0 flex-1">
                     <div className={`text-sm font-medium truncate ${selected ? "text-text-primary" : "text-text-secondary"}`}>{commit.message.split("\n")[0]}</div>
                     <div className="flex items-center gap-2 mt-1 text-xs text-text-tertiary flex-wrap">

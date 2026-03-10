@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { NextRequest } from "next/server";
+import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
 import { getJobById, deleteJob } from "@/lib/jobs";
 import { decrementUsage } from "@/lib/subscription";
 
@@ -7,22 +7,21 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   try {
+    const { username } = await requireAuth();
     const { id } = await params;
+    
     const job = await getJobById(id);
-    if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    if (!job) return apiError("작업을 찾을 수 없습니다.", 404);
 
-    // 본인 작업인지 확인
-    if (job.github_username !== session.user.username) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (job.github_username !== username) {
+      return apiError("권한이 없습니다.", 403);
     }
 
-    return NextResponse.json({ job });
-  } catch {
-    return NextResponse.json({ error: "Fetch error" }, { status: 500 });
+    return apiSuccess({ job });
+  } catch (error: unknown) {
+    if (isAuthError(error)) return apiError(error.message, 401);
+    return apiError("작업을 가져오는 중 오류가 발생했습니다.", 500);
   }
 }
 
@@ -30,24 +29,22 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   try {
+    const { username } = await requireAuth();
     const { id } = await params;
+    
     const job = await getJobById(id);
-    if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
-    if (job.github_username !== session.user.username) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!job) return apiError("작업을 찾을 수 없습니다.", 404);
+    if (job.github_username !== username) return apiError("권한이 없습니다.", 403);
 
-    // 분석 미완료(pending/processing) 상태에서 취소 시 사용량 롤백
-    // completed/failed는 이미 분석이 끝난 것이므로 차감 유지
     if (job.status === "pending" || job.status === "processing") {
-      await decrementUsage(job.github_username);
+      await decrementUsage(username);
     }
 
     await deleteJob(id);
-    return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: "Delete error" }, { status: 500 });
+    return apiSuccess({ success: true });
+  } catch (error: unknown) {
+    if (isAuthError(error)) return apiError(error.message, 401);
+    return apiError("삭제 처리 중 오류가 발생했습니다.", 500);
   }
 }

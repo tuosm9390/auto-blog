@@ -1,34 +1,38 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { NextRequest } from "next/server";
 import { updateBio } from "@/lib/profiles";
+import { requireAuth, apiError, apiSuccess, parseJsonBody, isAuthError } from "@/lib/api-utils";
+import { z } from "zod";
 
-export async function PUT(req: Request, { params }: { params: Promise<{ username: string }> }) {
+const bioSchema = z.object({
+  bio: z.string().max(300, "bio는 300자 이하여야 합니다."),
+});
+
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ username: string }> }) {
   try {
-    const session = await auth();
+    const { username: authUser } = await requireAuth();
     const { username } = await params;
 
-    if (!session?.user?.username || session.user.username !== username) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (authUser !== username) {
+      return apiError("권한이 없습니다.", 403);
     }
 
-    const { bio } = await req.json();
-
-    if (typeof bio !== "string") {
-      return NextResponse.json({ error: "bio는 문자열이어야 합니다." }, { status: 400 });
-    }
-    if (bio.length > 300) {
-      return NextResponse.json({ error: "bio는 300자 이하여야 합니다." }, { status: 400 });
+    const body = await parseJsonBody(req);
+    const parsedData = bioSchema.safeParse(body);
+    
+    if (!parsedData.success) {
+      return apiError(parsedData.error.issues[0]?.message || "잘못된 입력값입니다.", 400);
     }
 
-    const success = await updateBio(username, bio);
+    const success = await updateBio(username, parsedData.data.bio);
 
     if (!success) {
-      return NextResponse.json({ error: "Failed to update bio" }, { status: 500 });
+      return apiError("서버 오류가 발생했습니다.", 500);
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
+    return apiSuccess({ success: true });
+  } catch (error: unknown) {
     console.error("Bio update error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    if (isAuthError(error)) return apiError(error.message, 401);
+    return apiError("서버 오류가 발생했습니다.", 500);
   }
 }

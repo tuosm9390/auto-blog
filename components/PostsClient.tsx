@@ -4,8 +4,7 @@ import { useState } from "react";
 import { Post } from "@/lib/types";
 import PostCard from "./PostCard";
 import SearchInput from "./SearchInput";
-import TagFilter from "./TagFilter";
-import RepoFilter from "./RepoFilter";
+import { SelectFilter } from "@/components/ui/SelectFilter";
 import { useTranslations } from "next-intl";
 
 interface PostsClientProps {
@@ -39,18 +38,22 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
           
           <div className="flex gap-3 w-full md:w-auto">
             {repos && repos.length > 0 && (
-              <RepoFilter
-                repos={repos}
-                activeRepo={activeRepo}
-                onRepoChange={setActiveRepo}
+              <SelectFilter
+                options={repos}
+                activeValue={activeRepo}
+                onChange={setActiveRepo}
                 labelAll={t("allRepos")}
+                formatOption={(val) => val.split("/").pop() || val}
+                className="min-w-40"
               />
             )}
-            <TagFilter
-              tags={tags}
-              activeTag={activeTag}
-              onTagChange={setActiveTag}
+            <SelectFilter
+              options={tags}
+              activeValue={activeTag}
+              onChange={setActiveTag}
               labelAll={t("allTags")}
+              formatOption={(val) => "#" + val}
+              className="min-w-32"
             />
           </div>
         </div>
@@ -69,7 +72,7 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
               key={post.id} 
               post={post} 
               index={idx} 
-              href={basePath ? `${basePath}/${post.slug}` : undefined}
+              href={basePath ? `${basePath}/` : undefined}
             />
           ))}
         </div>

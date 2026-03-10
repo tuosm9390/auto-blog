@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1773017610794,
+  "lastScanned": 1773104116852,
   "projectRoot": "C:\\Users\\tuosm\\.gemini\\antigravity\\scratch\\auto-blog",
   "techStack": {
     "languages": [
@@ -65,6 +65,7 @@
     "mainDirectories": [
       "app",
       "components",
+      "docs",
       "lib",
       "public",
       "scripts"
@@ -80,7 +81,7 @@
       "path": "app",
       "purpose": "Application code",
       "fileCount": 4,
-      "lastAccessed": 1773017610750,
+      "lastAccessed": 1773104116802,
       "keyFiles": [
         "favicon.ico",
         "globals.css",
@@ -92,7 +93,7 @@
       "path": "components",
       "purpose": "UI components",
       "fileCount": 19,
-      "lastAccessed": 1773017610751,
+      "lastAccessed": 1773104116818,
       "keyFiles": [
         "auth-components.tsx",
         "BioEditor.tsx",
@@ -101,11 +102,20 @@
         "Footer.tsx"
       ]
     },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1773104116819,
+      "keyFiles": [
+        "refactoring-plan.md"
+      ]
+    },
     "i18n": {
       "path": "i18n",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1773017610765,
+      "lastAccessed": 1773104116820,
       "keyFiles": [
         "request.ts",
         "routing.ts"
@@ -115,7 +125,7 @@
       "path": "lib",
       "purpose": "Library code",
       "fileCount": 11,
-      "lastAccessed": 1773017610766,
+      "lastAccessed": 1773104116821,
       "keyFiles": [
         "ai.ts",
         "github.ts",
@@ -128,7 +138,7 @@
       "path": "messages",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1773017610767,
+      "lastAccessed": 1773104116821,
       "keyFiles": [
         "en.json",
         "ko.json"
@@ -138,14 +148,14 @@
       "path": "public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1773017610767,
+      "lastAccessed": 1773104116822,
       "keyFiles": []
     },
     "results": {
       "path": "results",
       "purpose": null,
       "fileCount": 33,
-      "lastAccessed": 1773017610768,
+      "lastAccessed": 1773104116823,
       "keyFiles": [
         "260223_Task.md",
         "260223_Task_알림개선.md",
@@ -158,7 +168,7 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 6,
-      "lastAccessed": 1773017610769,
+      "lastAccessed": 1773104116823,
       "keyFiles": [
         "add-jobs-table.sql",
         "add-soft-delete-to-posts.sql",
@@ -171,7 +181,7 @@
       "path": "types",
       "purpose": "Type definitions",
       "fileCount": 1,
-      "lastAccessed": 1773017610769,
+      "lastAccessed": 1773104116824,
       "keyFiles": [
         "next-auth.d.ts"
       ]
@@ -180,125 +190,10 @@
       "path": "app\\api",
       "purpose": "API routes",
       "fileCount": 0,
-      "lastAccessed": 1773017610770,
+      "lastAccessed": 1773104116824,
       "keyFiles": []
     }
   },
-  "hotPaths": [
-    {
-      "path": "",
-      "accessCount": 7,
-      "lastAccessed": 1773024199402,
-      "type": "directory"
-    },
-    {
-      "path": "app\\api\\github\\repos\\route.ts",
-      "accessCount": 6,
-      "lastAccessed": 1773024176270,
-      "type": "file"
-    },
-    {
-      "path": "components\\GenerateForm.tsx",
-      "accessCount": 6,
-      "lastAccessed": 1773024194967,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\github\\route.ts",
-      "accessCount": 5,
-      "lastAccessed": 1773024189274,
-      "type": "file"
-    },
-    {
-      "path": "messages\\ko.json",
-      "accessCount": 4,
-      "lastAccessed": 1773024226377,
-      "type": "directory"
-    },
-    {
-      "path": "messages\\en.json",
-      "accessCount": 4,
-      "lastAccessed": 1773024227246,
-      "type": "directory"
-    },
-    {
-      "path": "auth.ts",
-      "accessCount": 3,
-      "lastAccessed": 1773023973253,
-      "type": "file"
-    },
-    {
-      "path": "app\\api",
-      "accessCount": 3,
-      "lastAccessed": 1773024018401,
-      "type": "directory"
-    },
-    {
-      "path": "middleware.ts",
-      "accessCount": 2,
-      "lastAccessed": 1773023973710,
-      "type": "file"
-    },
-    {
-      "path": "lib\\github.ts",
-      "accessCount": 2,
-      "lastAccessed": 1773023978063,
-      "type": "file"
-    },
-    {
-      "path": "components\\RepoFilter.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773023517239,
-      "type": "file"
-    },
-    {
-      "path": "components\\PostsClient.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773023535136,
-      "type": "file"
-    },
-    {
-      "path": "lib\\posts.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773023535303,
-      "type": "directory"
-    },
-    {
-      "path": "i18n\\routing.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773023761774,
-      "type": "file"
-    },
-    {
-      "path": "next.config.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773023762679,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\generate\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773023763562,
-      "type": "file"
-    },
-    {
-      "path": "i18n\\request.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773023771884,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\generate\\route.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773024005266,
-      "type": "file"
-    },
-    {
-      "path": "messages",
-      "accessCount": 1,
-      "lastAccessed": 1773024204593,
-      "type": "directory"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }

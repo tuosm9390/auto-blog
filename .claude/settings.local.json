@@ -7,7 +7,8 @@
       "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm uninstall @anthropic-ai/sdk 2>&1)",
       "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && rm lib/claude.ts && npm run build 2>&1)",
       "Bash(tail:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(wc:*)"
     ]
   },
   "spinnerTipsEnabled": false
