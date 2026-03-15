@@ -46,7 +46,7 @@ export async function updateJobStatus(
     .eq("id", jobId);
 
   if (error) {
-    console.error(작업 상태 업데이트 실패 ():, error.message);
+    console.error(`작업 상태 업데이트 실패 (${jobId}):`, error.message);
   }
 }
 
@@ -98,10 +98,10 @@ export async function runAIAnalysisBackground(
     const commitDiffs = await Promise.all(
       shas.slice(0, 5).map((sha) => getCommitDiff(owner, repo, sha))
     );
-    const repoFullName = ${owner}/;
+    const repoFullName = `${owner}/${repo}`;
     const result = await analyzeCommits(commitDiffs, repoFullName, tier);
     await updateJobStatus(jobId, "completed", result);
-    console.log(Job  completed successfully.);
+    console.log(`Job ${jobId} completed successfully.`);
   };
 
   const timeout = new Promise<never>((_, reject) =>
@@ -121,7 +121,8 @@ export async function runAIAnalysisBackground(
         : "AI 서비스 요청이 너무 많습니다.";
     }
 
-    console.error(Job  failed:, error);
+    console.error(`Job ${jobId} failed:`, error);
     await updateJobStatus(jobId, "failed", undefined, message);
   }
 }
+

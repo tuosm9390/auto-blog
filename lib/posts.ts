@@ -10,7 +10,7 @@ function slugify(title: string): string {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .trim();
-  return ${date}-;
+  return `${date}-${slug}`;
 }
 
 interface DbPost {
@@ -46,8 +46,7 @@ export async function getAllPosts(options?: {
 
   if (options?.query) {
     const q = options.query.replace(/[,()]/g, "");
-    queryBuilder = queryBuilder.or(
-      	itle.ilike.%%,summary.ilike.%%,content.ilike.%%
+    queryBuilder = queryBuilder.or(      `title.ilike.%${q}%,summary.ilike.%${q}%,content.ilike.%${q}%`
     );
   }
 
@@ -151,17 +150,17 @@ export async function createPost(
   const { data: existingSlugs } = await supabase
     .from("posts")
     .select("slug")
-    .like("slug", ${slug}%);
+    .like("slug", `${slug}%`);
 
   if (existingSlugs && existingSlugs.length > 0) {
     const slugSet = new Set(existingSlugs.map(s => s.slug));
     if (slugSet.has(slug)) {
       let counter = 1;
-      while (slugSet.has(${slug}-)) {
+      while (slugSet.has(`${slug}-${counter}`)) {
         counter++;
         if (counter > 100) throw new Error("slug 생성에 실패했습니다.");
       }
-      uniqueSlug = ${slug}-;
+      uniqueSlug = `${slug}-${counter}`;
     }
   }
 
@@ -309,3 +308,5 @@ export async function getAllRepos(): Promise<string[]> {
   });
   return Array.from(repos).sort();
 }
+
+

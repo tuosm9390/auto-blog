@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { auth } from "@/auth";
 import { updatePost, publishDraft, createPost } from "@/lib/posts";
@@ -56,7 +56,7 @@ export async function createPostAction(formData: z.infer<typeof createSchema>) {
     }
 
     if (jobId) {
-      await deleteJob(jobId).catch(err => console.error("Job cleanup error:", err));
+      await deleteJob(jobId, session.user.username).catch(err => console.error("Job cleanup error:", err));
     }
 
     revalidatePath("/settings");
@@ -81,7 +81,7 @@ export async function updatePostAction(formData: z.infer<typeof updateSchema>) {
 
   const { id, title, content, ...metadata } = parsed.data;
   
-  const success = await updatePost(id, title, content, metadata);
+  const success = await updatePost(id, session.user.username, title, content, metadata);
   if (success) {
     revalidatePath(`/posts/${id}`);
     revalidatePath(`/@${session.user.username}/${id}`);
@@ -96,10 +96,13 @@ export async function publishDraftAction(postId: string) {
     return { error: "권한이 없습니다." };
   }
 
-  const success = await publishDraft(postId);
+  const success = await publishDraft(postId, session.user.username);
   if (success) {
     revalidatePath("/jobs"); // Draft 목록 갱신
     return { success: true };
   }
   return { error: "게시에 실패했습니다." };
 }
+
+
+

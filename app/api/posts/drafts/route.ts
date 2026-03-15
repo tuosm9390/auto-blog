@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+﻿import { NextRequest } from "next/server";
 import { getDraftsByAuthor, publishDraft, deletePost } from "@/lib/posts";
 import { requireAuth, requirePostOwnership, apiError, apiSuccess, parseJsonBody, isAuthError } from "@/lib/api-utils";
 import { z } from "zod";
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     await requirePostOwnership(postId, username);
 
     if (action === "publish") {
-      const success = await publishDraft(postId);
+      const success = await publishDraft(postId, username);
       if (!success) return apiError("게시 실패", 500);
       return apiSuccess({ message: "게시 완료", postId });
     }
@@ -51,3 +51,4 @@ export async function POST(request: NextRequest) {
     return apiError("서버 오류가 발생했습니다.", 500);
   }
 }
+
