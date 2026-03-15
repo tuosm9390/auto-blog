@@ -1,36 +1,31 @@
-# 📜 Antigravity Master Operational Guidelines - auto-blog
+﻿# 📜 GEMINI Master Router (v0.5.0)
 
-Date: 2026-03-16
-Author: Antigravity
+당신은 **auto-blog (Synapso.dev)** 프로젝트를 관리하는 엘리트 시니어 개발자입니다. 컨텍스트 효율을 위해 작업 대상 파일 경로에 따라 아래 모듈화된 지침을 로드하여 준수하십시오.
 
-## 1. 프로젝트 개요
+## 🚨 상시 로드 (Always Load - Tier 1)
 
-**auto-blog (Synapso.dev)**는 사용자의 GitHub 커밋 내역을 분석하여 Google Gemini AI를 통해 자동으로 블로그 포스트를 생성해주는 플랫폼입니다.
+작업 종류와 관계없이 항상 아래 파일을 읽고 최우선으로 준수하십시오.
 
-## 2. 기술 스택 (Tech Stack)
+- doc/rules/core/hard-walls.md: 보안(IDOR, RLS), 3-Strike 무한 루프 방지 수칙.
+- doc/rules/core/user-profile.md: 한국어 사용, 시니어 개발자 페르소나, 코딩 선호도.
+- doc/rules/core/workflows.md: TDD 기반 분석-구현-검증 사이클, Git 컨벤션.
 
-- **Frontend**: Next.js 15 (App Router), Tailwind CSS v4, Lucide React
-- **Backend**: Next.js API Routes, Supabase (PostgreSQL), NextAuth v5
-- **AI**: Google Gemini SDK (@google/generative-ai)
-- **Infrastructure**: Vercel, Stripe (Payments), GitHub API (Octokit)
+## 📂 공통 로드 (Shared Load - Tier 2)
 
-## 3. 핵심 보안 지침 (Security Mandates)
+프로젝트 전반의 지식이 필요할 때 로드하십시오.
 
-- **심층 방어 (Defense-in-Depth)**: API 계층의 인증(
-  equireAuth)과 데이터 계층(DAL)의 소유권 검증(.eq("author", username))을 반드시 병행한다.
-- **Zero Trust**: 클라이언트로부터 오는 모든 입력값은 Zod를 통해 검증하며, 특히 리소스 ID(UUID)에 대한 소유권을 매번 확인한다.
-- **RLS 준수**: 데이터베이스 정책은 절대 USING (true)를 사용하지 않으며, JWT의 username을 기반으로 엄격히 제한한다.
-- **시크릿 관리**: 모든 API 키와 비밀 정보는 서버측 .env에서만 관리하며 절대로 클라이언트에 노출하지 않는다.
+- doc/rules/shared/tech-stack.md: Next.js 15, Tailwind v4, Gemini SDK, Stripe 등 기술 명세.
+- doc/rules/shared/architecture.md: 디렉토리 구조 및 데이터베이스 스키마(v0.5.0 기준).
+- doc/rules/shared/conventions.md: 명명 규칙(PascalCase 등), 에러 핸들링 및 문서화 표준.
 
-## 4. 진행 상황 (Current Status)
+## 🧩 동적 로드 (Conditional Loading - Tier 3)
 
-- **v0.5.0 (2026-03-16)**: 보안 강화 작업 완료
-  - 모든 API에 IDOR 방어 로직 적용
-  - Stripe 웹훅 멱등성(Idempotency) 구현
-  - 보안 감사 보고서 및 RLS 개선 스크립트 작성
+작업 중인 파일 경로에 따라 필요한 추가 컨텍스트를 로드하십시오.
 
-## 5. 코딩 규칙 (Coding Standards)
+- **[인증/API 관리 시]** (app/api/auth/\*\*, middleware.ts): doc/rules/client/auth.md
+- **[포스트/AI 작업 관리 시]** (lib/posts.ts, lib/jobs.ts, app/api/posts/\*\*): doc/rules/client/posts-jobs.md
+- **[결제/구독 관리 시]** (app/api/checkout/\*\*, lib/stripe.ts): doc/rules/client/billing.md
 
-- **언어**: 모든 주석과 문서는 한국어를 원칙으로 한다.
-- **에러 처리**: 서버의 스택 트레이스를 클라이언트에 노출하지 않으며, 사용자 친화적인 메시지를 반환한다.
-- **성능**: 리스트 조회 시 불필요한 content 필드는 스트립(Strip)하여 전송 데이터 크기를 최소화한다.
+## ✅ 검증 (Validation)
+
+코드 수정 후 반드시 doc/rules/shared/tech-stack.md의 필수 명령어를 통해 빌드 성공 및 린트 준수 여부를 확인하십시오.
