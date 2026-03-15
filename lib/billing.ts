@@ -19,8 +19,8 @@ export async function createCheckoutSession(session: Session, profile: { stripe_
     mode: "subscription",
     client_reference_id: session.user?.id ?? undefined,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?billing=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+    success_url: ${process.env.NEXT_PUBLIC_APP_URL}/settings?billing=success&session_id={CHECKOUT_SESSION_ID},
+    cancel_url: ${process.env.NEXT_PUBLIC_APP_URL}/pricing,
     metadata: {
       userId: session.user?.id ?? "",
       username: session.user?.username ?? "",
@@ -73,7 +73,7 @@ export async function createPortalSession(session: Session, profile: { stripe_cu
   }
 
   if (!customerId && session.user?.username) {
-    const searchResult = await stripe.customers.search({ query: `metadata["username"]:"${session.user.username}"`, limit: 1 });
+    const searchResult = await stripe.customers.search({ query: metadata["username"]:"", limit: 1 });
     if (searchResult.data.length > 0) {
       customerId = searchResult.data[0].id;
       await supabaseAdmin.from("profiles").update({ stripe_customer_id: customerId }).eq("username", session.user.username ?? "");
@@ -86,7 +86,7 @@ export async function createPortalSession(session: Session, profile: { stripe_cu
 
   return await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings`,
+    return_url: ${process.env.NEXT_PUBLIC_APP_URL}/settings,
   });
 }
 
@@ -134,7 +134,7 @@ export async function cancelSubscription(username: string) {
 
     for (const sub of subscriptions.data) {
       await stripe.subscriptions.cancel(sub.id);
-      console.log(`Stripe 구독 취소 완료: ${sub.id} (customer: ${profile.stripe_customer_id})`);
+      console.log(Stripe 구독 취소 완료:  (customer: ));
     }
   }
 
@@ -152,6 +152,19 @@ export async function cancelSubscription(username: string) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function handleWebhookEvent(event: any) {
+  // 1. 멱등성 체크: 이미 처리된 이벤트인지 확인
+  const { data: existingEvent } = await supabaseAdmin
+    .from("stripe_events")
+    .select("id")
+    .eq("id", event.id)
+    .single();
+
+  if (existingEvent) {
+    console.log(이미 처리된 웹훅 이벤트입니다: );
+    return;
+  }
+
+  // 2. 이벤트 유형별 처리
   if (event.type === "invoice.payment_succeeded") {
     const invoice = event.data.object;
     if (invoice.subscription) {
@@ -183,4 +196,10 @@ export async function handleWebhookEvent(event: any) {
         .eq("username", username);
     }
   }
+
+  // 3. 처리 완료된 이벤트 기록
+  await supabaseAdmin.from("stripe_events").insert({
+    id: event.id,
+    type: event.type,
+  });
 }

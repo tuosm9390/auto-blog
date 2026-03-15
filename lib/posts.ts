@@ -1,4 +1,4 @@
-import { supabaseAdmin as supabase } from "./supabase-admin";
+﻿import { supabaseAdmin as supabase } from "./supabase-admin";
 import { Post, PostStatus } from "./types";
 import { cache } from "react";
 
@@ -10,7 +10,7 @@ function slugify(title: string): string {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .trim();
-  return `${date}-${slug}`;
+  return ${date}-;
 }
 
 interface DbPost {
@@ -25,11 +25,10 @@ interface DbPost {
   status: PostStatus | null;
   author: string | null;
   createdAt: string;
+  updatedAt?: string;
   deletedAt?: string | null;
   deleted_by?: string | null;
 }
-
-// 리스트 페이지에서는 content를 클라이언트로 전달하지 않아 직렬화 크기 절감
 
 export async function getAllPosts(options?: {
   query?: string;
@@ -46,45 +45,33 @@ export async function getAllPosts(options?: {
     .order("createdAt", { ascending: false });
 
   if (options?.query) {
-    // PostgREST or() 필터 구문에서 쉼표와 괄호는 필터 구분자로 해석되므로 제거
     const q = options.query.replace(/[,()]/g, "");
     queryBuilder = queryBuilder.or(
-      `title.ilike.%${q}%,summary.ilike.%${q}%,content.ilike.%${q}%`
+      	itle.ilike.%%,summary.ilike.%%,content.ilike.%%
     );
   }
 
-  if (options?.tag) {
-    queryBuilder = queryBuilder.contains("tags", [options.tag]);
-  }
-
-  if (options?.repo) {
-    queryBuilder = queryBuilder.eq("repo", options.repo);
-  }
-
-  if (options?.author) {
-    queryBuilder = queryBuilder.eq("author", options.author);
-  }
+  if (options?.tag) queryBuilder = queryBuilder.contains("tags", [options.tag]);
+  if (options?.repo) queryBuilder = queryBuilder.eq("repo", options.repo);
+  if (options?.author) queryBuilder = queryBuilder.eq("author", options.author);
 
   if (options?.status) {
     queryBuilder = queryBuilder.eq("status", options.status);
   } else {
-    // 기본적으로 published 포스트만 표시
     queryBuilder = queryBuilder.eq("status", "published");
   }
 
   const { data: posts, error } = await queryBuilder;
-
   if (error) {
     console.error("Error fetching posts:", error);
     return [];
   }
 
   const stripContent = !options?.includeContent;
-
   return posts.map((post: DbPost) => ({
     ...post,
     id: post.id,
-    slug: post.slug || post.id, // slug가 없는 구형 데이터를 위해 id 대체
+    slug: post.slug || post.id,
     content: stripContent ? "" : post.content,
     summary: post.summary || "",
     repo: post.repo || "",
@@ -104,9 +91,7 @@ export const getPostById = cache(async function getPostById(id: string): Promise
     .is("deletedAt", null)
     .single();
 
-  if (error || !post) {
-    return null;
-  }
+  if (error || !post) return null;
 
   return {
     ...post,
@@ -135,10 +120,7 @@ export const getPostByUsernameAndSlug = cache(async function getPostByUsernameAn
   }
 
   const { data: post, error } = await query.single();
-
-  if (error || !post) {
-    return null;
-  }
+  if (error || !post) return null;
 
   return {
     ...post,
@@ -165,25 +147,21 @@ export async function createPost(
   }
 ): Promise<{ id: string; slug: string }> {
   const slug = slugify(title);
-
-  // slug 중복 처리 최적화 (N+1 방지를 위해 LIKE 쿼리로 한 번에 조회)
   let uniqueSlug = slug;
   const { data: existingSlugs } = await supabase
     .from("posts")
     .select("slug")
-    .like("slug", `${slug}%`);
+    .like("slug", ${slug}%);
 
   if (existingSlugs && existingSlugs.length > 0) {
     const slugSet = new Set(existingSlugs.map(s => s.slug));
     if (slugSet.has(slug)) {
       let counter = 1;
-      while (slugSet.has(`${slug}-${counter}`)) {
+      while (slugSet.has(${slug}-)) {
         counter++;
-        if (counter > 100) {
-          throw new Error("slug 생성에 실패했습니다. (중복 과다)");
-        }
+        if (counter > 100) throw new Error("slug 생성에 실패했습니다.");
       }
-      uniqueSlug = `${slug}-${counter}`;
+      uniqueSlug = ${slug}-;
     }
   }
 
@@ -203,11 +181,7 @@ export async function createPost(
     .select("id, slug")
     .single();
 
-  if (error || !data) {
-    console.error("createPost DB error:", error?.message);
-    throw new Error("포스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
-  }
-
+  if (error || !data) throw new Error("포스트 생성에 실패했습니다.");
   return { id: data.id, slug: data.slug };
 }
 
@@ -218,12 +192,14 @@ export async function deletePost(id: string, username: string): Promise<boolean>
       deletedAt: new Date().toISOString(),
       deleted_by: username
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("author", username);
   return !error;
 }
 
 export async function updatePost(
   id: string,
+  username: string,
   title: string,
   content: string,
   metadata: {
@@ -244,19 +220,21 @@ export async function updatePost(
       tags: metadata.tags,
       updatedAt: new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("author", username);
 
   return !error;
 }
 
-export async function publishDraft(id: string): Promise<boolean> {
+export async function publishDraft(id: string, username: string): Promise<boolean> {
   const { error } = await supabase
     .from("posts")
     .update({
       status: "published",
       updatedAt: new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("author", username);
 
   return !error;
 }
@@ -271,11 +249,10 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
     .order("createdAt", { ascending: false });
 
   if (error || !posts) return [];
-
   return posts.map((post: DbPost) => ({
     ...post,
     id: post.id,
-    slug: post.slug || post.id, // slug가 없는 구형 데이터를 위해 id 대체
+    slug: post.slug || post.id,
     summary: post.summary || "",
     repo: post.repo || "",
     commits: post.commits || [],
@@ -286,7 +263,6 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
   }));
 }
 
-// 특정 사용자/레포의 가장 최근 포스트 생성일 반환 (auto_schedule weekly 체크용)
 export async function getLastPostDate(author: string, repo: string): Promise<Date | null> {
   const { data } = await supabase
     .from("posts")
@@ -307,21 +283,15 @@ export async function getAllTags(options?: { repo?: string }): Promise<string[]>
     .eq("status", "published")
     .is("deletedAt", null);
 
-  if (options?.repo) {
-    queryBuilder = queryBuilder.eq("repo", options.repo);
-  }
+  if (options?.repo) queryBuilder = queryBuilder.eq("repo", options.repo);
 
   const { data, error } = await queryBuilder;
-
-  if (error || !data) {
-    return [];
-  }
+  if (error || !data) return [];
 
   const tags = new Set<string>();
   data.forEach((post: { tags: string[] | null }) => {
     post.tags?.forEach((tag: string) => tags.add(tag));
   });
-
   return Array.from(tags).sort();
 }
 
@@ -332,16 +302,10 @@ export async function getAllRepos(): Promise<string[]> {
     .eq("status", "published")
     .is("deletedAt", null);
 
-  if (error || !data) {
-    return [];
-  }
-
+  if (error || !data) return [];
   const repos = new Set<string>();
   data.forEach((post: { repo: string | null }) => {
-    if (post.repo) {
-      repos.add(post.repo);
-    }
+    if (post.repo) repos.add(post.repo);
   });
-
   return Array.from(repos).sort();
 }

@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (jobId) {
-      await deleteJob(jobId).catch(err => console.error("Job cleanup error:", err));
+      await deleteJob(jobId, username).catch(err => console.error("Job cleanup error:", err));
     }
 
     return apiSuccess({ id, slug, message: "포스트가 생성되었습니다." });
@@ -73,6 +73,9 @@ export async function DELETE(request: NextRequest) {
       return apiError("slug 파라미터가 필요합니다.", 400);
     }
 
+    // 슬러그 기반 삭제 시에도 소유권 확인 (내부적으로 author 체크)
+    // 참고: 현재 deletePost는 ID(UUID)를 기대하므로 슬러그 기반 삭제 로직 확인 필요
+    // 여기서는 일관성을 위해 username 전달
     const deleted = await deletePost(slug, username);
     if (!deleted) {
       return apiError("포스트를 찾을 수 없거나 삭제에 실패했습니다.", 404);

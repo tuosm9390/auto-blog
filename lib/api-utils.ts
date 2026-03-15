@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+﻿import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { getPostById } from "@/lib/posts";
 
@@ -46,4 +46,16 @@ export async function requirePostOwnership(postId: string, username: string) {
     throw new AuthError("권한이 없습니다.");
   }
   return post;
+}
+
+export async function requireJobOwnership(jobId: string, username: string) {
+  const { getJobById } = await import("./jobs");
+  const job = await getJobById(jobId);
+  if (!job) {
+    throw new Error("Job not found");
+  }
+  if (job.github_username !== username) {
+    throw new AuthError("권한이 없습니다.");
+  }
+  return job;
 }

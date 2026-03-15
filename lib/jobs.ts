@@ -1,4 +1,4 @@
-import { supabaseAdmin as supabase } from "./supabase-admin";
+﻿import { supabaseAdmin as supabase } from "./supabase-admin";
 import { AIJob, JobStatus, GenerateResult, SubscriptionTier } from "./types";
 
 export async function createJob(
@@ -39,13 +39,14 @@ export async function updateJobStatus(
   if (result) updateData.result = result;
   if (errorText) updateData.error = errorText;
 
+  // 시스템 레벨의 상태 업데이트 (백그라운드 작업용)
   const { error } = await supabase
     .from("jobs")
     .update(updateData)
     .eq("id", jobId);
 
   if (error) {
-    console.error(`작업 상태 업데이트 실패 (${jobId}):`, error.message);
+    console.error(작업 상태 업데이트 실패 ():, error.message);
   }
 }
 
@@ -71,8 +72,12 @@ export async function getJobsByAuthor(githubUsername: string): Promise<AIJob[]> 
   return data as AIJob[];
 }
 
-export async function deleteJob(jobId: string): Promise<boolean> {
-  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+export async function deleteJob(jobId: string, githubUsername: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("jobs")
+    .delete()
+    .eq("id", jobId)
+    .eq("github_username", githubUsername);
   return !error;
 }
 
@@ -89,21 +94,14 @@ export async function runAIAnalysisBackground(
   const { analyzeCommits } = await import("./ai");
 
   const run = async () => {
-    // 1. 상태를 processing으로 변경
     await updateJobStatus(jobId, "processing");
-
-    // 2. Diff 가져오기 (최대 5개 커밋)
     const commitDiffs = await Promise.all(
       shas.slice(0, 5).map((sha) => getCommitDiff(owner, repo, sha))
     );
-
-    // 3. AI 분석 (Gemini) — 티어별 모델 사용
-    const repoFullName = `${owner}/${repo}`;
+    const repoFullName = ${owner}/;
     const result = await analyzeCommits(commitDiffs, repoFullName, tier);
-
-    // 4. 분석 결과와 함께 Job 완료
     await updateJobStatus(jobId, "completed", result);
-    console.log(`Job ${jobId} completed successfully.`);
+    console.log(Job  completed successfully.);
   };
 
   const timeout = new Promise<never>((_, reject) =>
@@ -114,23 +112,16 @@ export async function runAIAnalysisBackground(
     await Promise.race([run(), timeout]);
   } catch (error: unknown) {
     let message = "AI 분석 중 오류가 발생했습니다.";
-    
-    if (error instanceof Error) {
-      message = error.message;
-    } else if (typeof error === 'string') {
-      message = error;
-    }
+    if (error instanceof Error) message = error.message;
+    else if (typeof error === 'string') message = error;
 
-    // 구체적인 에러 타입에 따른 사용자 친화적 문구 보강 (Fallback)
     if (message.includes("429") || message.includes("quota") || message.includes("limit")) {
-      if (message.includes("20")) {
-        message = "Gemini API 일일 할당량(20회)을 초과했습니다. 내일 다시 시도해주세요.";
-      } else {
-        message = "AI 서비스 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
-      }
+      message = message.includes("20") 
+        ? "Gemini API 일일 할당량(20회)을 초과했습니다." 
+        : "AI 서비스 요청이 너무 많습니다.";
     }
 
-    console.error(`Job ${jobId} failed:`, error);
+    console.error(Job  failed:, error);
     await updateJobStatus(jobId, "failed", undefined, message);
   }
 }

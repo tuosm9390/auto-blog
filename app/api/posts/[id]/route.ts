@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest, { params }: RouteProps) {
 
     const { title, content, summary, repo, commits, tags } = parsedData.data;
 
-    const success = await updatePost(id, title, content, {
+    const success = await updatePost(id, username, title, content, {
       summary,
       repo,
       commits,
