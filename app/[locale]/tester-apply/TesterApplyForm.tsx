@@ -96,7 +96,7 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
           </label>
           <input
             type="text"
-            value={user.username}
+            value={user.username || user.name}
             readOnly
             className="w-full px-4 py-2.5 rounded-lg bg-elevated border border-border-subtle text-text-tertiary outline-none"
           />
@@ -156,7 +156,11 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
               key={interest.id}
               type="button"
               onClick={() => handleInterestToggle(interest.id)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all`}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                selectedInterests.includes(interest.id)
+                  ? "bg-accent text-black border-accent"
+                  : "bg-canvas text-text-secondary border-border-subtle hover:border-accent"
+              }`}
             >
               {interest.label}
             </button>

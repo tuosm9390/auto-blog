@@ -1,4 +1,4 @@
-﻿import NextAuth from 'next-auth'
+import NextAuth from 'next-auth'
 import GitHub from 'next-auth/providers/github'
 import { supabaseAdmin as supabase } from './lib/supabase-admin'
 import { upsertProfile } from './lib/profiles'
@@ -67,10 +67,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, account, profile }) {
       if (account) {
         token.accessToken = account.access_token;
+      }
+      
+      // 세션 유지 중에도 DB에서 최신 역할 정보를 가져옵니다 (실시간 권한 반영)
+      if (token.sub) {
+        const { data } = await supabase.from('profiles').select('role, username, avatar_url').eq('id', token.sub).single();
+        if (data) {
+          token.role = data.role || 'user';
+          token.username = data.username;
+          token.avatar_url = data.avatar_url;
+        }
+      }
+      
+      if (account && profile) {
         const githubProfile = profile as Record<string, any>;
-        
-        if (githubProfile?.login && token.sub) {
-          // 최신 정보로 프로필 동기화
+        if (githubProfile.login) {
           await upsertProfile({
             id: token.sub as string,
             username: githubProfile.login,
@@ -78,9 +89,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: githubProfile.name || (profile as any)?.name,
             avatar_url: githubProfile.avatar_url
           });
-
-          const { data } = await supabase.from('profiles').select('role').eq('id', token.sub).single();
-          token.role = data?.role || 'user';
         }
       }
       return token;

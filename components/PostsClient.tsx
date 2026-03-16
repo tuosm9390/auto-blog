@@ -14,7 +14,12 @@ interface PostsClientProps {
   basePath?: string;
 }
 
-export default function PostsClient({ initialPosts, tags, repos, basePath }: PostsClientProps) {
+export default function PostsClient({
+  initialPosts,
+  tags,
+  repos,
+  basePath,
+}: PostsClientProps) {
   const [query, setValue] = useState("");
   const [activeTag, setActiveTag] = useState("");
   const [activeRepo, setActiveRepo] = useState("");
@@ -35,7 +40,7 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
       <div className="flex flex-col gap-4">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           <SearchInput initialValue={query} onSearch={setValue} />
-          
+
           <div className="flex gap-3 w-full md:w-auto">
             {repos && repos.length > 0 && (
               <SelectFilter
@@ -68,10 +73,10 @@ export default function PostsClient({ initialPosts, tags, repos, basePath }: Pos
       {filteredPosts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPosts.map((post, idx) => (
-            <PostCard 
-              key={post.id} 
-              post={post} 
-              index={idx} 
+            <PostCard
+              key={post.id}
+              post={post}
+              index={idx}
               href={basePath ? `${basePath}/` : undefined}
             />
           ))}

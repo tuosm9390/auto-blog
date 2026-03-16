@@ -1,10 +1,14 @@
 import { getAllPosts, getAllTags, getAllRepos } from "@/lib/posts";
 import PostsClient from "@/components/PostsClient";
 import { getTranslations } from "next-intl/server";
+import { auth } from "@/auth";
+import { redirect } from "@/i18n/routing";
 
 export const revalidate = 60; // 60초마다 캐시 갱신 (ISR)
 
 export default async function HomePage() {
+  const s = await auth();
+  if (!s) redirect({ href: "/about", locale: "ko" });
   const [posts, tags, repos, t] = await Promise.all([
     getAllPosts({ query: "", tag: "", status: "published" }),
     getAllTags(),
