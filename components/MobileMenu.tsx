@@ -184,3 +184,4 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName, 
     </div>
   );
 }
+
