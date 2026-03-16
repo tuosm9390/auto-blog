@@ -1,61 +1,108 @@
-﻿import NextAuth from "next-auth"
-import GitHub from "next-auth/providers/github"
-import { upsertProfile, getProfileByUsername } from "@/lib/profiles"
+import NextAuth from 'next-auth'
+import GitHub from 'next-auth/providers/github'
+import { supabaseAdmin as supabase } from './lib/supabase-admin'
+import { upsertProfile } from './lib/profiles'
+
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     GitHub({
-      authorization: { params: { scope: "read:user user:email repo" } },
+      authorization: { params: { scope: 'read:user user:email repo' } },
     }),
   ],
   pages: {
     signIn: '/login',
   },
   callbacks: {
-    authorized: ({ auth }) => !!auth,
-    async jwt({ token, account, profile, user }) {
-      if (account && profile && user) {
-        token.accessToken = account.access_token
-        const githubProfile = profile as unknown as { login?: string; avatar_url?: string; name?: string };
-        const githubUsername = githubProfile.login;
+    authorized: ({ auth, request: { nextUrl } }) => {
+      const isLoggedIn = !!auth?.user;
+      const role = (auth?.user as any)?.role || 'user';
+      const isAdmin = role === 'admin';
+      const isTester = role === 'tester';
+      const isPrivileged = isAdmin || isTester;
+      
+      const pathname = nextUrl.pathname;
 
-        if (githubUsername) {
-          token.username = githubUsername;
-          token.avatar_url = githubProfile.avatar_url;
-          token.name = githubProfile.name;
+      // 1. 완전 공개 페이지 (비로그인/로그인 무관)
+      const isPublicPage = 
+        pathname === '/' || 
+        pathname.includes('/about') || 
+        pathname.includes('/pricing') || 
+        pathname.includes('/terms') ||
+        pathname.includes('/login') ||
+        pathname.startsWith('/api/auth');
 
-          try {
-            const dbProfile = await upsertProfile({
-              id: user.id as string,
-              username: githubUsername,
-              name: githubProfile.name || null,
-              avatar_url: githubProfile.avatar_url || null,
-            });
-            
-            token.role = dbProfile?.role || "user";
-          } catch (err) {
-            console.error("Failed to sync profile:", err);
-            token.role = "user";
-          }
-        }
-      } else if (token.username && !token.role) {
-        // 세션에 role이 없는 기존 유저들을 위해 DB에서 최신 role을 가져옴
-        try {
-          const dbProfile = await getProfileByUsername(token.username as string);
-          token.role = dbProfile?.role || "user";
-        } catch (err) {
-          token.role = "user";
-        }
+      if (isPublicPage) return true;
+
+      // 2. 로그인 필수 체크
+      if (!isLoggedIn) return false;
+
+      // 3. 테스터 신청 페이지는 일반 유저(권한 없음)만 접근 가능
+      if (pathname.includes('/tester-apply')) {
+        return !isPrivileged;
       }
-      return token
+
+      // 4. 핵심 기능 및 설정 페이지 (관리자/테스터 전용)
+      const isRestrictedPage = 
+        pathname.includes('/generate') || 
+        pathname.includes('/jobs') || 
+        pathname.includes('/settings');
+
+      if (isRestrictedPage) {
+        return isPrivileged;
+      }
+
+      // 5. 관리자 전용 페이지
+      if (pathname.includes('/admin')) {
+        return isAdmin;
+      }
+
+      // 6. 사용자 블로그 페이지 (본인 또는 타인 공개용)
+      if (pathname.startsWith('/@')) {
+        return true;
+      }
+
+      return isLoggedIn;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.username = token.username as string | undefined;
-        session.user.avatar_url = token.avatar_url as string | null | undefined;
-        session.user.role = (token.role as string) || "user";
+    async jwt({ token, account, profile }) {
+      if (account) {
+        token.accessToken = account.access_token;
       }
-      return session
+      
+      // 세션 유지 중에도 DB에서 최신 역할 정보를 가져옵니다 (실시간 권한 반영)
+      if (token.sub) {
+        const { data } = await supabase.from('profiles').select('role, username, avatar_url').eq('id', token.sub).single();
+        if (data) {
+          token.role = data.role || 'user';
+          token.username = data.username;
+          token.avatar_url = data.avatar_url;
+        }
+      }
+      
+      if (account && profile) {
+        const githubProfile = profile as Record<string, any>;
+        if (githubProfile.login) {
+          await upsertProfile({
+            id: token.sub as string,
+            username: githubProfile.login,
+            email: githubProfile.email || (profile as any)?.email,
+            name: githubProfile.name || (profile as any)?.name,
+            avatar_url: githubProfile.avatar_url
+          });
+        }
+      }
+      return token;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: any) {
+      if (session.user) {
+        session.user.id = token.sub;
+        session.user.username = token.username;
+        session.user.avatar_url = token.avatar_url;
+        session.user.accessToken = token.accessToken;
+        session.user.role = token.role;
+      }
+      return session;
     },
   },
 })

@@ -1,88 +1,35 @@
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
-import { stripe } from "@/lib/stripe";
-import { auth } from "@/auth";
+import { requireAuth, apiError, apiSuccess, parseJsonBody, isAuthError } from "@/lib/api-utils";
 import { getProfileByUsername } from "@/lib/profiles";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { createCheckoutSession } from "@/lib/billing";
+import { z } from "zod";
+
+const checkoutSchema = z.object({
+  tier: z.string().min(1),
+  cycle: z.enum(["monthly", "yearly"]),
+});
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
-    if (!session || !session.user || !session.user.username) {
-      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+    const { session, username } = await requireAuth();
+
+    const body = await parseJsonBody(req);
+    const parsed = checkoutSchema.safeParse(body);
+    if (!parsed.success) {
+      return apiError("Tier and cycle parameters are required or invalid.", 400);
     }
+    const { tier, cycle } = parsed.data;
 
-    const { tier, cycle } = await req.json();
-    if (!tier || !cycle) {
-      return NextResponse.json({ error: "Tier and cycle parameters are required." }, { status: 400 });
-    }
-
-    let priceId = "";
-    if (tier === "pro" && cycle === "monthly") priceId = process.env.STRIPE_PRO_MONTHLY_PRICE_ID!;
-    if (tier === "pro" && cycle === "yearly") priceId = process.env.STRIPE_PRO_YEARLY_PRICE_ID!;
-    if (tier === "business" && cycle === "monthly") priceId = process.env.STRIPE_BIZ_MONTHLY_PRICE_ID!;
-    if (tier === "business" && cycle === "yearly") priceId = process.env.STRIPE_BIZ_YEARLY_PRICE_ID!;
-
-    if (!priceId) {
-      return NextResponse.json({ error: "해당 요금제의 Price ID가 서버에 설정되어 있지 않습니다." }, { status: 500 });
-    }
-
-    const profile = await getProfileByUsername(session.user.username);
+    const profile = await getProfileByUsername(username);
     if (!profile) {
-      return NextResponse.json({ error: "프로필을 찾을 수 없습니다." }, { status: 404 });
+      return apiError("프로필을 찾을 수 없습니다.", 404);
     }
 
-    // Stripe Checkout Session 생성
-    const checkoutParams: Stripe.Checkout.SessionCreateParams = {
-      mode: "subscription",
-      client_reference_id: session.user.id ?? undefined,
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?billing=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
-      metadata: {
-        userId: session.user.id ?? "",
-        username: session.user.username,
-        tier: tier,
-      },
-      // 🔧 중요: 생성되는 구독(Subscription) 객체에도 메타데이터 전파
-      subscription_data: {
-        metadata: {
-          username: session.user.username,
-          tier: tier,
-        }
-      }
-    };
-
-    if (profile.stripe_customer_id) {
-      checkoutParams.customer = profile.stripe_customer_id;
-    } else if (session.user.email) {
-      checkoutParams.customer_email = session.user.email;
-    }
-
-    const checkoutSession = await stripe.checkout.sessions.create(checkoutParams);
-
-    if (checkoutSession.customer) {
-      const customerId = typeof checkoutSession.customer === 'string'
-        ? checkoutSession.customer
-        : checkoutSession.customer.id;
-      
-      // Customer 객체에도 유저 정보 저장 (동기화 보장)
-      await stripe.customers.update(customerId, {
-        metadata: { username: session.user.username },
-      });
-
-      await supabaseAdmin
-        .from("profiles")
-        .update({ stripe_customer_id: customerId })
-        .eq("username", session.user.username);
-    }
-
-    return NextResponse.json({ url: checkoutSession.url });
+    const checkoutSession = await createCheckoutSession(session, profile, tier, cycle);
+    return apiSuccess({ url: checkoutSession.url });
   } catch (error: unknown) {
     console.error("Stripe Checkout Error:", error);
-    return NextResponse.json(
-      { error: "결제 세션을 생성하는 중 오류가 발생했습니다." },
-      { status: 500 }
-    );
+    if (isAuthError(error)) return apiError(error.message, 401);
+    const message = error instanceof Error ? error.message : "결제 세션을 생성하는 중 오류가 발생했습니다.";
+    return apiError(message, 500);
   }
 }

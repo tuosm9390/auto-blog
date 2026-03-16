@@ -85,3 +85,24 @@ export interface AIJob {
   created_at: string;
   updated_at: string;
 }
+
+export interface Repo {
+  name: string;
+  full_name: string;
+  private: boolean;
+}
+
+export interface SubscriptionInfo {
+  tier: string;
+  usageCount: number;
+  monthlyLimit: number;
+  remaining: number;
+  resetDate: string | null;
+}
+
+export interface UserSettingsData {
+  github_username: string;
+  posting_mode: PostingMode;
+  auto_repos: string[];
+  auto_schedule: AutoSchedule;
+}

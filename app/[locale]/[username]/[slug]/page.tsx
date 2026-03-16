@@ -22,7 +22,8 @@ interface PageProps {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { username, slug } = await params;
+  const { username, slug: encodedSlug } = await params;
+  const slug = decodeURIComponent(encodedSlug);
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
 
   const post = await getPostByUsernameAndSlug(plainUsername, slug);
@@ -43,7 +44,8 @@ export async function generateMetadata({
 }
 
 export default async function PostPage({ params }: PageProps) {
-  const { locale, username, slug } = await params;
+  const { locale, username, slug: encodedSlug } = await params;
+  const slug = decodeURIComponent(encodedSlug);
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
 
   const [session, t, post, profile] = await Promise.all([

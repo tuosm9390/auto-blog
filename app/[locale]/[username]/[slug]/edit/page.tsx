@@ -16,7 +16,8 @@ export default async function EditPage({ params }: PageProps) {
     redirect("/");
   }
 
-  const { username, slug } = await params;
+  const { username, slug: encodedSlug } = await params;
+  const slug = decodeURIComponent(encodedSlug);
   const plainUsername = decodeURIComponent(username).replace(/^@/, "");
   const t = await getTranslations("Edit");
 

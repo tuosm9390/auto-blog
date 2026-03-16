@@ -2,15 +2,14 @@
 
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { LoginRequired } from "@/components/ui/LoginRequired";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
 
   if (!session?.user) {
     return (
-      <div className="profile-page">
-        <p>로그인이 필요합니다.</p>
-      </div>
+      <LoginRequired />
     );
   }
 

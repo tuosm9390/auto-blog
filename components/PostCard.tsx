@@ -22,8 +22,7 @@ export default function PostCard({ post, index, href }: PostCardProps) {
 
   const formattedDate = format(dateObj, dateFormat, { locale: dateLocale });
 
-  const finalHref =
-    href || `/@${post.author || "unknown"}/${post.slug || post.id}`;
+  const finalHref = href || `/@${post.author || "unknown"}/${post.id}`;
   const displayRepo = post.repo ? post.repo.split("/").pop() : null;
 
   // 번역 키 확인용 태그 (영문/한글 공통)
