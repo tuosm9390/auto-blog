@@ -1,19 +1,29 @@
-﻿# 🏗️ 아키텍처 및 데이터 흐름
+﻿Date: 2026-03-16 12:06:39
+Author: Antigravity
 
-## 1. 디렉토리 구조
+# 🏗️ Synapso.dev Architecture (v0.5.0)
 
-- app/[locale]/: 다국어 지원 및 페이지 컴포넌트
-- app/api/: 서버리스 함수 및 웹훅 처리
-- components/: 재사용 가능한 UI 컴포넌트 (UI/Business 분리)
-- lib/: 데이터 액세스 계층(DAL), 외부 서비스 유틸리티
-- doc/results/: 작업 보고서 및 분석 문서 저장소
+## 1. Directory Structure
+- pp/[locale]/: 다국어 지원 페이지 (Next.js App Router).
+- pp/api/: 백엔드 API 엔드포인트.
+  - /admin/: 관리자 전용 API (Testers 등).
+  - /tester-apply/: 테스터 신청 API.
+- lib/: 비즈니스 로직 및 유틸리티.
+  - pi-utils.ts: 권한별 공통 가드 및 에러 핸들링.
+- components/: 재사용 가능한 UI 컴포넌트.
+- doc/: 모든 프로젝트 문서 및 규칙.
 
-## 2. 데이터 흐름 (Data Flow)
+## 2. Database Schema (Supabase)
+### profiles Table
+- id (text, PK): GitHub 고유 ID (sub).
+- username (text): GitHub 사용자 이름.
+- ole (text): dmin, 	ester, user (default: 'user').
+- email (text): 사용자 이메일.
+- subscription_tier (text): ree, pro, usiness (default: 'free').
 
-- Page -> Action -> DAL (lib/) -> Supabase 구조를 원칙으로 한다.
-- 복잡한 비즈니스 로직은 lib/ 폴더 내 도메인 파일에 캡슐화한다.
-
-## 3. DB 스키마 (v0.5.0)
-
-- profiles, posts, jobs 테이블 간의 관계(Foreign Key) 준수.
-- soft delete 로직이 적용된 deleted_at 필드 확인.
+### 	ester_applications Table
+- id (uuid, PK): 신청 고유 ID.
+- user_id (text, FK): 신청자 프로필 ID.
+- status (text): pending, pproved, ejected.
+- experience: Entry, Junior, Middle, Senior.
+- interests: Web, App, AI, etc (text[]).

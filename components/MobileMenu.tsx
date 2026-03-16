@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
@@ -10,12 +10,17 @@ interface MobileMenuProps {
   username?: string | null;
   userImage?: string | null;
   userName?: string | null;
+  role?: string;
 }
 
-export default function MobileMenu({ isLoggedIn, username, userImage, userName }: MobileMenuProps) {
+export default function MobileMenu({ isLoggedIn, username, userImage, userName, role = 'user' }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("Header");
+
+  const isAdmin = role === 'admin';
+  const isTester = role === 'tester';
+  const isPrivileged = isAdmin || isTester;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -43,19 +48,13 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
         className="flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-md hover:bg-elevated transition-colors cursor-pointer"
       >
         <span
-          className={`block w-5 h-px bg-text-primary transition-all duration-200 origin-center ${
-            isOpen ? "rotate-45 translate-y-[7px]" : ""
-          }`}
+          className={lock w-5 h-px bg-text-primary transition-all duration-200 origin-center }
         />
         <span
-          className={`block w-5 h-px bg-text-primary transition-all duration-200 ${
-            isOpen ? "opacity-0" : ""
-          }`}
+          className={lock w-5 h-px bg-text-primary transition-all duration-200 }
         />
         <span
-          className={`block w-5 h-px bg-text-primary transition-all duration-200 origin-center ${
-            isOpen ? "-rotate-45 -translate-y-[7px]" : ""
-          }`}
+          className={lock w-5 h-px bg-text-primary transition-all duration-200 origin-center }
         />
       </button>
 
@@ -68,7 +67,7 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
                 {/* 프로필 영역 */}
                 {(userImage || userName || username) && (
                   <Link
-                    href={`/@${username}`}
+                    href={/@}
                     onClick={close}
                     className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle hover:bg-elevated transition-colors"
                   >
@@ -86,14 +85,55 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
                   </Link>
                 )}
 
-                {/* 메뉴 항목 */}
-                <Link
-                  href="/generate"
-                  onClick={close}
-                  className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-medium"
-                >
-                  {t("generate")}
-                </Link>
+                {/* 권한 있는 사용자 전용 메뉴 */}
+                {isPrivileged && (
+                  <>
+                    <Link
+                      href="/generate"
+                      onClick={close}
+                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-medium"
+                    >
+                      {t("generate")}
+                    </Link>
+                    <Link
+                      href="/jobs"
+                      onClick={close}
+                      className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
+                    >
+                      {t("jobs")}
+                    </Link>
+                    <Link
+                      href="/settings"
+                      onClick={close}
+                      className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
+                    >
+                      {t("settings")}
+                    </Link>
+                  </>
+                )}
+
+                {/* 관리자 전용 메뉴 */}
+                {isAdmin && (
+                  <Link
+                    href="/admin/testers"
+                    onClick={close}
+                    className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors border-t border-border-subtle"
+                  >
+                    {t("testerStatus")}
+                  </Link>
+                )}
+
+                {/* 일반 유저 테스터 신청 버튼 */}
+                {!isPrivileged && (
+                  <Link
+                    href="/tester-apply"
+                    onClick={close}
+                    className="mx-4 my-2 px-4 py-2 text-center text-sm text-accent bg-accent/10 rounded-full hover:bg-accent/20 transition-all font-semibold border border-accent/20"
+                  >
+                    {t("testerApply")}
+                  </Link>
+                )}
+
                 <Link
                   href="/about"
                   onClick={close}
@@ -107,20 +147,6 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
                   {t("pricing")}
-                </Link>
-                <Link
-                  href="/jobs"
-                  onClick={close}
-                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
-                >
-                  {t("jobs")}
-                </Link>
-                <Link
-                  href="/settings"
-                  onClick={close}
-                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
-                >
-                  {t("settings")}
                 </Link>
 
                 {/* 로그아웃 */}

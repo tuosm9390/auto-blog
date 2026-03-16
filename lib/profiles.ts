@@ -3,7 +3,8 @@ import { cache } from "react";
 
 export interface Profile {
   id: string; // NextAuth user.id (Text)
-  username: string; // github login
+  username: string;
+  email?: string | null;
   name: string | null;
   avatar_url: string | null;
   bio: string | null;
@@ -12,6 +13,7 @@ export interface Profile {
   subscription_status?: string;
   usage_count_month?: number;
   usage_reset_date?: string;
+  role?: string;
   updated_at: string;
 }
 
@@ -23,6 +25,7 @@ export async function upsertProfile(profile: Partial<Profile> & { id: string, us
       username: profile.username,
       name: profile.name,
       avatar_url: profile.avatar_url,
+      email: profile.email,
       updated_at: new Date().toISOString()
     }, { onConflict: "id" })
     .select()
@@ -60,3 +63,5 @@ export async function updateBio(username: string, bio: string): Promise<boolean>
   }
   return true;
 }
+
+

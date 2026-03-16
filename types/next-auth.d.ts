@@ -9,6 +9,7 @@ declare module 'next-auth' {
       username?: string
       avatar_url?: string | null
       accessToken?: string
+      role?: string
     } & DefaultSession['user']
   }
 }
@@ -16,8 +17,10 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     accessToken?: string
+      role?: string
     username?: string
     avatar_url?: string | null
     name?: string | null
+    role?: string
   }
 }

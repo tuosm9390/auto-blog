@@ -1,32 +1,20 @@
-﻿# 🛠️ 기술 스택 (Infrastructure)
+﻿Date: 2026-03-16 12:06:48
+Author: Antigravity
 
-## 1. 프레임워크 및 라이브러리
+# 🛠️ Synapso.dev Tech Stack (v0.5.0)
 
-- **Frontend**: Next.js 15.x (App Router), Tailwind CSS v4.0.0
-- **Backend**: Next.js API Routes, NextAuth v5 (Beta)
-- **Database**: Supabase (PostgreSQL), Kysely or Drizzle (ORM 선택 사항)
-- **AI Integration**: @google/generative-ai (Gemini 2.0 Flash/Pro)
-- **Payments**: Stripe SDK v17+
+## 1. Core Stack
+- **Next.js 16 (App Router)**: 최신 프레임워크 기반 성능 최적화.
+- **Tailwind CSS v4**: CSS-first 구성의 스타일 엔진.
+- **Supabase (PostgreSQL)**: 실시간 데이터베이스 및 RLS 보안.
+- **NextAuth.js (v5 Beta)**: GitHub OAuth 기반의 안전한 인증.
+- **next-intl**: i18n 기반의 글로벌 서비스 지원.
 
-## 2. 필수 명령어
+## 2. AI & Third-Party
+- **Google Gemini SDK**: Gemini 2.5 Pro를 활용한 GitHub Diff 심층 분석 및 포스트 생성.
+- **Stripe SDK**: 구독 및 결제 처리 (illing.ts, stripe.ts).
+- **Octokit**: GitHub API 연동 및 레포지토리 관리.
 
-- **빌드**:
-  ```bash
-  npm run build
-  ```
-- **린트**:
-  ```bash
-  npm run lint
-  ```
-- **타입 체크**:
-  ```bash
-  npm run tsc --noEmit
-  ```
-- **로컬 실행**:
-  ```bash
-  npm run dev
-  ```
-
-## 3. 환경 변수
-
-- .env.local에 정의된 NEXT_PUBLIC_SUPABASE_URL, STRIPE_SECRET_KEY 등을 서버에서만 호출한다.
+## 3. Security & Validation
+- **Zod**: 모든 API 입출력의 런타임 타입 검증.
+- **Supabase RLS**: 데이터 무결성 보장을 위한 DB 레벨의 보안 정책.
