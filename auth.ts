@@ -25,13 +25,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.avatar_url = githubProfile.avatar_url;
           token.name = githubProfile.name;
 
-          // DB에 프로필 동기화
-          await upsertProfile({
-            id: user.id as string,
-            username: githubUsername,
-            name: githubProfile.name || null,
-            avatar_url: githubProfile.avatar_url || null,
-          }).catch(err => console.error("Failed to sync profile:", err));
+          // DB에 프로필 동기화 및 권한 정보 취득
+          try {
+            const dbProfile = await upsertProfile({
+              id: user.id as string,
+              username: githubUsername,
+              name: githubProfile.name || null,
+              avatar_url: githubProfile.avatar_url || null,
+            });
+            
+            if (dbProfile) {
+              token.role = dbProfile.role;
+            }
+          } catch (err) {
+            console.error("Failed to sync profile:", err);
+          }
         }
       }
       return token
@@ -40,6 +48,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.username = token.username as string | undefined;
         session.user.avatar_url = token.avatar_url as string | null | undefined;
+        session.user.role = token.role as string | undefined;
       }
       return session
     },
