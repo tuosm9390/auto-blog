@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+﻿import { auth } from "@/auth";
 import { SignIn, SignOut } from "./auth-components";
 import MobileMenu from "./MobileMenu";
 import { Link } from "@/i18n/routing";
@@ -55,6 +55,23 @@ export default async function Header() {
               >
                 {t("settings")}
               </Link>
+              {session?.user?.role === 'admin' && (
+                <div className="flex items-center gap-4">
+                  <div className="h-4 w-[1px] bg-border-subtle mx-1" />
+                  <Link
+                    href="/admin/users"
+                    className="text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+                  >
+                    {t("adminUsers")}
+                  </Link>
+                  <Link
+                    href="/admin/subscription"
+                    className="text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+                  >
+                    {t("adminSubs")}
+                  </Link>
+                </div>
+              )}
             </>
           )}
 
@@ -94,6 +111,7 @@ export default async function Header() {
             username={session?.user?.username}
             userImage={session?.user?.image}
             userName={session?.user?.name}
+            role={session?.user?.role}
           />
         </div>
       </div>

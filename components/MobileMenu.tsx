@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
@@ -10,9 +10,10 @@ interface MobileMenuProps {
   username?: string | null;
   userImage?: string | null;
   userName?: string | null;
+  role?: string | null;
 }
 
-export default function MobileMenu({ isLoggedIn, username, userImage, userName }: MobileMenuProps) {
+export default function MobileMenu({ isLoggedIn, username, userImage, userName, role }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("Header");
@@ -122,6 +123,29 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName }
                 >
                   {t("settings")}
                 </Link>
+
+                {role === 'admin' && (
+                  <>
+                    <div className="px-4 py-1.5 border-t border-border-subtle mt-1">
+                      <span className="text-[10px] font-bold text-accent uppercase tracking-wider">Admin</span>
+                    </div>
+                    <Link
+                      href="/admin/users"
+                      onClick={close}
+                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-semibold"
+                    >
+                      {t("adminUsers")}
+                    </Link>
+                    <Link
+                      href="/admin/subscription"
+                      onClick={close}
+                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-semibold"
+                    >
+                      {t("adminSubs")}
+                    </Link>
+                    <div className="border-b border-border-subtle mb-1" />
+                  </>
+                )}
 
                 {/* 로그아웃 */}
                 <div className="px-4 py-2.5 border-t border-border-subtle mt-1">
