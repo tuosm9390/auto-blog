@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
@@ -85,8 +85,13 @@ export default function MobileMenu({
                         className="w-8 h-8 rounded-full object-cover border border-border-subtle"
                       />
                     )}
-                    <span className="text-sm font-medium text-text-primary truncate">
+                    <span className="text-sm font-medium text-text-primary truncate flex items-center">
                       {username || userName}
+                      {role === 'admin' && (
+                        <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-bold bg-accent text-black rounded-sm uppercase tracking-tighter">
+                          Admin
+                        </span>
+                      )}
                     </span>
                   </Link>
                 )}
@@ -155,6 +160,29 @@ export default function MobileMenu({
                   {t("pricing")}
                 </Link>
 
+                {role === 'admin' && (
+                  <>
+                    <div className="px-4 py-1.5 border-t border-border-subtle mt-1 bg-white/5">
+                      <span className="text-[10px] font-bold text-accent uppercase tracking-wider">Admin Tools</span>
+                    </div>
+                    <Link
+                      href="/admin/users"
+                      onClick={close}
+                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-semibold"
+                    >
+                      {t("adminUsers")}
+                    </Link>
+                    <Link
+                      href="/admin/subscription"
+                      onClick={close}
+                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-semibold"
+                    >
+                      {t("adminSubs")}
+                    </Link>
+                    <div className="border-b border-border-subtle mb-1" />
+                  </>
+                )}
+
                 {/* 로그아웃 */}
                 <div className="px-4 py-2.5 border-t border-border-subtle mt-1">
                   <SignOut />
@@ -187,3 +215,4 @@ export default function MobileMenu({
     </div>
   );
 }
+

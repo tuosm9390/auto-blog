@@ -1,4 +1,4 @@
-﻿import { supabaseAdmin as supabase } from "./supabase-admin";
+import { supabaseAdmin as supabase } from "./supabase-admin";
 import { cache } from "react";
 
 export interface Profile {
@@ -8,6 +8,7 @@ export interface Profile {
   name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  role?: string;
   stripe_customer_id?: string | null;
   subscription_tier?: 'free' | 'pro' | 'business';
   subscription_status?: string;

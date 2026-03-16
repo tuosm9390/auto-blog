@@ -49,6 +49,22 @@ export default async function Header() {
               >
                 {t("settings")}
               </Link>
+              {session?.user?.role === 'admin' && (
+                <div className="flex items-center gap-3 pl-3 border-l border-border-strong/40 bg-white/5 px-2.5 py-1 rounded-md ml-1">
+                  <Link
+                    href="/admin/users"
+                    className="text-[11px] font-bold text-accent hover:text-white transition-colors uppercase tracking-tight"
+                  >
+                    {t("adminUsers")}
+                  </Link>
+                  <Link
+                    href="/admin/subscription"
+                    className="text-[11px] font-bold text-accent hover:text-white transition-colors uppercase tracking-tight"
+                  >
+                    {t("adminSubs")}
+                  </Link>
+                </div>
+              )}
             </>
           )}
 
@@ -103,8 +119,13 @@ export default async function Header() {
                     className="w-7 h-7 rounded-full object-cover border border-border-subtle"
                   />
                 )}
-                <span className="text-sm font-medium text-text-primary">
+                <span className="text-sm font-medium text-text-primary flex items-center">
                   {session.user.username || session.user.name}
+                  {session.user.role === 'admin' && (
+                    <span className="ml-1.5 px-1.5 py-0.5 text-[9px] font-bold bg-accent text-black rounded-sm uppercase tracking-tighter">
+                      Admin
+                    </span>
+                  )}
                 </span>
               </Link>
               <SignOut label={t("signOut")} />
@@ -129,3 +150,5 @@ export default async function Header() {
     </header>
   );
 }
+
+
