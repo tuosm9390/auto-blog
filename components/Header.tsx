@@ -8,10 +8,10 @@ import LanguageSwitcher from "./LanguageSwitcher";
 export default async function Header() {
   const session = await auth();
   const t = await getTranslations("Header");
-  
-  const role = (session?.user as any)?.role || 'user';
-  const isAdmin = role === 'admin';
-  const isTester = role === 'tester';
+
+  const role = (session?.user as any)?.role || "user";
+  const isAdmin = role === "admin";
+  const isTester = role === "tester";
   const isPrivileged = isAdmin || isTester;
 
   return (
@@ -92,7 +92,7 @@ export default async function Header() {
           {session?.user ? (
             <div className="flex items-center gap-3 ml-2">
               <Link
-                href={/@}
+                href={"/"}
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 {session.user.image && (

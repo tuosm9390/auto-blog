@@ -13,13 +13,19 @@ interface MobileMenuProps {
   role?: string;
 }
 
-export default function MobileMenu({ isLoggedIn, username, userImage, userName, role = 'user' }: MobileMenuProps) {
+export default function MobileMenu({
+  isLoggedIn,
+  username,
+  userImage,
+  userName,
+  role = "user",
+}: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("Header");
 
-  const isAdmin = role === 'admin';
-  const isTester = role === 'tester';
+  const isAdmin = role === "admin";
+  const isTester = role === "tester";
   const isPrivileged = isAdmin || isTester;
 
   useEffect(() => {
@@ -48,13 +54,13 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName, 
         className="flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-md hover:bg-elevated transition-colors cursor-pointer"
       >
         <span
-          className={lock w-5 h-px bg-text-primary transition-all duration-200 origin-center }
+          className={`block w-5 h-px bg-text-primary transition-all duration-200 origin-center`}
         />
         <span
-          className={lock w-5 h-px bg-text-primary transition-all duration-200 }
+          className={`block w-5 h-px bg-text-primary transition-all duration-200`}
         />
         <span
-          className={lock w-5 h-px bg-text-primary transition-all duration-200 origin-center }
+          className={`block w-5 h-px bg-text-primary transition-all duration-200 origin-center`}
         />
       </button>
 
@@ -67,7 +73,7 @@ export default function MobileMenu({ isLoggedIn, username, userImage, userName, 
                 {/* 프로필 영역 */}
                 {(userImage || userName || username) && (
                   <Link
-                    href={/@}
+                    href={"/"}
                     onClick={close}
                     className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle hover:bg-elevated transition-colors"
                   >

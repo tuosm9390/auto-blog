@@ -8,7 +8,16 @@
       "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && rm lib/claude.ts && npm run build 2>&1)",
       "Bash(tail:*)",
       "Bash(grep:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm run build 2>&1 | tail -30)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && xxd messages/en.json | head -3)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && sed -i '1s/^\\\\xEF\\\\xBB\\\\xBF//' messages/en.json && xxd messages/en.json | head -1)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm run build 2>&1 | tail -20)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && xxd components/MobileMenu.tsx | grep -A1 \"lock\" | head -20)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && xxd components/MobileMenu.tsx | grep -n \"lock\\\\|6c6f 636b\" | head -10)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && xxd components/MobileMenu.tsx | sed -n '95,120p')",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm run build 2>&1 | tail -25)",
+      "Bash(cd \"C:\\\\Users\\\\tuosm\\\\.gemini\\\\antigravity\\\\scratch\\\\auto-blog\" && npm run build 2>&1 | tail -15)"
     ]
   },
   "spinnerTipsEnabled": false

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -35,7 +35,7 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
 
   const handleInterestToggle = (id: string) => {
     setSelectedInterests((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -91,7 +91,9 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
       {/* 기본 정보 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-text-primary">{t("githubUsername")}</label>
+          <label className="text-sm font-semibold text-text-primary">
+            {t("githubUsername")}
+          </label>
           <input
             type="text"
             value={user.username}
@@ -100,7 +102,9 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-text-primary">{t("githubEmail")}</label>
+          <label className="text-sm font-semibold text-text-primary">
+            {t("githubEmail")}
+          </label>
           <input
             type="email"
             name="githubEmail"
@@ -112,7 +116,9 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-text-primary">{t("email")}</label>
+        <label className="text-sm font-semibold text-text-primary">
+          {t("email")}
+        </label>
         <input
           type="email"
           name="email"
@@ -124,7 +130,9 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
 
       {/* 개발 경력 */}
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-text-primary">{t("experience")}</label>
+        <label className="text-sm font-semibold text-text-primary">
+          {t("experience")}
+        </label>
         <select
           name="experience"
           required
@@ -139,14 +147,16 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
 
       {/* 관심 분야 (태그 클라우드 형태) */}
       <div className="space-y-3">
-        <label className="text-sm font-semibold text-text-primary">{t("interests")}</label>
+        <label className="text-sm font-semibold text-text-primary">
+          {t("interests")}
+        </label>
         <div className="flex flex-wrap gap-2">
           {interestsList.map((interest) => (
             <button
               key={interest.id}
               type="button"
               onClick={() => handleInterestToggle(interest.id)}
-              className={px-4 py-1.5 rounded-full text-sm font-medium border transition-all }
+              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all`}
             >
               {interest.label}
             </button>
@@ -156,7 +166,9 @@ export default function TesterApplyForm({ user }: TesterApplyFormProps) {
 
       {/* 신청 동기 */}
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-text-primary">{t("motivation")}</label>
+        <label className="text-sm font-semibold text-text-primary">
+          {t("motivation")}
+        </label>
         <textarea
           name="motivation"
           rows={4}

@@ -13,7 +13,7 @@ interface Application {
   experience: string;
   interests: string[];
   motivation: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   created_at: string;
   profiles: {
     username: string;
@@ -43,11 +43,20 @@ export default function TesterManagementClient() {
     }
   };
 
-  const updateStatus = async (id: string, status: 'approved' | 'rejected') => {
-    if (!confirm(${status === 'approved' ? '승인' : '거절'}하시겠습니까?)) return;
+  const updateStatus = async (
+    id: string,
+    status: "approved" | "rejected" | "pending",
+  ) => {
+    const confirmMsg =
+      status === "approved"
+        ? "승인"
+        : status === "rejected"
+          ? "거절"
+          : "초기화";
+    if (!confirm(`${confirmMsg}하시겠습니까?`)) return;
 
     try {
-      const res = await fetch(/api/admin/testers/ + id, {
+      const res = await fetch(`/api/admin/testers/` + id, {
         method: "PATCH",
         body: JSON.stringify({ status }),
         headers: { "Content-Type": "application/json" },
@@ -55,7 +64,7 @@ export default function TesterManagementClient() {
 
       if (res.ok) {
         setApplications((prev) =>
-          prev.map((app) => (app.id === id ? { ...app, status } : app))
+          prev.map((app) => (app.id === id ? { ...app, status } : app)),
         );
       } else {
         alert("처리에 실패했습니다.");
@@ -65,7 +74,12 @@ export default function TesterManagementClient() {
     }
   };
 
-  if (loading) return <div className="text-center py-20 text-text-tertiary">데이터를 불러오는 중...</div>;
+  if (loading)
+    return (
+      <div className="text-center py-20 text-text-tertiary">
+        데이터를 불러오는 중...
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -76,26 +90,35 @@ export default function TesterManagementClient() {
       ) : (
         <div className="grid gap-6">
           {applications.map((app) => (
-            <Card key={app.id} className="p-6 overflow-hidden border-border-subtle hover:border-border-strong transition-all">
+            <Card
+              key={app.id}
+              className="p-6 overflow-hidden border-border-subtle hover:border-border-strong transition-all"
+            >
               <div className="flex flex-col md:flex-row justify-between gap-6">
                 <div className="flex-1 space-y-4">
                   {/* 헤더: 사용자 정보 */}
                   <div className="flex items-center gap-3">
                     {app.profiles.avatar_url && (
-                      <img 
-                        src={app.profiles.avatar_url} 
-                        alt={app.github_username} 
+                      <img
+                        src={app.profiles.avatar_url}
+                        alt={app.github_username}
                         className="w-10 h-10 rounded-full border border-border-subtle"
                       />
                     )}
                     <div>
                       <h3 className="font-bold text-lg flex items-center gap-2">
                         {app.profiles.name || app.github_username}
-                        <span className="text-sm font-normal text-text-tertiary">(@{app.github_username})</span>
+                        <span className="text-sm font-normal text-text-tertiary">
+                          (@{app.github_username})
+                        </span>
                       </h3>
-                      <p className="text-xs text-text-tertiary">{new Date(app.created_at).toLocaleString()}</p>
+                      <p className="text-xs text-text-tertiary">
+                        {new Date(app.created_at).toLocaleString()}
+                      </p>
                     </div>
-                    <div className={ml-auto px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider }>
+                    <div
+                      className={`ml-auto px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}
+                    >
                       {app.status}
                     </div>
                   </div>
@@ -103,13 +126,28 @@ export default function TesterManagementClient() {
                   {/* 상세 정보 */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-canvas/50 p-4 rounded-xl border border-border-subtle/50">
                     <div>
-                      <p className="text-xs text-text-tertiary mb-1">연락처 / GitHub</p>
+                      <p className="text-xs text-text-tertiary mb-1">
+                        연락처 / GitHub
+                      </p>
                       <p className="text-sm font-medium">{app.email}</p>
-                      <p className="text-xs text-text-tertiary">{app.github_email}</p>
+                      <p className="text-xs text-text-tertiary">
+                        {app.github_email}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs text-text-tertiary mb-1">경력</p>
-                      <p className="text-sm font-medium">{t(exp + (app.experience === 'entry' ? '1' : app.experience === 'junior' ? '2' : app.experience === 'middle' ? '3' : '4'))}</p>
+                      <p className="text-sm font-medium">
+                        {t(
+                          "exp" +
+                            (app.experience === "entry"
+                              ? "1"
+                              : app.experience === "junior"
+                                ? "2"
+                                : app.experience === "middle"
+                                  ? "3"
+                                  : "4"),
+                        )}
+                      </p>
                     </div>
                   </div>
 
@@ -118,7 +156,10 @@ export default function TesterManagementClient() {
                     <p className="text-xs text-text-tertiary mb-2">관심 분야</p>
                     <div className="flex flex-wrap gap-1.5">
                       {app.interests.map((interest) => (
-                        <span key={interest} className="px-2 py-0.5 bg-accent/5 text-accent border border-accent/10 rounded-md text-[11px] font-semibold">
+                        <span
+                          key={interest}
+                          className="px-2 py-0.5 bg-accent/5 text-accent border border-accent/10 rounded-md text-[11px] font-semibold"
+                        >
                           {interest.toUpperCase()}
                         </span>
                       ))}
@@ -136,27 +177,27 @@ export default function TesterManagementClient() {
 
                 {/* 액션 버튼 */}
                 <div className="flex md:flex-col gap-2 justify-end min-w-[120px]">
-                  {app.status === 'pending' && (
+                  {app.status === "pending" && (
                     <>
-                      <Button 
-                        onClick={() => updateStatus(app.id, 'approved')}
+                      <Button
+                        onClick={() => updateStatus(app.id, "approved")}
                         className="bg-green-600 hover:bg-green-700 text-white border-none shadow-sm"
                       >
                         승인하기
                       </Button>
-                      <Button 
+                      <Button
                         variant="secondary"
-                        onClick={() => updateStatus(app.id, 'rejected')}
+                        onClick={() => updateStatus(app.id, "rejected")}
                         className="text-red-500 hover:bg-red-500/10 border-red-500/20"
                       >
                         거절
                       </Button>
                     </>
                   )}
-                  {app.status !== 'pending' && (
-                    <Button 
+                  {app.status !== "pending" && (
+                    <Button
                       variant="secondary"
-                      onClick={() => updateStatus(app.id, 'pending')}
+                      onClick={() => updateStatus(app.id, "pending")}
                       className="text-text-tertiary hover:bg-elevated text-xs"
                     >
                       상태 초기화
