@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -27,7 +27,7 @@ No test suite is configured in this project.
 ### Stack
 
 - **Framework**: Next.js App Router (server components by default, `"use client"` where needed)
-- **Auth**: NextAuth v5 beta — GitHub OAuth only. `auth.ts` configures the provider with scopes `read:user user:email repo`. JWT callback captures `accessToken`/`username`/`avatar_url`, and session callback exposes them via `session.user`.
+- **Auth**: NextAuth v5 beta — GitHub OAuth only. `auth.ts` configures the provider with scopes `read:user user:email repo`. JWT callback captures `accessToken`/`username`/`avatar_url`. It syncs profile with DB using `upsertProfile` and assigns a **default role (`"user"`)** if DB sync fails or role is missing. Session callback exposes these via `session.user`.
 - **Database**: Supabase (PostgreSQL). Client initialized in `lib/supabase.ts` with the public anon key. Admin client (Service Role Key) in `lib/supabase-admin.ts` for RLS bypass in server-side operations.
 - **AI**: Google Gemini via `@google/generative-ai`. Model is **tier-dependent** — `gemini-2.5-flash-lite` (free), `gemini-2.5-flash` (pro), `gemini-2.5-pro` (business). All AI logic is in `lib/ai.ts`.
 - **GitHub**: Octokit in `lib/github.ts` for fetching commit history and diffs.
@@ -251,3 +251,5 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 NEXT_PUBLIC_APP_URL
 CRON_SECRET
 ```
+
+
