@@ -1,102 +1,106 @@
-﻿import { auth } from "@/auth";
-import { SignIn, SignOut } from "./auth-components";
-import MobileMenu from "./MobileMenu";
-import { Link } from "@/i18n/routing";
-import { getTranslations } from "next-intl/server";
-import LanguageSwitcher from "./LanguageSwitcher";
+import { auth } from \"@/auth\";
+import { SignIn, SignOut } from \"./auth-components\";
+import MobileMenu from \"./MobileMenu\";
+import { Link } from \"@/i18n/routing\";
+import { getTranslations } from \"next-intl/server\";
+import LanguageSwitcher from \"./LanguageSwitcher\";
 
 export default async function Header() {
   const session = await auth();
-  const t = await getTranslations("Header");
+  const t = await getTranslations(\"Header\");
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border-subtle bg-canvas/80 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-md bg-accent flex items-center justify-center">
-            <span className="text-xs font-bold text-black">SD</span>
+    <header className=\"sticky top-0 z-50 border-b border-border-subtle bg-canvas/80 backdrop-blur-md\">
+      <div className=\"max-w-6xl mx-auto px-4 h-16 flex items-center justify-between\">
+        <Link href=\"/\" className=\"flex items-center gap-2 group\">
+          <div className=\"w-8 h-8 rounded-md bg-accent flex items-center justify-center\">
+            <span className=\"text-xs font-bold text-black\">SD</span>
           </div>
-          <span className="font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors">
+          <span className=\"font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors\">
             Synapso.dev
           </span>
         </Link>
 
         {/* 데스크탑 nav */}
-        <nav className="hidden sm:flex items-center gap-4">
+        <nav className=\"hidden sm:flex items-center gap-4\">
           <Link
-            href="/generate"
-            className="text-sm text-accent hover:text-accent-hover transition-colors font-medium"
+            href=\"/generate\"
+            className=\"text-sm text-accent hover:text-accent-hover transition-colors font-medium\"
           >
-            {t("generate")}
+            {t(\"generate\")}
           </Link>
           <Link
-            href="/about"
-            className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
+            href=\"/about\"
+            className=\"text-sm text-text-secondary hover:text-text-primary transition-colors font-medium\"
           >
-            {t("about")}
+            {t(\"about\")}
           </Link>
           <Link
-            href="/pricing"
-            className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
+            href=\"/pricing\"
+            className=\"text-sm text-text-secondary hover:text-text-primary transition-colors font-medium\"
           >
-            {t("pricing")}
+            {t(\"pricing\")}
           </Link>
           {session?.user && (
             <>
               <Link
-                href="/jobs"
-                className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+                href=\"/jobs\"
+                className=\"text-sm text-text-secondary hover:text-text-primary transition-colors\"
               >
-                {t("jobs")}
+                {t(\"jobs\")}
               </Link>
               <Link
-                href="/settings"
-                className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+                href=\"/settings\"
+                className=\"text-sm text-text-secondary hover:text-text-primary transition-colors\"
               >
-                {t("settings")}
+                {t(\"settings\")}
               </Link>
               {session?.user?.role === 'admin' && (
-                <div className="flex items-center gap-4">
-                  <div className="h-4 w-[1px] bg-border-subtle mx-1" />
+                <div className=\"flex items-center gap-3 pl-3 border-l border-border-strong/40 bg-white/5 px-2.5 py-1 rounded-md ml-1\">
                   <Link
-                    href="/admin/users"
-                    className="text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+                    href=\"/admin/users\"
+                    className=\"text-[11px] font-bold text-accent hover:text-white transition-colors uppercase tracking-tight\"
                   >
-                    {t("adminUsers")}
+                    {t(\"adminUsers\")}
                   </Link>
                   <Link
-                    href="/admin/subscription"
-                    className="text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+                    href=\"/admin/subscription\"
+                    className=\"text-[11px] font-bold text-accent hover:text-white transition-colors uppercase tracking-tight\"
                   >
-                    {t("adminSubs")}
+                    {t(\"adminSubs\")}
                   </Link>
                 </div>
               )}
             </>
           )}
 
-          <div className="h-4 w-[1px] bg-border-subtle mx-1" />
+          <div className=\"h-4 w-[1px] bg-border-subtle mx-1\" />
           <LanguageSwitcher />
 
           {session?.user ? (
-            <div className="flex items-center gap-3 ml-2">
+            <div className=\"flex items-center gap-3 ml-2\">
               <Link
                 href={`/@${session.user.username}`}
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                className=\"flex items-center gap-2 hover:opacity-80 transition-opacity\"
               >
                 {session.user.image && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={session.user.image}
-                    alt={session.user.name ?? "Profile"}
-                    className="w-7 h-7 rounded-full object-cover border border-border-subtle"
+                    alt={session.user.name ?? \"Profile\"}
+                    className=\"w-7 h-7 rounded-full object-cover border border-border-subtle\"
                   />
                 )}
-                <span className="text-sm font-medium text-text-primary">
+                <span className=\"text-sm font-medium text-text-primary flex items-center\">
                   {session.user.username || session.user.name}
+                  {session.user.role === 'admin' && (
+                    <span className=\"ml-1.5 px-1.5 py-0.5 text-[9px] font-bold bg-accent text-black rounded-sm uppercase tracking-tighter\">
+                      Admin
+                    </span>
+                  )}
                 </span>
               </Link>
-              <SignOut label={t("signOut")} />
+              <SignOut label={t(\"signOut\")} />
             </div>
           ) : (
             <SignIn />
@@ -104,7 +108,7 @@ export default async function Header() {
         </nav>
 
         {/* 모바일 햄버거 메뉴 */}
-        <div className="sm:hidden flex items-center gap-3">
+        <div className=\"sm:hidden flex items-center gap-3\">
           <LanguageSwitcher />
           <MobileMenu
             isLoggedIn={!!session?.user}
