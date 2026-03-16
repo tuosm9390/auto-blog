@@ -8,6 +8,7 @@ declare module "next-auth" {
     user: {
       username?: string
       avatar_url?: string | null
+      role?: string
     } & DefaultSession["user"]
   }
 }
@@ -18,5 +19,6 @@ declare module "next-auth/jwt" {
     username?: string
     avatar_url?: string | null
     name?: string | null
+    role?: string
   }
 }
