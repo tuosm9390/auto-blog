@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { toast } from "sonner";
 import { LoginRequired } from "@/components/ui/LoginRequired";
@@ -28,6 +29,37 @@ function SettingsContent() {
   const [cancelLoading, setCancelLoading] = useState(false);
 
   const username = session?.user?.username;
+  const searchParams = useSearchParams();
+
+  // Stripe 결제 성공 후 구독 활성화 검증
+  const verifyBilling = useCallback(async (sessionId: string) => {
+    try {
+      const res = await fetch("/api/subscription/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+      if (res.ok) {
+        toast.success("🎉 구독이 활성화되었습니다!");
+        // 구독 정보 새로고침
+        const subRes = await fetch("/api/subscription");
+        if (subRes.ok) {
+          const subData = await subRes.json();
+          setSubscription(subData);
+        }
+      }
+    } catch (err) {
+      console.error("Billing verify failed:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const billing = searchParams.get("billing");
+    const sessionId = searchParams.get("session_id");
+    if (billing === "success" && sessionId) {
+      verifyBilling(sessionId);
+    }
+  }, [searchParams, verifyBilling]);
 
   useEffect(() => {
     if (!username) return;

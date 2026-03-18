@@ -1,4 +1,4 @@
-﻿import { stripe } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import { getNextResetDate } from "@/lib/subscription";
 import { supabaseAdmin } from "@/lib/supabase-admin";
@@ -107,7 +107,6 @@ export async function verifyCheckoutAndActivate(sessionId: string) {
     .update({
       subscription_tier: tier,
       stripe_customer_id: checkoutSession.customer as string,
-      stripe_subscription_id: subscription.id,
       usage_count_month: 0,
       usage_reset_date: nextResetDate.toISOString(),
       updated_at: new Date().toISOString(),
@@ -191,7 +190,6 @@ export async function handleWebhookEvent(event: any) {
         .from("profiles")
         .update({
           subscription_tier: "free",
-          stripe_subscription_id: null,
         })
         .eq("username", username);
     }
