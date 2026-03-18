@@ -23,43 +23,48 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       const pathname = nextUrl.pathname;
 
+      // 로케일 접두사 제거 (e.g. /ko/@username → /@username)
+      const locales = ['ko', 'en'];
+      const localePrefix = locales.find(l => pathname.startsWith(`/${l}/`) || pathname === `/${l}`);
+      const cleanPath = localePrefix ? pathname.replace(`/${localePrefix}`, '') || '/' : pathname;
+
       // 1. 완전 공개 페이지 (비로그인/로그인 무관)
-      const isPublicPage = 
-        pathname === '/' || 
-        pathname.includes('/about') || 
-        pathname.includes('/pricing') || 
-        pathname.includes('/terms') ||
-        pathname.includes('/login') ||
+      const isPublicPage =
+        cleanPath === '/' ||
+        cleanPath.includes('/about') ||
+        cleanPath.includes('/pricing') ||
+        cleanPath.includes('/terms') ||
+        cleanPath.includes('/login') ||
         pathname.startsWith('/api/auth');
 
       if (isPublicPage) return true;
 
-      // 2. 로그인 필수 체크
+      // 2. 사용자 블로그 페이지 — 로그인 없이 공개 열람 허용
+      if (cleanPath.startsWith('/@')) {
+        return true;
+      }
+
+      // 3. 로그인 필수 체크
       if (!isLoggedIn) return false;
 
-      // 3. 테스터 신청 페이지는 일반 유저(권한 없음)만 접근 가능
-      if (pathname.includes('/tester-apply')) {
+      // 4. 테스터 신청 페이지는 일반 유저(권한 없음)만 접근 가능
+      if (cleanPath.includes('/tester-apply')) {
         return !isPrivileged;
       }
 
-      // 4. 핵심 기능 및 설정 페이지 (관리자/테스터 전용)
-      const isRestrictedPage = 
-        pathname.includes('/generate') || 
-        pathname.includes('/jobs') || 
-        pathname.includes('/settings');
+      // 5. 핵심 기능 및 설정 페이지 (관리자/테스터 전용)
+      const isRestrictedPage =
+        cleanPath.includes('/generate') ||
+        cleanPath.includes('/jobs') ||
+        cleanPath.includes('/settings');
 
       if (isRestrictedPage) {
         return isPrivileged;
       }
 
-      // 5. 관리자 전용 페이지
-      if (pathname.includes('/admin')) {
+      // 6. 관리자 전용 페이지 (startsWith로 정밀 매칭 — /@admin-user 같은 username 오탐 방지)
+      if (cleanPath.startsWith('/admin') || cleanPath.startsWith('/admin-portal-v5-secret')) {
         return isAdmin;
-      }
-
-      // 6. 사용자 블로그 페이지 (본인 또는 타인 공개용)
-      if (pathname.startsWith('/@')) {
-        return true;
       }
 
       return isLoggedIn;
@@ -87,7 +92,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             username: githubProfile.login,
             email: githubProfile.email || (profile as any)?.email,
             name: githubProfile.name || (profile as any)?.name,
-            avatar_url: githubProfile.avatar_url
+            avatar_url: githubProfile.avatar_url, role: token.role as string
           });
         }
       }

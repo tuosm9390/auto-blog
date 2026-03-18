@@ -201,6 +201,36 @@
   },
   "hotPaths": [
     {
+      "path": "",
+      "accessCount": 7,
+      "lastAccessed": 1773653765062,
+      "type": "directory"
+    },
+    {
+      "path": "components\\PostsClient.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1773654107459,
+      "type": "file"
+    },
+    {
+      "path": "auth.ts",
+      "accessCount": 5,
+      "lastAccessed": 1773654120899,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\[username]\\[slug]\\page.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1773654934488,
+      "type": "file"
+    },
+    {
+      "path": "components\\Header.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1773654948114,
+      "type": "file"
+    },
+    {
       "path": "app\\[locale]\\admin\\testers\\TesterManagementClient.tsx",
       "accessCount": 4,
       "lastAccessed": 1773632841672,
@@ -208,14 +238,62 @@
     },
     {
       "path": "components\\MobileMenu.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1773632770448,
+      "accessCount": 4,
+      "lastAccessed": 1773653301556,
+      "type": "file"
+    },
+    {
+      "path": "middleware.ts",
+      "accessCount": 4,
+      "lastAccessed": 1773653750184,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\[username]\\page.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1773654101633,
+      "type": "file"
+    },
+    {
+      "path": "components\\PostCard.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1773654660973,
       "type": "file"
     },
     {
       "path": "app\\api\\admin\\testers\\[id]\\route.ts",
       "accessCount": 2,
       "lastAccessed": 1773632810384,
+      "type": "file"
+    },
+    {
+      "path": "components",
+      "accessCount": 2,
+      "lastAccessed": 1773653602447,
+      "type": "directory"
+    },
+    {
+      "path": "i18n\\routing.ts",
+      "accessCount": 2,
+      "lastAccessed": 1773653750308,
+      "type": "file"
+    },
+    {
+      "path": "lib\\posts.ts",
+      "accessCount": 2,
+      "lastAccessed": 1773653792056,
+      "type": "file"
+    },
+    {
+      "path": "messages\\ko.json",
+      "accessCount": 2,
+      "lastAccessed": 1773654960710,
+      "type": "file"
+    },
+    {
+      "path": "messages\\en.json",
+      "accessCount": 2,
+      "lastAccessed": 1773654961921,
       "type": "file"
     },
     {
@@ -237,10 +315,70 @@
       "type": "file"
     },
     {
-      "path": "components\\Header.tsx",
+      "path": "lib\\profiles.ts",
       "accessCount": 1,
-      "lastAccessed": 1773632656892,
+      "lastAccessed": 1773653288509,
       "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\profile\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653300702,
+      "type": "file"
+    },
+    {
+      "path": "components\\PostControls.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653309754,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653309849,
+      "type": "file"
+    },
+    {
+      "path": "components\\UserProfileBox.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653309902,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\[username]\\[slug]\\edit\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653318058,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\admin-portal-v5-secret\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653605408,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\admin\\layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653606178,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\admin\\subscriptions\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653606736,
+      "type": "file"
+    },
+    {
+      "path": "app\\[locale]\\admin\\users\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1773653606828,
+      "type": "file"
+    },
+    {
+      "path": "lib\\types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773653786774,
+      "type": "directory"
     }
   ],
   "userDirectives": []

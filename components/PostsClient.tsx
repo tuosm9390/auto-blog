@@ -11,14 +11,12 @@ interface PostsClientProps {
   initialPosts: Post[];
   tags: string[];
   repos?: string[];
-  basePath?: string;
 }
 
 export default function PostsClient({
   initialPosts,
   tags,
   repos,
-  basePath,
 }: PostsClientProps) {
   const [query, setValue] = useState("");
   const [activeTag, setActiveTag] = useState("");
@@ -77,7 +75,6 @@ export default function PostsClient({
               key={post.id}
               post={post}
               index={idx}
-              href={basePath ? `${basePath}/` : undefined}
             />
           ))}
         </div>

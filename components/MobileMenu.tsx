@@ -87,12 +87,24 @@ export default function MobileMenu({
                     )}
                     <span className="text-sm font-medium text-text-primary truncate flex items-center">
                       {username || userName}
-                      {role === 'admin' && (
+                      {role === "admin" && (
                         <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-bold bg-accent text-black rounded-sm uppercase tracking-tighter">
                           Admin
                         </span>
                       )}
                     </span>
+                  </Link>
+                )}
+
+                {/* 관리자 통합 대시보드 (최상단 노출) */}
+                {isAdmin && (
+                  <Link
+                    href="/admin-portal-v5-secret"
+                    onClick={close}
+                    className="px-4 py-3 text-sm text-accent bg-accent/5 hover:bg-accent/10 transition-colors font-bold flex items-center gap-2 border-b border-border-subtle"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                    {t("adminDashboard")}
                   </Link>
                 )}
 
@@ -123,17 +135,6 @@ export default function MobileMenu({
                   </>
                 )}
 
-                {/* 관리자 전용 메뉴 */}
-                {isAdmin && (
-                  <Link
-                    href="/admin/testers"
-                    onClick={close}
-                    className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors border-t border-border-subtle"
-                  >
-                    {t("testerStatus")}
-                  </Link>
-                )}
-
                 {/* 일반 유저 테스터 신청 버튼 */}
                 {!isPrivileged && (
                   <Link
@@ -159,29 +160,6 @@ export default function MobileMenu({
                 >
                   {t("pricing")}
                 </Link>
-
-                {role === 'admin' && (
-                  <>
-                    <div className="px-4 py-1.5 border-t border-border-subtle mt-1 bg-white/5">
-                      <span className="text-[10px] font-bold text-accent uppercase tracking-wider">Admin Tools</span>
-                    </div>
-                    <Link
-                      href="/admin/users"
-                      onClick={close}
-                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-semibold"
-                    >
-                      {t("adminUsers")}
-                    </Link>
-                    <Link
-                      href="/admin/subscription"
-                      onClick={close}
-                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-semibold"
-                    >
-                      {t("adminSubs")}
-                    </Link>
-                    <div className="border-b border-border-subtle mb-1" />
-                  </>
-                )}
 
                 {/* 로그아웃 */}
                 <div className="px-4 py-2.5 border-t border-border-subtle mt-1">
@@ -215,4 +193,3 @@ export default function MobileMenu({
     </div>
   );
 }
-

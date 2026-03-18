@@ -67,12 +67,7 @@ export default async function UserProfilePage({ params }: PageProps) {
       <UserProfileBox profile={profile} variant="large" isOwner={isOwner} />
 
       {/* 포스트 리스트 */}
-      <PostsClient
-        initialPosts={userPosts}
-        tags={userTags}
-        repos={userRepos}
-        basePath={`/@${plainUsername}`}
-      />
+      <PostsClient initialPosts={userPosts} tags={userTags} repos={userRepos} />
     </div>
   );
 }

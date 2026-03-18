@@ -161,16 +161,14 @@ export default async function PostPage({ params }: PageProps) {
       {showWatermark && (
         <div className="mt-10 pt-6 border-t border-border-subtle flex items-center justify-between">
           <p className="text-xs text-text-tertiary">
-            {t.rich("watermark", {
-              link: (chunks: React.ReactNode) => (
-                <Link
-                  href="/"
-                  className="text-accent hover:text-accent-hover transition-colors font-medium"
-                >
-                  {chunks || "Synapso.dev"}
-                </Link>
-              ),
-            })}
+            {t("watermarkPrefix")}{" "}
+            <Link
+              href="/"
+              className="text-accent hover:text-accent-hover transition-colors font-medium"
+            >
+              Synapso.dev
+            </Link>
+            {t("watermarkSuffix")}
           </p>
           <Link
             href="/pricing"

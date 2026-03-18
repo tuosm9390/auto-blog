@@ -1,4 +1,4 @@
-import { supabaseAdmin as supabase } from "./supabase-admin";
+﻿import { supabaseAdmin as supabase } from "./supabase-admin";
 import { cache } from "react";
 
 export interface Profile {
@@ -24,7 +24,7 @@ export async function upsertProfile(profile: Partial<Profile> & { id: string, us
       id: profile.id,
       username: profile.username,
       name: profile.name,
-      avatar_url: profile.avatar_url,
+      avatar_url: profile.avatar_url, role: profile.role,
       email: profile.email,
       updated_at: new Date().toISOString()
     }, { onConflict: "id" })
@@ -64,4 +64,17 @@ export async function updateBio(username: string, bio: string): Promise<boolean>
   return true;
 }
 
+
+export async function getAllProfiles(): Promise<Profile[]> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching all profiles:', error);
+    return [];
+  }
+  return data as Profile[];
+}
 

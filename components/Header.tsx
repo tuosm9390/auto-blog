@@ -1,4 +1,4 @@
-﻿import { auth } from "@/auth";
+import { auth } from "@/auth";
 import { SignIn, SignOut } from "./auth-components";
 import MobileMenu from "./MobileMenu";
 import { Link } from "@/i18n/routing";
@@ -28,7 +28,7 @@ export default async function Header() {
 
         {/* 데스크탑 nav */}
         <nav className="hidden sm:flex items-center gap-4">
-          {/* 1. 권한 있는 유저 전용 메뉴 */}
+          {/* 1. 권한 있는 유저 전용 메뉴 (테스터/관리자 공통) */}
           {isPrivileged && (
             <>
               <Link
@@ -49,32 +49,17 @@ export default async function Header() {
               >
                 {t("settings")}
               </Link>
-              {session?.user?.role === 'admin' && (
-                <div className="flex items-center gap-3 pl-3 border-l border-border-strong/40 bg-white/5 px-2.5 py-1 rounded-md ml-1">
-                  <Link
-                    href="/admin/users"
-                    className="text-[11px] font-bold text-accent hover:text-white transition-colors uppercase tracking-tight"
-                  >
-                    {t("adminUsers")}
-                  </Link>
-                  <Link
-                    href="/admin/subscription"
-                    className="text-[11px] font-bold text-accent hover:text-white transition-colors uppercase tracking-tight"
-                  >
-                    {t("adminSubs")}
-                  </Link>
-                </div>
-              )}
             </>
           )}
 
-          {/* 2. 관리자 전용 메뉴 */}
+          {/* 2. 관리자 통합 대시보드 버튼 (난독화 경로) */}
           {isAdmin && (
             <Link
-              href="/admin/testers"
-              className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium flex items-center gap-1 border-l border-border-subtle pl-4 ml-2"
+              href="/admin-portal-v5-secret"
+              className="text-sm text-accent bg-accent/5 hover:bg-accent/10 px-3 py-1.5 rounded-md transition-all font-bold border border-accent/20 flex items-center gap-1.5 ml-2"
             >
-              {t("testerStatus")}
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+              {t("adminDashboard")}
             </Link>
           )}
 
@@ -108,7 +93,7 @@ export default async function Header() {
           {session?.user ? (
             <div className="flex items-center gap-3 ml-2">
               <Link
-                href={"/"}
+                href={`/@${(session.user as any).username || session.user.name}`}
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 {session.user.image && (
@@ -121,7 +106,7 @@ export default async function Header() {
                 )}
                 <span className="text-sm font-medium text-text-primary flex items-center">
                   {session.user.username || session.user.name}
-                  {session.user.role === 'admin' && (
+                  {session.user.role === "admin" && (
                     <span className="ml-1.5 px-1.5 py-0.5 text-[9px] font-bold bg-accent text-black rounded-sm uppercase tracking-tighter">
                       Admin
                     </span>
@@ -135,7 +120,7 @@ export default async function Header() {
           )}
         </nav>
 
-        {/* 모바일 햄버거 메뉴 (MobileMenu 컴포넌트 내의 로직도 필요에 따라 수정 권장) */}
+        {/* 모바일 햄버거 메뉴 */}
         <div className="sm:hidden flex items-center gap-3">
           <LanguageSwitcher />
           <MobileMenu
@@ -150,5 +135,3 @@ export default async function Header() {
     </header>
   );
 }
-
-
