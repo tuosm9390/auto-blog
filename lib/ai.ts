@@ -167,7 +167,7 @@ export async function analyzeCommits(
 
   // Structured Output으로 JSON 형태의 응답을 보장
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-3.1-flash-lite-preview",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: schema // 스키마 기반 강제 출력 구조

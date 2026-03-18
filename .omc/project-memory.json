@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1773632459979,
-  "projectRoot": "C:\\Users\\tuosm\\.gemini\\antigravity\\scratch\\auto-blog",
+  "lastScanned": 1773848193263,
+  "projectRoot": "D:\\development\\auto-blog",
   "techStack": {
     "languages": [
       {
@@ -81,7 +81,7 @@
       "path": "app",
       "purpose": "Application code",
       "fileCount": 4,
-      "lastAccessed": 1773632459937,
+      "lastAccessed": 1773848193207,
       "keyFiles": [
         "favicon.ico",
         "globals.css",
@@ -93,7 +93,7 @@
       "path": "components",
       "purpose": "UI components",
       "fileCount": 17,
-      "lastAccessed": 1773632459948,
+      "lastAccessed": 1773848193208,
       "keyFiles": [
         "auth-components.tsx",
         "BioEditor.tsx",
@@ -106,14 +106,14 @@
       "path": "doc",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1773632459949,
+      "lastAccessed": 1773848193226,
       "keyFiles": []
     },
     "i18n": {
       "path": "i18n",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1773632459950,
+      "lastAccessed": 1773848193228,
       "keyFiles": [
         "request.ts",
         "routing.ts"
@@ -123,7 +123,7 @@
       "path": "lib",
       "purpose": "Library code",
       "fileCount": 14,
-      "lastAccessed": 1773632459950,
+      "lastAccessed": 1773848193228,
       "keyFiles": [
         "ai.ts",
         "api-utils.ts",
@@ -136,7 +136,7 @@
       "path": "messages",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1773632459951,
+      "lastAccessed": 1773848193229,
       "keyFiles": [
         "en.json",
         "ko.json"
@@ -146,14 +146,14 @@
       "path": "public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1773632459951,
+      "lastAccessed": 1773848193229,
       "keyFiles": []
     },
     "results": {
       "path": "results",
       "purpose": null,
       "fileCount": 34,
-      "lastAccessed": 1773632459952,
+      "lastAccessed": 1773848193230,
       "keyFiles": [
         "260223_Task.md",
         "260223_Task_알림개선.md",
@@ -165,28 +165,28 @@
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 10,
-      "lastAccessed": 1773632459952,
+      "fileCount": 11,
+      "lastAccessed": 1773848193231,
       "keyFiles": [
         "add-email-to-profiles.sql",
         "add-jobs-table.sql",
+        "add-role-column.sql",
         "add-role-to-profiles.sql",
-        "add-soft-delete-to-posts.sql",
-        "add-subscription-fields.sql"
+        "add-soft-delete-to-posts.sql"
       ]
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 0,
-      "lastAccessed": 1773632459953,
+      "lastAccessed": 1773848193231,
       "keyFiles": []
     },
     "types": {
       "path": "types",
       "purpose": "Type definitions",
       "fileCount": 1,
-      "lastAccessed": 1773632459953,
+      "lastAccessed": 1773848193232,
       "keyFiles": [
         "next-auth.d.ts"
       ]
@@ -195,189 +195,201 @@
       "path": "app\\api",
       "purpose": "API routes",
       "fileCount": 0,
-      "lastAccessed": 1773632459954,
+      "lastAccessed": 1773848193233,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "",
-      "accessCount": 7,
-      "lastAccessed": 1773653765062,
+      "accessCount": 60,
+      "lastAccessed": 1773850259973,
       "type": "directory"
     },
     {
-      "path": "components\\PostsClient.tsx",
-      "accessCount": 6,
-      "lastAccessed": 1773654107459,
-      "type": "file"
-    },
-    {
       "path": "auth.ts",
-      "accessCount": 5,
-      "lastAccessed": 1773654120899,
+      "accessCount": 7,
+      "lastAccessed": 1773850222630,
       "type": "file"
     },
     {
-      "path": "app\\[locale]\\[username]\\[slug]\\page.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1773654934488,
+      "path": "doc\\rules\\shared\\architecture.md",
+      "accessCount": 6,
+      "lastAccessed": 1773850154805,
       "type": "file"
     },
     {
-      "path": "components\\Header.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1773654948114,
+      "path": "doc\\rules\\shared\\tech-stack.md",
+      "accessCount": 6,
+      "lastAccessed": 1773850154940,
       "type": "file"
     },
     {
-      "path": "app\\[locale]\\admin\\testers\\TesterManagementClient.tsx",
+      "path": "scripts\\create-profiles-table.sql",
+      "accessCount": 6,
+      "lastAccessed": 1773850222469,
+      "type": "file"
+    },
+    {
+      "path": "lib\\stripe.ts",
+      "accessCount": 6,
+      "lastAccessed": 1773850223506,
+      "type": "file"
+    },
+    {
+      "path": "scripts\\fix-security-rls.sql",
+      "accessCount": 6,
+      "lastAccessed": 1773850241502,
+      "type": "file"
+    },
+    {
+      "path": "doc\\rules\\core\\hard-walls.md",
+      "accessCount": 5,
+      "lastAccessed": 1773850154348,
+      "type": "file"
+    },
+    {
+      "path": "app\\api\\generate\\route.ts",
       "accessCount": 4,
-      "lastAccessed": 1773632841672,
-      "type": "file"
-    },
-    {
-      "path": "components\\MobileMenu.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1773653301556,
+      "lastAccessed": 1773850228869,
       "type": "file"
     },
     {
       "path": "middleware.ts",
       "accessCount": 4,
-      "lastAccessed": 1773653750184,
+      "lastAccessed": 1773850264425,
       "type": "file"
     },
     {
-      "path": "app\\[locale]\\[username]\\page.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1773654101633,
+      "path": "lib\\api-utils.ts",
+      "accessCount": 3,
+      "lastAccessed": 1773849424497,
       "type": "file"
     },
     {
-      "path": "components\\PostCard.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1773654660973,
+      "path": "app\\[locale]\\settings\\page.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1773850241632,
       "type": "file"
     },
     {
-      "path": "app\\api\\admin\\testers\\[id]\\route.ts",
+      "path": "lib",
       "accessCount": 2,
-      "lastAccessed": 1773632810384,
-      "type": "file"
-    },
-    {
-      "path": "components",
-      "accessCount": 2,
-      "lastAccessed": 1773653602447,
+      "lastAccessed": 1773849773126,
       "type": "directory"
     },
     {
-      "path": "i18n\\routing.ts",
+      "path": "package.json",
       "accessCount": 2,
-      "lastAccessed": 1773653750308,
+      "lastAccessed": 1773849777981,
       "type": "file"
     },
     {
-      "path": "lib\\posts.ts",
+      "path": "doc\\rules\\core\\workflows.md",
       "accessCount": 2,
-      "lastAccessed": 1773653792056,
+      "lastAccessed": 1773849907323,
       "type": "file"
     },
     {
-      "path": "messages\\ko.json",
-      "accessCount": 2,
-      "lastAccessed": 1773654960710,
-      "type": "file"
-    },
-    {
-      "path": "messages\\en.json",
-      "accessCount": 2,
-      "lastAccessed": 1773654961921,
-      "type": "file"
-    },
-    {
-      "path": "messages",
+      "path": "doc\\marketing\\brainstorming-2026-03-19.md",
       "accessCount": 1,
-      "lastAccessed": 1773632499631,
-      "type": "directory"
-    },
-    {
-      "path": "app\\[locale]\\tester-apply\\TesterApplyForm.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773632500041,
+      "lastAccessed": 1773849108385,
       "type": "file"
     },
     {
-      "path": "fix.patch",
+      "path": "app\\api\\settings\\route.ts",
       "accessCount": 1,
-      "lastAccessed": 1773632622428,
+      "lastAccessed": 1773849225547,
       "type": "file"
     },
     {
-      "path": "lib\\profiles.ts",
+      "path": "lib\\github.ts",
       "accessCount": 1,
-      "lastAccessed": 1773653288509,
+      "lastAccessed": 1773849226284,
       "type": "file"
     },
     {
-      "path": "app\\[locale]\\profile\\page.tsx",
+      "path": "lib\\billing.ts",
       "accessCount": 1,
-      "lastAccessed": 1773653300702,
-      "type": "file"
-    },
-    {
-      "path": "components\\PostControls.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653309754,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653309849,
-      "type": "file"
-    },
-    {
-      "path": "components\\UserProfileBox.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653309902,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\[username]\\[slug]\\edit\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653318058,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\admin-portal-v5-secret\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653605408,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\admin\\layout.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653606178,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\admin\\subscriptions\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653606736,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\admin\\users\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773653606828,
+      "lastAccessed": 1773849227376,
       "type": "file"
     },
     {
       "path": "lib\\types.ts",
       "accessCount": 1,
-      "lastAccessed": 1773653786774,
+      "lastAccessed": 1773849232002,
+      "type": "file"
+    },
+    {
+      "path": "scripts\\add-subscription-fields.sql",
+      "accessCount": 1,
+      "lastAccessed": 1773849243384,
+      "type": "file"
+    },
+    {
+      "path": "lib\\subscription.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773849244769,
+      "type": "file"
+    },
+    {
+      "path": "app\\api\\posts\\route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773849434427,
+      "type": "file"
+    },
+    {
+      "path": "scripts\\fix-rls.sql",
+      "accessCount": 1,
+      "lastAccessed": 1773849440123,
+      "type": "file"
+    },
+    {
+      "path": "lib\\ai.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773849441462,
+      "type": "file"
+    },
+    {
+      "path": "app\\api\\webhooks\\stripe\\route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773849460153,
+      "type": "file"
+    },
+    {
+      "path": "next.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773849772068,
+      "type": "file"
+    },
+    {
+      "path": "lib\\supabase-admin.ts",
+      "accessCount": 1,
+      "lastAccessed": 1773849777470,
+      "type": "file"
+    },
+    {
+      "path": "scripts",
+      "accessCount": 1,
+      "lastAccessed": 1773849939580,
+      "type": "directory"
+    },
+    {
+      "path": "messages\\ko.json",
+      "accessCount": 1,
+      "lastAccessed": 1773850223810,
+      "type": "file"
+    },
+    {
+      "path": "messages\\en.json",
+      "accessCount": 1,
+      "lastAccessed": 1773850223855,
+      "type": "file"
+    },
+    {
+      "path": "app",
+      "accessCount": 1,
+      "lastAccessed": 1773850247766,
       "type": "directory"
     }
   ],

@@ -70,21 +70,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return isLoggedIn;
     },
     async jwt({ token, account, profile }) {
+      // ✅ 최초 로그인 시: account.providerAccountId(GitHub numeric ID)를 sub으로 명시 고정
+      // 이렇게 하지 않으면 NextAuth v5가 내부적으로 randomUUID()를 sub으로 할당해
+      // 로그인할 때마다 user.id가 달라지는 문제가 발생합니다.
       if (account) {
         token.accessToken = account.access_token;
+        token.sub = account.providerAccountId; // GitHub user numeric ID (안정적, 불변)
       }
-      
-      // 세션 유지 중에도 DB에서 최신 역할 정보를 가져옵니다 (실시간 권한 반영)
-      if (token.sub) {
-        const { data } = await supabase.from('profiles').select('role, username, avatar_url').eq('id', token.sub).single();
-        if (data) {
-          token.role = data.role || 'user';
-          token.username = data.username;
-          token.avatar_url = data.avatar_url;
-        }
-      }
-      
+
       if (account && profile) {
+        // upsertProfile을 DB 조회보다 먼저 실행해야 최초 로그인 시 row가 생성됩니다.
         const githubProfile = profile as Record<string, any>;
         if (githubProfile.login) {
           await upsertProfile({
@@ -92,10 +87,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             username: githubProfile.login,
             email: githubProfile.email || (profile as any)?.email,
             name: githubProfile.name || (profile as any)?.name,
-            avatar_url: githubProfile.avatar_url, role: token.role as string
+            avatar_url: githubProfile.avatar_url,
+            role: token.role as string,
           });
         }
       }
+
+      // 세션 유지 중에도 DB에서 최신 역할 정보를 가져옵니다 (실시간 권한 반영)
+      if (token.sub) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role, username, avatar_url')
+          .eq('id', token.sub)
+          .single();
+        if (data) {
+          token.role = data.role || 'user';
+          token.username = data.username;
+          token.avatar_url = data.avatar_url;
+        }
+      }
+
       return token;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

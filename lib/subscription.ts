@@ -10,19 +10,19 @@ export const TIER_LIMITS: Record<SubscriptionTier, {
 }> = {
   free: {
     monthlyLimit: 3,
-    aiModel: "gemini-2.5-flash-lite",
+    aiModel: "gemini-3.1-flash-lite-preview",
     watermark: true,
     maxAutoRepos: 1,
   },
   pro: {
     monthlyLimit: 30,
-    aiModel: "gemini-2.5-flash",
+    aiModel: "gemini-3-flash-preview",
     watermark: false,
     maxAutoRepos: Infinity,
   },
   business: {
     monthlyLimit: Infinity,
-    aiModel: "gemini-2.5-pro",
+    aiModel: "gemini-3.1-pro-preview",
     watermark: false,
     maxAutoRepos: Infinity,
   },
