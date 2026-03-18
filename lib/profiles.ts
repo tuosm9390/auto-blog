@@ -1,4 +1,4 @@
-﻿import { supabaseAdmin as supabase } from "./supabase-admin";
+import { supabaseAdmin as supabase } from "./supabase-admin";
 import { cache } from "react";
 
 export interface Profile {
@@ -15,6 +15,33 @@ export interface Profile {
   usage_reset_date?: string;
   role?: string;
   updated_at: string;
+}
+
+/**
+ * 기존 프로필의 id를 GitHub numeric ID로 마이그레이션합니다.
+ * username으로 기존 행을 찾아 id가 다르면 업데이트합니다.
+ * @returns 마이그레이션 성공 여부 (이미 일치하면 true 반환)
+ */
+export async function migrateProfileId(username: string, newId: string): Promise<boolean> {
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .single();
+
+  if (!existing) return false; // 프로필 없음 → 새로 생성 필요
+  if (existing.id === newId) return true; // 이미 일치
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ id: newId, updated_at: new Date().toISOString() })
+    .eq("username", username);
+
+  if (error) {
+    console.error("Profile ID migration failed:", error);
+    return false;
+  }
+  return true;
 }
 
 export async function upsertProfile(profile: Partial<Profile> & { id: string, username: string }) {

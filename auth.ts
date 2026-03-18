@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth'
 import GitHub from 'next-auth/providers/github'
 import { supabaseAdmin as supabase } from './lib/supabase-admin'
-import { upsertProfile } from './lib/profiles'
+import { upsertProfile, migrateProfileId } from './lib/profiles'
 
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -79,9 +79,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (account && profile) {
-        // upsertProfile을 DB 조회보다 먼저 실행해야 최초 로그인 시 row가 생성됩니다.
         const githubProfile = profile as Record<string, any>;
         if (githubProfile.login) {
+          // 기존 프로필의 id(UUID)를 GitHub numeric ID로 마이그레이션 (1회성)
+          await migrateProfileId(githubProfile.login, token.sub as string);
+
           await upsertProfile({
             id: token.sub as string,
             username: githubProfile.login,

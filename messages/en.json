@@ -240,7 +240,10 @@
     "back": "Back",
     "save": "Save",
     "cancel": "Cancel",
-    "readMore": "Read more →"
+    "readMore": "Read more →",
+    "loginRequiredTitle": "Login Required",
+    "loginRequiredDesc": "Please sign in to access this feature.",
+    "signIn": "Sign In"
   },
   "TesterApply": {
     "githubUsername": "GitHub Username",

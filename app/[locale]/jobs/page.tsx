@@ -144,6 +144,60 @@ export default function JobsPage() {
     }
   };
 
+  const handlePublishDraft = async (postId: string) => {
+    if (publishing) return;
+
+    const isConfirmed = await confirm({
+      title: "게시 확인",
+      description: "✨ 이 초안을 게시하시겠습니까?",
+      confirmText: "게시",
+    });
+    if (!isConfirmed) return;
+
+    setPublishing(postId);
+    try {
+      const res = await fetch("/api/posts/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "publish", postId }),
+      });
+
+      if (!res.ok) throw new Error("게시 실패");
+
+      setDrafts(prev => prev.filter(d => d.id !== postId));
+      toast.success("🎉 포스트가 게시되었습니다!");
+    } catch {
+      toast.error("❌ 게시에 실패했습니다.");
+    } finally {
+      setPublishing(null);
+    }
+  };
+
+  const handleDeleteDraft = async (postId: string) => {
+    const isConfirmed = await confirm({
+      title: "삭제 확인",
+      description: "🚨 이 초안을 영구적으로 삭제하시겠습니까?",
+      confirmText: "삭제",
+      destructive: true,
+    });
+    if (!isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/posts/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", postId }),
+      });
+
+      if (res.ok) {
+        setDrafts(prev => prev.filter(d => d.id !== postId));
+        toast.success("🗑️ 초안이 삭제되었습니다.");
+      }
+    } catch {
+      toast.error(commonT("error"));
+    }
+  };
+
   if (!session) {
     return (
       <LoginRequired />
@@ -217,6 +271,9 @@ export default function JobsPage() {
                   locale={locale} 
                   expandedDraft={expandedDraft} 
                   onToggleExpand={(id) => setExpandedDraft(expandedDraft === id ? null : id)} 
+                  onPublish={handlePublishDraft}
+                  onDelete={handleDeleteDraft}
+                  publishing={publishing}
                   t={t} 
                 />
               ))}
