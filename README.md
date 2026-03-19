@@ -51,12 +51,12 @@ GitHub OAuth   →   커밋 diff 선택     →   Gemini AI 분석     →   편
 
 | 영역           | 기술                                           |
 | -------------- | ---------------------------------------------- |
-| **Framework**  | Next.js 15 App Router, React 19                |
-| **Auth**       | NextAuth v5 beta (GitHub OAuth)                |
+| **Framework**  | Next.js 16.1.6 App Router, React 19.2.3        |
+| **Auth**       | NextAuth v5.0.0-beta.30 (GitHub OAuth)         |
 | **Database**   | Supabase (PostgreSQL)                          |
 | **AI**         | Google Gemini 2.5 (Flash Lite / Flash / Pro)   |
 | **Payments**   | Stripe (구독 + Billing Portal)                 |
-| **Styling**    | Tailwind CSS v4, 다크 테마, CSS Variables      |
+| **Styling**    | Tailwind CSS v4.2.0, 다크 테마, CSS Variables  |
 | **Deployment** | Vercel (ISR + Cron Jobs)                       |
 | **Markdown**   | react-markdown + rehype-highlight + remark-gfm |
 | **Validation** | Zod                                            |
