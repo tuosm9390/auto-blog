@@ -2,6 +2,7 @@
 import { auth } from "@/auth";
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { z } from "zod";
+import { sendTesterApplyConfirmEmail } from "@/lib/email";
 
 const testerApplySchema = z.object({
   email: z.string().email(),
@@ -40,9 +41,12 @@ export async function POST(request: NextRequest) {
       }, { onConflict: "user_id" });
 
     if (error) {
-      console.error("Supabase error:", error);
+      console.error("Supabase error:", { code: error.code, message: error.message, details: error.details, hint: error.hint });
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
+
+    // 신청 접수 확인 이메일 발송 (fire-and-forget)
+    sendTesterApplyConfirmEmail(parsedData.data.email, parsedData.data.githubUsername);
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

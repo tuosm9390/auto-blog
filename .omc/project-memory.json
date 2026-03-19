@@ -202,14 +202,20 @@
   "hotPaths": [
     {
       "path": "",
-      "accessCount": 60,
-      "lastAccessed": 1773850259973,
+      "accessCount": 64,
+      "lastAccessed": 1773896706112,
       "type": "directory"
     },
     {
       "path": "auth.ts",
-      "accessCount": 13,
-      "lastAccessed": 1773883211523,
+      "accessCount": 14,
+      "lastAccessed": 1773893144543,
+      "type": "file"
+    },
+    {
+      "path": "doc\\rules\\shared\\architecture.md",
+      "accessCount": 8,
+      "lastAccessed": 1773890871220,
       "type": "file"
     },
     {
@@ -243,12 +249,6 @@
       "type": "file"
     },
     {
-      "path": "doc\\rules\\shared\\architecture.md",
-      "accessCount": 6,
-      "lastAccessed": 1773850154805,
-      "type": "file"
-    },
-    {
       "path": "doc\\rules\\shared\\tech-stack.md",
       "accessCount": 6,
       "lastAccessed": 1773850154940,
@@ -273,15 +273,21 @@
       "type": "file"
     },
     {
+      "path": "lib\\api-utils.ts",
+      "accessCount": 6,
+      "lastAccessed": 1773893127528,
+      "type": "file"
+    },
+    {
       "path": "doc\\rules\\core\\hard-walls.md",
       "accessCount": 5,
       "lastAccessed": 1773850154348,
       "type": "file"
     },
     {
-      "path": "lib\\api-utils.ts",
+      "path": "scripts\\create-tester-applications.sql",
       "accessCount": 5,
-      "lastAccessed": 1773882561747,
+      "lastAccessed": 1773893114709,
       "type": "file"
     },
     {
@@ -327,27 +333,39 @@
       "type": "file"
     },
     {
+      "path": "package.json",
+      "accessCount": 3,
+      "lastAccessed": 1773893114778,
+      "type": "file"
+    },
+    {
+      "path": "lib\\supabase-admin.ts",
+      "accessCount": 3,
+      "lastAccessed": 1773893121963,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\feedback_synapso_patterns.md",
+      "accessCount": 3,
+      "lastAccessed": 1773896744528,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\MEMORY.md",
+      "accessCount": 3,
+      "lastAccessed": 1773896844610,
+      "type": "file"
+    },
+    {
       "path": "lib",
       "accessCount": 2,
       "lastAccessed": 1773849773126,
       "type": "directory"
     },
     {
-      "path": "package.json",
-      "accessCount": 2,
-      "lastAccessed": 1773849777981,
-      "type": "file"
-    },
-    {
       "path": "doc\\rules\\core\\workflows.md",
       "accessCount": 2,
       "lastAccessed": 1773849907323,
-      "type": "file"
-    },
-    {
-      "path": "lib\\supabase-admin.ts",
-      "accessCount": 2,
-      "lastAccessed": 1773881143595,
       "type": "file"
     },
     {
@@ -381,6 +399,24 @@
       "type": "file"
     },
     {
+      "path": "lib\\subscription.ts",
+      "accessCount": 2,
+      "lastAccessed": 1773893150551,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\project_pending_tasks.md",
+      "accessCount": 2,
+      "lastAccessed": 1773896703963,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\project_marketing_implementation.md",
+      "accessCount": 2,
+      "lastAccessed": 1773896704779,
+      "type": "file"
+    },
+    {
       "path": "doc\\marketing\\brainstorming-2026-03-19.md",
       "accessCount": 1,
       "lastAccessed": 1773849108385,
@@ -408,12 +444,6 @@
       "path": "scripts\\add-subscription-fields.sql",
       "accessCount": 1,
       "lastAccessed": 1773849243384,
-      "type": "file"
-    },
-    {
-      "path": "lib\\subscription.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773849244769,
       "type": "file"
     },
     {
@@ -468,30 +498,6 @@
       "path": "C:\\Users\\tuosm\\AppData\\Local\\Temp\\claude\\D--development-auto-blog\\e5a996c7-e31d-4b3e-822a-71c7224af85f\\tasks\\b193jwqjs.output",
       "accessCount": 1,
       "lastAccessed": 1773883449004,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\project_marketing_implementation.md",
-      "accessCount": 1,
-      "lastAccessed": 1773883548124,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\project_pending_tasks.md",
-      "accessCount": 1,
-      "lastAccessed": 1773883560049,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\feedback_synapso_patterns.md",
-      "accessCount": 1,
-      "lastAccessed": 1773883578697,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\MEMORY.md",
-      "accessCount": 1,
-      "lastAccessed": 1773883583599,
       "type": "file"
     }
   ],

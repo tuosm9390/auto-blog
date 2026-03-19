@@ -22,7 +22,10 @@
       "Bash(npx tsc:*)",
       "Bash(npx next:*)",
       "mcp__plugin_oh-my-claudecode_t__state_list_active",
-      "mcp__plugin_oh-my-claudecode_t__state_clear"
+      "mcp__plugin_oh-my-claudecode_t__state_clear",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(\"D:/development/auto-blog/doc/results/260316_AdminTesterSystemPlan.md\":*)"
     ]
   },
   "spinnerTipsEnabled": false

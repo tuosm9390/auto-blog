@@ -2,6 +2,7 @@
 import { requireAdminAuth, apiError, apiSuccess } from "@/lib/api-utils";
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { z } from "zod";
+import { sendTesterApprovedEmail } from "@/lib/email";
 
 const updateStatusSchema = z.object({
   status: z.enum(["approved", "rejected", "pending"]),
@@ -29,7 +30,7 @@ export async function PATCH(
       .from("tester_applications")
       .update({ status, updated_at: new Date().toISOString() })
       .eq("id", id)
-      .select("user_id")
+      .select("user_id, email, github_username")
       .single();
 
     if (appError || !application) {
@@ -47,6 +48,11 @@ export async function PATCH(
       if (roleError) {
         console.error("User role update error:", roleError);
         // 신청 상태는 업데이트되었으나 권한 변경 실패 시 로깅만 하고 응답은 보냄
+      }
+
+      // 승인 안내 이메일 발송 (fire-and-forget)
+      if (application.email) {
+        sendTesterApprovedEmail(application.email, application.github_username ?? application.user_id);
       }
     } else if (status === "rejected") {
       // 거절 시 다시 'user'로 강제 변경 (이전 권한 취소)

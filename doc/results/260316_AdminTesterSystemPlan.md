@@ -52,3 +52,23 @@ Author: Antigravity
 - API 유틸리티(equirePrivilegedAuth)를 통한 서버 사이드 2중 검증
 - Supabase RLS를 통한 사용자 직접 권한 수정 차단
 
+
+## Phase 4: Email Notification (2026-03-19 완료)
+
+- [x] **Task 9: Resend 이메일 서비스 연동**
+  - `resend`, `@react-email/components`, `@react-email/render` 패키지 설치.
+  - `lib/email.ts` — Resend 클라이언트 초기화, `sendTesterApplyConfirmEmail`, `sendTesterApprovedEmail` 함수 구현.
+  - Verify: `RESEND_API_KEY` 미설정 시 graceful skip, 빌드 성공 확인.
+- [x] **Task 10: 신청 접수 확인 이메일**
+  - `emails/TesterApplyConfirm.tsx` — React Email 기반 한국어 템플릿.
+  - `app/api/tester-apply/route.ts` — upsert 성공 후 fire-and-forget 이메일 발송.
+  - Verify: 테스터 신청 시 입력한 이메일로 접수 확인 메일 수신.
+- [x] **Task 11: 테스터 승인 안내 이메일**
+  - `emails/TesterApproved.tsx` — React Email 기반 승인 안내 템플릿 (서비스 바로가기 버튼 포함).
+  - `app/api/admin/testers/[id]/route.ts` — `email, github_username` 추가 select, approved 분기에서 이메일 발송.
+  - Verify: 어드민 승인 시 신청자 이메일로 승인 안내 메일 수신.
+
+### 📧 이메일 알림 시스템 (Completed)
+- 이메일 발송 실패가 API 응답에 영향 없음 (fire-and-forget + try/catch)
+- `RESEND_API_KEY` 미설정 시 경고 로그 후 skip (개발 환경 안전)
+- 프로덕션 배포 전 Resend 대시보드에서 `synapso.dev` 도메인 SPF/DKIM 인증 필요
