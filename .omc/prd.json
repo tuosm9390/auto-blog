@@ -1,0 +1,110 @@
+{
+  "title": "Synapso.dev 마케팅 전략 구현 (Phase 1 + Phase 2 MVP)",
+  "version": "1.0",
+  "plan": ".omc/plans/synapso-marketing-plan-final.md",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Phase 0 보안 SQL 스크립트 생성",
+      "passes": true,
+      "acceptanceCriteria": [
+        "scripts/marketing-phase0-security.sql 파일이 존재함 ✅",
+        "파일에 profiles 테이블의 USING(true) permissive 정책 DROP 쿼리가 포함됨 ✅",
+        "파일에 user_integrations 테이블 생성 쿼리가 포함됨 (USING(false) RLS 포함) ✅",
+        "파일에 post_publications 테이블 생성 쿼리가 포함됨 (external_id, status 컬럼 포함) ✅"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "auth.ts isPublicPage에 /demo 경로 추가",
+      "passes": true,
+      "acceptanceCriteria": [
+        "auth.ts의 isPublicPage에 cleanPath.startsWith('/demo') 조건이 추가됨 ✅ (라인 38)",
+        "기존 .includes() 패턴이 .startsWith()로 전환됨 ✅ (라인 34-37)",
+        "기존 6개 경로가 모두 유지됨 ✅"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "GitHub Webhook 엔드포인트 (X-Hub-Signature-256 검증)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "app/api/webhooks/github/route.ts 파일이 존재함 ✅",
+        "X-Hub-Signature-256 헤더 검증 로직이 timingSafeEqual로 구현됨 ✅",
+        "서명 검증 실패 시 HTTP 401 반환 ✅",
+        "master 브랜치 push 이벤트만 처리 ✅",
+        "GITHUB_WEBHOOK_SECRET 환경변수 사용 ✅"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "PostFooterBadge 컴포넌트",
+      "passes": true,
+      "acceptanceCriteria": [
+        "components/PostFooterBadge.tsx 파일이 존재함 ✅",
+        "locale prop을 받아 ko/en 언어별 텍스트 렌더링 ✅",
+        "synapso.dev 링크 포함 ✅",
+        "messages/ko.json과 messages/en.json에 PostFooterBadge.text 키 추가됨 ✅"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Dev.to 배포 스크립트 (임시)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "scripts/publish-to-devto.ts 파일이 존재함 ✅",
+        "Dev.to API v1 POST /articles 호출 ✅",
+        "DEVTO_API_KEY 환경변수 사용 ✅",
+        "포스트 본문 끝에 'Powered by Synapso' 배지 마크다운 자동 삽입 ✅"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Demo 랜딩 페이지 (/demo)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "app/[locale]/demo/page.tsx 파일이 존재함 ✅",
+        "GitHub OAuth 로그인 없이 접근 가능한 공개 페이지 ✅",
+        "'내 GitHub 회고 만들기' CTA 버튼이 /api/demo/github-oauth로 연결됨 ✅",
+        "messages/ko.json과 messages/en.json에 DemoPage 키가 추가됨 ✅"
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "Stateless GitHub OAuth 엔드포인트 (CSRF 방어)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "app/api/demo/github-oauth/route.ts 파일이 존재함 ✅ (state nonce + httpOnly 쿠키)",
+        "app/api/demo/github-oauth/callback/route.ts 파일이 존재함 ✅",
+        "timingSafeEqual로 state 파라미터 검증, 불일치 시 HTTP 403 반환 ✅ (라인 42-43)",
+        "OAuth scope가 'read:user public_repo' ✅",
+        "access token을 HS256 JWT로 서명 후 httpOnly+Secure+SameSite=Lax 쿠키에 저장 ✅",
+        "DEMO_JWT_SECRET 환경변수 사용 ✅"
+      ]
+    },
+    {
+      "id": "US-008",
+      "title": "Demo 포스트 생성 API (fail-close Rate Limit)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "app/api/demo/generate/route.ts 파일이 존재함 ✅",
+        "Redis 미구성 시 HTTP 503 반환 (fail-close) ✅ (라인 105-109)",
+        "IP 기준 fixedWindow(3, '1 d') Rate Limit 적용 ✅",
+        "demo_token 쿠키에서 JWT 검증 후 GitHub access token 추출 ✅",
+        "최근 90일 커밋 수집 후 AI 분석 ✅",
+        "Rate Limit 초과 시 HTTP 429 반환 ✅"
+      ]
+    },
+    {
+      "id": "US-009",
+      "title": "Demo 결과 미리보기 페이지",
+      "passes": true,
+      "acceptanceCriteria": [
+        "app/[locale]/demo/result/page.tsx 파일이 존재함 ✅ (빌드 성공 확인)",
+        "생성된 포스트 마크다운을 렌더링하는 UI ✅",
+        "X(트위터), LinkedIn 공유 버튼 ✅",
+        "'Pro 가입' CTA 버튼이 /pricing 링크로 연결됨 ✅"
+      ]
+    }
+  ]
+}

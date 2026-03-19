@@ -285,6 +285,7 @@ STRIPE_PRO_PRODUCT_ID=<Stripe Product ID>  # Stripe 대시보드 Products에서 
   ```
 - **신규 파일**: `app/api/demo/github-oauth/callback/route.ts`
   - **[CSRF 방지]** 쿠키의 `demo_oauth_state` 값과 URL `state` 파라미터를 `timingSafeEqual`로 검증 → 불일치 시 HTTP 403 반환
+
   ```ts
   const cookieState = cookies().get("demo_oauth_state")?.value;
   const urlState = searchParams.get("state");
@@ -588,3 +589,64 @@ Synapso.dev 마케팅 전략으로 **Phase 1 (Build in Public) + Phase 2 MVP (Gi
 | "Edge Runtime" → "Serverless Function" 문구 수정 (Step 2.3)              | Architect v2 #5: 런타임 오해 방지                           |
 | OAuth CSRF 리스크 Risks 테이블 추가                                      | Critic v2: 리스크 누락 지적                                 |
 | Phase 2 검증에 state 파라미터 CSRF 테스트 추가                           | Critic v2: Acceptance Criteria 보완                         |
+
+---
+
+## 🚀 구현 완료 현황 (2026-03-19)
+
+> Ralph + Architect 검증 완료. 모든 PRD 스토리(US-001 ~ US-009) `passes: true`.
+
+### Phase 0 — 구현 완료 ✅ (DB 적용은 수동 미완)
+
+| 항목                                          | 상태 | 비고                               |
+| --------------------------------------------- | ---- | ---------------------------------- |
+| `scripts/marketing-phase0-security.sql` 생성  | ✅   | Supabase SQL Editor 수동 실행 필요 |
+| `profiles` USING(true) 정책 DROP SQL          | ✅   |                                    |
+| `user_integrations` 테이블 + USING(false) RLS | ✅   |                                    |
+| `post_publications` 테이블 + 월별 인덱스      | ✅   |                                    |
+
+### Phase 1 (Build in Public) — 구현 완료 ✅
+
+| 항목                                    | 파일                                   | 상태 |
+| --------------------------------------- | -------------------------------------- | ---- |
+| GitHub Webhook X-Hub-Signature-256 검증 | `app/api/webhooks/github/route.ts`     | ✅   |
+| PostFooterBadge 컴포넌트 (ko/en)        | `components/PostFooterBadge.tsx`       | ✅   |
+| i18n 키 추가                            | `messages/ko.json`, `messages/en.json` | ✅   |
+| Dev.to 수동 배포 스크립트               | `scripts/publish-to-devto.ts`          | ✅   |
+
+### Phase 2 MVP (GitHub Wrapped 데모) — 구현 완료 ✅
+
+| 항목                                         | 파일                                          | 상태 |
+| -------------------------------------------- | --------------------------------------------- | ---- |
+| isPublicPage /demo 추가 + .startsWith() 전환 | `auth.ts`                                     | ✅   |
+| 데모 랜딩 페이지                             | `app/[locale]/demo/page.tsx`                  | ✅   |
+| Stateless GitHub OAuth (CSRF nonce)          | `app/api/demo/github-oauth/route.ts`          | ✅   |
+| OAuth 콜백 + HS256 JWT 쿠키                  | `app/api/demo/github-oauth/callback/route.ts` | ✅   |
+| 커밋 수집 + Gemini 분석 API (fail-close)     | `app/api/demo/generate/route.ts`              | ✅   |
+| 결과 미리보기 + 공유 버튼                    | `app/[locale]/demo/result/page.tsx`           | ✅   |
+
+### 보안 패치 (Architect LOW Advisory 해결)
+
+- `app/api/demo/generate/route.ts:18` — JWT 서명 비교 `!==` → `timingSafeEqual` 적용
+  ```ts
+  // Before
+  if (expected !== sigB64) return null;
+  // After
+  if (!timingSafeEqual(Buffer.from(expected), Buffer.from(sigB64))) return null;
+  ```
+
+### Phase 2 Full / Phase 3 — 미구현 (예정)
+
+| 단계         | 항목                                     | 예정 시점                    |
+| ------------ | ---------------------------------------- | ---------------------------- |
+| Phase 2 Full | `lib/stripe.ts` createDemoCoupon()       | D+14 (Phase 2 MVP 검증 후)   |
+| Phase 2 Full | `app/api/demo/coupon/route.ts`           | D+14                         |
+| Phase 3      | `lib/devto.ts`                           | D+21 (Phase 2 MVP 안정화 후) |
+| Phase 3      | `app/api/settings/integrations/route.ts` | D+21                         |
+| Phase 3      | `app/api/posts/[id]/publish/route.ts`    | D+21                         |
+
+### 수동 작업 (미완)
+
+- [x] `scripts/marketing-phase0-security.sql` → Supabase SQL Editor에서 실행
+- [x] 환경변수 설정: `GITHUB_WEBHOOK_SECRET`, `DEMO_JWT_SECRET`, `ENCRYPTION_KEY`, `DEVTO_API_KEY`
+- [ ] GitHub Webhook endpoint 연결 → 실제 포스트 생성 job 트리거

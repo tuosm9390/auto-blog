@@ -31,10 +31,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // 1. 완전 공개 페이지 (비로그인/로그인 무관)
       const isPublicPage =
         cleanPath === '/' ||
-        cleanPath.includes('/about') ||
-        cleanPath.includes('/pricing') ||
-        cleanPath.includes('/terms') ||
-        cleanPath.includes('/login') ||
+        cleanPath.startsWith('/about') ||
+        cleanPath.startsWith('/pricing') ||
+        cleanPath.startsWith('/terms') ||
+        cleanPath.startsWith('/login') ||
+        cleanPath.startsWith('/demo') ||
         pathname.startsWith('/api/auth');
 
       if (isPublicPage) return true;

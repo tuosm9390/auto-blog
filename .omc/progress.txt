@@ -1,0 +1,86 @@
+================================================================================
+Synapso.dev 마케팅 전략 구현 — Progress Log
+Date: 2026-03-19
+================================================================================
+
+## 구현 완료 항목
+
+### Phase 0: 보안 선행 (SQL 스크립트만 — 실제 DB 적용은 수동)
+- scripts/marketing-phase0-security.sql
+  - profiles 테이블 permissive RLS DROP
+  - user_integrations 테이블 (USING(false) RLS, AES-256 암호화용)
+  - post_publications 테이블 (external_id, status, 월별 인덱스)
+  ⚠️  Supabase SQL Editor에서 수동 실행 필요
+
+### Phase 1: Build in Public
+- app/api/webhooks/github/route.ts
+  - X-Hub-Signature-256 timingSafeEqual 검증
+  - master 브랜치 필터, GITHUB_WEBHOOK_SECRET 환경변수
+  - TODO: 실제 포스트 생성 job 트리거 연결 필요
+- components/PostFooterBadge.tsx
+  - locale prop, ko/en 배지 텍스트
+  - messages/ko.json + en.json에 PostFooterBadge.text 추가
+- scripts/publish-to-devto.ts
+  - Dev.to API v1 POST /articles
+  - Powered by Synapso 배지 자동 삽입
+
+### Phase 2 MVP: GitHub Wrapped 데모
+- auth.ts
+  - isPublicPage에 /demo 추가, .includes() → .startsWith() 전환
+- app/[locale]/demo/page.tsx
+  - 공개 랜딩 페이지, CTA → /api/demo/github-oauth
+  - DemoPage i18n 키 (ko/en)
+- app/api/demo/github-oauth/route.ts
+  - state nonce 생성, httpOnly 쿠키, GitHub authorize redirect
+  - scope: read:user public_repo (최소 권한)
+- app/api/demo/github-oauth/callback/route.ts
+  - timingSafeEqual CSRF state 검증 (HTTP 403 on mismatch)
+  - GitHub access token 교환
+  - HS256 JWT 서명 (Node.js crypto, jose 미사용)
+  - demo_token httpOnly 쿠키 저장 (24h)
+- app/api/demo/generate/route.ts
+  - Redis 미구성 → HTTP 503 fail-close (fail-open 패턴 금지)
+  - IP 기준 fixedWindow(3, '1 d') Rate Limit
+  - demo_token JWT 검증 → GitHub access token 추출
+  - 최근 90일 커밋 수집 (public repos 상위 5개)
+  - Gemini API 분석 or 마크다운 폴백
+- app/[locale]/demo/result/page.tsx
+  - Client component, /api/demo/generate POST 호출
+  - 503/429/401/403 에러별 사용자 메시지
+  - X/LinkedIn 공유 버튼, Pro 업그레이드 CTA
+
+## 환경변수 추가 필요
+- GITHUB_WEBHOOK_SECRET: GitHub Webhook 설정과 동일값
+- DEMO_JWT_SECRET: openssl rand -hex 32 (NEXTAUTH_SECRET과 다른 값!)
+- ENCRYPTION_KEY: openssl rand -hex 32 (Phase 3 Dev.to API 키 암호화용)
+- DEVTO_API_KEY: Dev.to 설정 페이지에서 발급 (Phase 1 수동 배포용)
+
+## 미구현 항목 (추후 구현)
+- Phase 2 Full: lib/stripe.ts createDemoCoupon(), app/api/demo/coupon/route.ts
+- Phase 3: lib/devto.ts, app/api/settings/integrations, app/api/posts/[id]/publish
+
+## 학습된 패턴
+- jose 패키지 미포함 → Node.js crypto로 HS256 JWT 직접 구현
+- Octokit listForUser는 type: "owner" 등 특정 타입 필요 (public은 타입 오류)
+- Next.js App Router: cookies()는 await 필요 (Next.js 15+)
+- auth.ts isPublicPage 패턴: boolean 변수 (함수가 아님)
+
+## 보안 패치 (Architect Advisory 반영)
+
+### app/api/demo/generate/route.ts — JWT 서명 비교 timingSafeEqual 적용
+- 변경: `import { createHmac } from "crypto"` → `import { createHmac, timingSafeEqual } from "crypto"`
+- 변경: `if (expected !== sigB64) return null;`
+        → `if (!timingSafeEqual(Buffer.from(expected), Buffer.from(sigB64))) return null;`
+- 이유: 문자열 `!==` 비교는 early-exit으로 타이밍 차이 발생 가능 → timing attack 취약점
+- 결과: Architect LOW advisory 해결 완료
+
+## TypeScript 검증
+- npx tsc --noEmit --skipLibCheck → 오류 0건 (패치 후 재확인)
+- npx next build → 성공 (demo/result, webhooks/github 포함)
+
+## 최종 상태
+- 모든 PRD 스토리 (US-001 ~ US-009): passes: true ✅
+- Architect 검증: APPROVED ✅
+- Ralph 상태 정리: 완료 ✅
+- 완료일: 2026-03-19
+================================================================================

@@ -272,6 +272,19 @@
     "exp3": "미들 (3-5년)",
     "success": "신청이 완료되었습니다! 검토 후 연락드리겠습니다."
   },
+  "PostFooterBadge": {
+    "text": "이 포스트는 Synapso로 자동 생성되었습니다."
+  },
+  "DemoPage": {
+    "tag": "GitHub × AI",
+    "title": "나의 코드 여정을 블로그로 만들어보세요",
+    "description": "최근 90일간의 GitHub 커밋을 AI가 분석하여 기술 블로그 포스트를 자동 생성합니다.",
+    "cta": "내 GitHub 회고 만들기",
+    "free": "무료 체험 · 계정 생성 불필요",
+    "step1": "GitHub 로그인",
+    "step2": "AI 분석",
+    "step3": "포스트 미리보기"
+  },
   "Admin": {
     "Menu": {
       "Testers": "테스터 관리",
