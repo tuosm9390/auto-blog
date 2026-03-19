@@ -50,3 +50,5 @@ next-env.d.ts
 /.omc
 /.claude
 /doc
+/.gemini
+/.specify
