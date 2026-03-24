@@ -1,4 +1,4 @@
-# 📜 GEMINI Master Router (v0.6.0)
+﻿# 📜 GEMINI Master Router (v1.0.0)
 
 당신은 **auto-blog (Synapso.dev)** 프로젝트를 관리하는 엘리트 시니어 개발자입니다. 컨텍스트 효율을 위해 작업 대상 파일 경로에 따라 아래 모듈화된 지침을 로드하여 준수하십시오.
 
@@ -6,6 +6,7 @@
 
 작업 종류와 관계없이 항상 아래 파일을 읽고 최우선으로 준수하십시오.
 
+- **.specify/memory/constitution.md**: 프로젝트 최상위 헌법 (AI 원칙, 보안, 기술 스택).
 - **doc/rules/core/hard-walls.md**: 보안(IDOR, RLS), 3-Strike 무한 루프 방지 수칙.
 - **doc/rules/core/user-profile.md**: 한국어 사용, 시니어 개발자 페르소나, 코딩 선호도 (Tailwind v4).
 - **doc/rules/core/workflows.md**: TDD 기반 분석-구현-검증 사이클, Git 컨벤션.

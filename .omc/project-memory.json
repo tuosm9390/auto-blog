@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1773848193263,
+  "lastScanned": 1774358815778,
   "projectRoot": "D:\\development\\auto-blog",
   "techStack": {
     "languages": [
@@ -81,7 +81,7 @@
       "path": "app",
       "purpose": "Application code",
       "fileCount": 4,
-      "lastAccessed": 1773848193207,
+      "lastAccessed": 1774358815685,
       "keyFiles": [
         "favicon.ico",
         "globals.css",
@@ -92,8 +92,8 @@
     "components": {
       "path": "components",
       "purpose": "UI components",
-      "fileCount": 17,
-      "lastAccessed": 1773848193208,
+      "fileCount": 18,
+      "lastAccessed": 1774358815687,
       "keyFiles": [
         "auth-components.tsx",
         "BioEditor.tsx",
@@ -106,14 +106,24 @@
       "path": "doc",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1773848193226,
+      "lastAccessed": 1774358815717,
       "keyFiles": []
+    },
+    "emails": {
+      "path": "emails",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1774358815720,
+      "keyFiles": [
+        "TesterApplyConfirm.tsx",
+        "TesterApproved.tsx"
+      ]
     },
     "i18n": {
       "path": "i18n",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1773848193228,
+      "lastAccessed": 1774358815720,
       "keyFiles": [
         "request.ts",
         "routing.ts"
@@ -122,21 +132,21 @@
     "lib": {
       "path": "lib",
       "purpose": "Library code",
-      "fileCount": 14,
-      "lastAccessed": 1773848193228,
+      "fileCount": 15,
+      "lastAccessed": 1774358815721,
       "keyFiles": [
         "ai.ts",
         "api-utils.ts",
         "billing.ts",
         "date.ts",
-        "github.ts"
+        "email.ts"
       ]
     },
     "messages": {
       "path": "messages",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1773848193229,
+      "lastAccessed": 1774358815721,
       "keyFiles": [
         "en.json",
         "ko.json"
@@ -146,14 +156,14 @@
       "path": "public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1773848193229,
+      "lastAccessed": 1774358815722,
       "keyFiles": []
     },
     "results": {
       "path": "results",
       "purpose": null,
       "fileCount": 34,
-      "lastAccessed": 1773848193230,
+      "lastAccessed": 1774358815725,
       "keyFiles": [
         "260223_Task.md",
         "260223_Task_알림개선.md",
@@ -165,8 +175,8 @@
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 11,
-      "lastAccessed": 1773848193231,
+      "fileCount": 13,
+      "lastAccessed": 1774358815726,
       "keyFiles": [
         "add-email-to-profiles.sql",
         "add-jobs-table.sql",
@@ -179,14 +189,14 @@
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 0,
-      "lastAccessed": 1773848193231,
+      "lastAccessed": 1774358815726,
       "keyFiles": []
     },
     "types": {
       "path": "types",
       "purpose": "Type definitions",
       "fileCount": 1,
-      "lastAccessed": 1773848193232,
+      "lastAccessed": 1774358815754,
       "keyFiles": [
         "next-auth.d.ts"
       ]
@@ -195,309 +205,123 @@
       "path": "app\\api",
       "purpose": "API routes",
       "fileCount": 0,
-      "lastAccessed": 1773848193233,
+      "lastAccessed": 1774358815755,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "",
-      "accessCount": 64,
-      "lastAccessed": 1773896706112,
+      "accessCount": 19,
+      "lastAccessed": 1774361684597,
       "type": "directory"
     },
     {
-      "path": "auth.ts",
-      "accessCount": 14,
-      "lastAccessed": 1773893144543,
+      "path": "C:\\Users\\tuosm\\.gstack\\projects\\tuosm9390-auto-blog\\tuosm-master-design-20260324-230159.md",
+      "accessCount": 12,
+      "lastAccessed": 1774363665924,
       "type": "file"
     },
     {
       "path": "doc\\rules\\shared\\architecture.md",
-      "accessCount": 8,
-      "lastAccessed": 1773890871220,
-      "type": "file"
-    },
-    {
-      "path": "lib\\stripe.ts",
-      "accessCount": 7,
-      "lastAccessed": 1773881139164,
-      "type": "file"
-    },
-    {
-      "path": "messages\\ko.json",
-      "accessCount": 7,
-      "lastAccessed": 1773882388544,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\demo\\generate\\route.ts",
-      "accessCount": 7,
-      "lastAccessed": 1773883365823,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\generate\\route.ts",
-      "accessCount": 7,
-      "lastAccessed": 1773885938327,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\webhooks\\github\\route.ts",
-      "accessCount": 7,
-      "lastAccessed": 1773886271803,
+      "accessCount": 2,
+      "lastAccessed": 1774361650176,
       "type": "file"
     },
     {
       "path": "doc\\rules\\shared\\tech-stack.md",
-      "accessCount": 6,
-      "lastAccessed": 1773850154940,
-      "type": "file"
-    },
-    {
-      "path": "scripts\\create-profiles-table.sql",
-      "accessCount": 6,
-      "lastAccessed": 1773850222469,
-      "type": "file"
-    },
-    {
-      "path": "scripts\\fix-security-rls.sql",
-      "accessCount": 6,
-      "lastAccessed": 1773850241502,
-      "type": "file"
-    },
-    {
-      "path": "messages\\en.json",
-      "accessCount": 6,
-      "lastAccessed": 1773882393843,
-      "type": "file"
-    },
-    {
-      "path": "lib\\api-utils.ts",
-      "accessCount": 6,
-      "lastAccessed": 1773893127528,
-      "type": "file"
-    },
-    {
-      "path": "doc\\rules\\core\\hard-walls.md",
-      "accessCount": 5,
-      "lastAccessed": 1773850154348,
-      "type": "file"
-    },
-    {
-      "path": "scripts\\create-tester-applications.sql",
-      "accessCount": 5,
-      "lastAccessed": 1773893114709,
-      "type": "file"
-    },
-    {
-      "path": "middleware.ts",
-      "accessCount": 4,
-      "lastAccessed": 1773850264425,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\settings\\page.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1773850241632,
-      "type": "file"
-    },
-    {
-      "path": "lib\\github.ts",
-      "accessCount": 3,
-      "lastAccessed": 1773882557522,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\demo\\github-oauth\\route.ts",
-      "accessCount": 3,
-      "lastAccessed": 1773883216030,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\demo\\github-oauth\\callback\\route.ts",
-      "accessCount": 3,
-      "lastAccessed": 1773883216329,
-      "type": "file"
-    },
-    {
-      "path": "scripts\\marketing-phase0-security.sql",
-      "accessCount": 3,
-      "lastAccessed": 1773883218249,
-      "type": "file"
-    },
-    {
-      "path": "scripts\\publish-to-devto.ts",
-      "accessCount": 3,
-      "lastAccessed": 1773883218445,
-      "type": "file"
-    },
-    {
-      "path": "package.json",
-      "accessCount": 3,
-      "lastAccessed": 1773893114778,
-      "type": "file"
-    },
-    {
-      "path": "lib\\supabase-admin.ts",
-      "accessCount": 3,
-      "lastAccessed": 1773893121963,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\feedback_synapso_patterns.md",
-      "accessCount": 3,
-      "lastAccessed": 1773896744528,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\MEMORY.md",
-      "accessCount": 3,
-      "lastAccessed": 1773896844610,
-      "type": "file"
-    },
-    {
-      "path": "lib",
       "accessCount": 2,
-      "lastAccessed": 1773849773126,
-      "type": "directory"
+      "lastAccessed": 1774361650563,
+      "type": "file"
     },
     {
       "path": "doc\\rules\\core\\workflows.md",
       "accessCount": 2,
-      "lastAccessed": 1773849907323,
+      "lastAccessed": 1774361650872,
       "type": "file"
     },
     {
-      "path": "lib\\ai.ts",
+      "path": "doc\\results\\260319_MarketingPromotions.md",
       "accessCount": 2,
-      "lastAccessed": 1773882561518,
+      "lastAccessed": 1774361675536,
       "type": "file"
     },
     {
-      "path": "components\\PostFooterBadge.tsx",
+      "path": "app",
       "accessCount": 2,
-      "lastAccessed": 1773883212303,
-      "type": "file"
+      "lastAccessed": 1774361683137,
+      "type": "directory"
     },
     {
-      "path": "app\\[locale]\\demo\\page.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1773883212776,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\demo\\result\\page.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1773883217444,
-      "type": "file"
-    },
-    {
-      "path": "lib\\jobs.ts",
-      "accessCount": 2,
-      "lastAccessed": 1773885938377,
-      "type": "file"
-    },
-    {
-      "path": "lib\\subscription.ts",
-      "accessCount": 2,
-      "lastAccessed": 1773893150551,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\project_pending_tasks.md",
-      "accessCount": 2,
-      "lastAccessed": 1773896703963,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\projects\\D--development-auto-blog\\memory\\project_marketing_implementation.md",
-      "accessCount": 2,
-      "lastAccessed": 1773896704779,
-      "type": "file"
-    },
-    {
-      "path": "doc\\marketing\\brainstorming-2026-03-19.md",
+      "path": "C:\\Users\\tuosm\\.claude\\skills\\gstack\\gstack-upgrade\\SKILL.md",
       "accessCount": 1,
-      "lastAccessed": 1773849108385,
+      "lastAccessed": 1774358890312,
       "type": "file"
     },
     {
-      "path": "app\\api\\settings\\route.ts",
+      "path": "doc\\rules\\core\\hard-walls.md",
       "accessCount": 1,
-      "lastAccessed": 1773849225547,
+      "lastAccessed": 1774361017563,
+      "type": "file"
+    },
+    {
+      "path": "doc\\rules\\shared\\conventions.md",
+      "accessCount": 1,
+      "lastAccessed": 1774361024526,
+      "type": "file"
+    },
+    {
+      "path": "doc\\rules\\core\\user-profile.md",
+      "accessCount": 1,
+      "lastAccessed": 1774361026105,
+      "type": "file"
+    },
+    {
+      "path": "app\\api",
+      "accessCount": 1,
+      "lastAccessed": 1774361089679,
+      "type": "directory"
+    },
+    {
+      "path": "doc\\results\\260316_ImplementationPlan.md",
+      "accessCount": 1,
+      "lastAccessed": 1774361098039,
       "type": "file"
     },
     {
       "path": "lib\\billing.ts",
       "accessCount": 1,
-      "lastAccessed": 1773849227376,
+      "lastAccessed": 1774361098179,
       "type": "file"
     },
     {
-      "path": "lib\\types.ts",
+      "path": "doc\\results\\260316_ProjectIntroduction.md",
       "accessCount": 1,
-      "lastAccessed": 1773849232002,
+      "lastAccessed": 1774361413744,
       "type": "file"
     },
     {
-      "path": "scripts\\add-subscription-fields.sql",
+      "path": "doc\\marketing\\brainstorming-2026-03-19.md",
       "accessCount": 1,
-      "lastAccessed": 1773849243384,
+      "lastAccessed": 1774361676613,
       "type": "file"
     },
     {
-      "path": "app\\api\\posts\\route.ts",
+      "path": "lib\\ai.ts",
       "accessCount": 1,
-      "lastAccessed": 1773849434427,
+      "lastAccessed": 1774361676732,
       "type": "file"
     },
     {
-      "path": "scripts\\fix-rls.sql",
+      "path": "lib",
       "accessCount": 1,
-      "lastAccessed": 1773849440123,
-      "type": "file"
-    },
-    {
-      "path": "app\\api\\webhooks\\stripe\\route.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773849460153,
-      "type": "file"
-    },
-    {
-      "path": "next.config.ts",
-      "accessCount": 1,
-      "lastAccessed": 1773849772068,
-      "type": "file"
-    },
-    {
-      "path": "scripts",
-      "accessCount": 1,
-      "lastAccessed": 1773849939580,
+      "lastAccessed": 1774361683714,
       "type": "directory"
     },
     {
-      "path": "app",
+      "path": "package.json",
       "accessCount": 1,
-      "lastAccessed": 1773850247766,
-      "type": "directory"
-    },
-    {
-      "path": "app\\[locale]\\about\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773882368038,
-      "type": "file"
-    },
-    {
-      "path": "app\\[locale]\\generate\\page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1773882691236,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\AppData\\Local\\Temp\\claude\\D--development-auto-blog\\e5a996c7-e31d-4b3e-822a-71c7224af85f\\tasks\\b193jwqjs.output",
-      "accessCount": 1,
-      "lastAccessed": 1773883449004,
+      "lastAccessed": 1774361685002,
       "type": "file"
     }
   ],

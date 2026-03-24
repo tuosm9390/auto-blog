@@ -224,7 +224,15 @@
   },
   "PostCard": {
     "autoPost": "🤖 자동 포스팅",
-    "unknown": "익명"
+    "unknown": "익명",
+    "demoSample": "Demo Sample"
+  },
+  "MarketingDemo": {
+    "title": "AI 기술 블로그 데모",
+    "desc": "Synapso.dev가 생성한 실제 포스트들을 확인해보세요.",
+    "back": "이전 페이지로 이동",
+    "applyCta": "나도 시작하기",
+    "empty": "표시할 포스트가 없습니다."
   },
   "BioEditor": {
     "empty": "작성자 소개글이 없습니다. 클릭하여 소개글을 등록해 보세요.",
