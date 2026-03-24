@@ -4,8 +4,18 @@ import MobileMenu from "./MobileMenu";
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { headers } from "next/headers";
+import DemoHeader from "./demo/DemoHeader";
 
 export default async function Header() {
+  const headerList = await headers();
+  const pathname = headerList.get("x-url-pathname") || "";
+  
+  // 데모 페이지인 경우 데모 전용 헤더 반환 (아카이브 제외)
+  if (pathname.includes("/demo") && !pathname.includes("/demo-archive")) {
+    return <DemoHeader />;
+  }
+
   const session = await auth();
   const t = await getTranslations("Header");
 

@@ -106,3 +106,23 @@ export interface UserSettingsData {
   auto_repos: string[];
   auto_schedule: AutoSchedule;
 }
+
+export interface DemoPost extends Omit<Post, 'author' | 'repo'> {
+  author: "";
+  repo: "";
+}
+
+import { z } from "zod";
+
+export const DemoPostSchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  title: z.string(),
+  date: z.string(),
+  summary: z.string(),
+  content: z.string(),
+  tags: z.array(z.string()),
+  author: z.literal(""),
+  repo: z.literal(""),
+  status: z.literal("published"),
+});
