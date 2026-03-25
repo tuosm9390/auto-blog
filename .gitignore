@@ -47,8 +47,8 @@ next-env.d.ts
 /.claude/settings.local.json
 
 .vercel
-/.omc
-/.claude
-/doc
-/.gemini
-/.specify
+/.omc/
+/.claude/
+/doc/
+/.gemini/
+/.specify/

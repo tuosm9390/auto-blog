@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1774358815778,
+  "lastScanned": 1774445580902,
   "projectRoot": "D:\\development\\auto-blog",
   "techStack": {
     "languages": [
@@ -80,11 +80,12 @@
     "app": {
       "path": "app",
       "purpose": "Application code",
-      "fileCount": 4,
-      "lastAccessed": 1774358815685,
+      "fileCount": 5,
+      "lastAccessed": 1774445580862,
       "keyFiles": [
         "favicon.ico",
         "globals.css",
+        "icon.png",
         "robots.ts",
         "sitemap.ts"
       ]
@@ -93,7 +94,7 @@
       "path": "components",
       "purpose": "UI components",
       "fileCount": 18,
-      "lastAccessed": 1774358815687,
+      "lastAccessed": 1774445580862,
       "keyFiles": [
         "auth-components.tsx",
         "BioEditor.tsx",
@@ -106,14 +107,14 @@
       "path": "doc",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1774358815717,
+      "lastAccessed": 1774445580875,
       "keyFiles": []
     },
     "emails": {
       "path": "emails",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1774358815720,
+      "lastAccessed": 1774445580876,
       "keyFiles": [
         "TesterApplyConfirm.tsx",
         "TesterApproved.tsx"
@@ -123,7 +124,7 @@
       "path": "i18n",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1774358815720,
+      "lastAccessed": 1774445580876,
       "keyFiles": [
         "request.ts",
         "routing.ts"
@@ -132,21 +133,21 @@
     "lib": {
       "path": "lib",
       "purpose": "Library code",
-      "fileCount": 15,
-      "lastAccessed": 1774358815721,
+      "fileCount": 16,
+      "lastAccessed": 1774445580876,
       "keyFiles": [
         "ai.ts",
         "api-utils.ts",
         "billing.ts",
         "date.ts",
-        "email.ts"
+        "demo.ts"
       ]
     },
     "messages": {
       "path": "messages",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1774358815721,
+      "lastAccessed": 1774445580877,
       "keyFiles": [
         "en.json",
         "ko.json"
@@ -155,15 +156,19 @@
     "public": {
       "path": "public",
       "purpose": "Public files",
-      "fileCount": 0,
-      "lastAccessed": 1774358815722,
-      "keyFiles": []
+      "fileCount": 3,
+      "lastAccessed": 1774445580877,
+      "keyFiles": [
+        "favicon.png",
+        "icon_black.png",
+        "icon_white.png"
+      ]
     },
     "results": {
       "path": "results",
       "purpose": null,
       "fileCount": 34,
-      "lastAccessed": 1774358815725,
+      "lastAccessed": 1774445580878,
       "keyFiles": [
         "260223_Task.md",
         "260223_Task_알림개선.md",
@@ -176,7 +181,7 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 13,
-      "lastAccessed": 1774358815726,
+      "lastAccessed": 1774445580879,
       "keyFiles": [
         "add-email-to-profiles.sql",
         "add-jobs-table.sql",
@@ -185,18 +190,25 @@
         "add-soft-delete-to-posts.sql"
       ]
     },
+    "specs": {
+      "path": "specs",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1774445580879,
+      "keyFiles": []
+    },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 0,
-      "lastAccessed": 1774358815726,
+      "lastAccessed": 1774445580879,
       "keyFiles": []
     },
     "types": {
       "path": "types",
       "purpose": "Type definitions",
       "fileCount": 1,
-      "lastAccessed": 1774358815754,
+      "lastAccessed": 1774445580880,
       "keyFiles": [
         "next-auth.d.ts"
       ]
@@ -205,125 +217,10 @@
       "path": "app\\api",
       "purpose": "API routes",
       "fileCount": 0,
-      "lastAccessed": 1774358815755,
+      "lastAccessed": 1774445580881,
       "keyFiles": []
     }
   },
-  "hotPaths": [
-    {
-      "path": "",
-      "accessCount": 19,
-      "lastAccessed": 1774361684597,
-      "type": "directory"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.gstack\\projects\\tuosm9390-auto-blog\\tuosm-master-design-20260324-230159.md",
-      "accessCount": 12,
-      "lastAccessed": 1774363665924,
-      "type": "file"
-    },
-    {
-      "path": "doc\\rules\\shared\\architecture.md",
-      "accessCount": 2,
-      "lastAccessed": 1774361650176,
-      "type": "file"
-    },
-    {
-      "path": "doc\\rules\\shared\\tech-stack.md",
-      "accessCount": 2,
-      "lastAccessed": 1774361650563,
-      "type": "file"
-    },
-    {
-      "path": "doc\\rules\\core\\workflows.md",
-      "accessCount": 2,
-      "lastAccessed": 1774361650872,
-      "type": "file"
-    },
-    {
-      "path": "doc\\results\\260319_MarketingPromotions.md",
-      "accessCount": 2,
-      "lastAccessed": 1774361675536,
-      "type": "file"
-    },
-    {
-      "path": "app",
-      "accessCount": 2,
-      "lastAccessed": 1774361683137,
-      "type": "directory"
-    },
-    {
-      "path": "C:\\Users\\tuosm\\.claude\\skills\\gstack\\gstack-upgrade\\SKILL.md",
-      "accessCount": 1,
-      "lastAccessed": 1774358890312,
-      "type": "file"
-    },
-    {
-      "path": "doc\\rules\\core\\hard-walls.md",
-      "accessCount": 1,
-      "lastAccessed": 1774361017563,
-      "type": "file"
-    },
-    {
-      "path": "doc\\rules\\shared\\conventions.md",
-      "accessCount": 1,
-      "lastAccessed": 1774361024526,
-      "type": "file"
-    },
-    {
-      "path": "doc\\rules\\core\\user-profile.md",
-      "accessCount": 1,
-      "lastAccessed": 1774361026105,
-      "type": "file"
-    },
-    {
-      "path": "app\\api",
-      "accessCount": 1,
-      "lastAccessed": 1774361089679,
-      "type": "directory"
-    },
-    {
-      "path": "doc\\results\\260316_ImplementationPlan.md",
-      "accessCount": 1,
-      "lastAccessed": 1774361098039,
-      "type": "file"
-    },
-    {
-      "path": "lib\\billing.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774361098179,
-      "type": "file"
-    },
-    {
-      "path": "doc\\results\\260316_ProjectIntroduction.md",
-      "accessCount": 1,
-      "lastAccessed": 1774361413744,
-      "type": "file"
-    },
-    {
-      "path": "doc\\marketing\\brainstorming-2026-03-19.md",
-      "accessCount": 1,
-      "lastAccessed": 1774361676613,
-      "type": "file"
-    },
-    {
-      "path": "lib\\ai.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774361676732,
-      "type": "file"
-    },
-    {
-      "path": "lib",
-      "accessCount": 1,
-      "lastAccessed": 1774361683714,
-      "type": "directory"
-    },
-    {
-      "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1774361685002,
-      "type": "file"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }

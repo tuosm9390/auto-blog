@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import LanguageSwitcher from "../LanguageSwitcher";
+import Image from "next/image";
 
 export default async function DemoHeader() {
   const t = await getTranslations("Header");
@@ -9,9 +10,7 @@ export default async function DemoHeader() {
     <header className="sticky top-0 z-50 border-b border-border-subtle bg-canvas/80 backdrop-blur-md shadow-sm shadow-black/5">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/demo" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-md bg-accent flex items-center justify-center">
-            <span className="text-xs font-bold text-black">SD</span>
-          </div>
+          <Image src="/favicon.png" alt="Synapso.dev" width={32} height={32} className="rounded-md" />
           <span className="font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors">
             Synapso.dev
           </span>

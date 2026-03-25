@@ -25,7 +25,9 @@
       "mcp__plugin_oh-my-claudecode_t__state_clear",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "Bash(\"D:/development/auto-blog/doc/results/260316_AdminTesterSystemPlan.md\":*)"
+      "Bash(\"D:/development/auto-blog/doc/results/260316_AdminTesterSystemPlan.md\":*)",
+      "Bash(cat:*)",
+      "Bash(python3:*)"
     ]
   },
   "spinnerTipsEnabled": false

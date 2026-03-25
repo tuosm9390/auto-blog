@@ -17,7 +17,7 @@ export default function PricingClient({
   const router = useRouter();
   const t = useTranslations("Pricing");
   const commonT = useTranslations("Common");
-  
+
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
     "monthly",
@@ -25,8 +25,8 @@ export default function PricingClient({
 
   const handleCheckout = async (tier: string) => {
     if (!isAuthenticated) {
-      toast(t("loginRequired") || "Login required", {
-        description: t("loginRequiredDesc") || "Please sign in to proceed.",
+      toast(t("loginRequired"), {
+        description: t("loginRequiredDesc"),
       });
       router.push("/api/auth/signin");
       return;
@@ -55,8 +55,7 @@ export default function PricingClient({
         window.location.href = data.url;
       }
     } catch (error: unknown) {
-      console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
+      const errorMessage = error instanceof Error ? error.message : commonT("unknownError");
       toast.error(commonT("error"), { description: errorMessage });
     } finally {
       setIsLoading(null);
@@ -110,13 +109,13 @@ export default function PricingClient({
           </div>
           <ul className="space-y-4 mb-8 flex-1 text-sm text-text-secondary">
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> 3 AI posts / month
+              <span className="text-accent">✓</span> {t("featureBasicPosts")}
             </li>
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> 1 GitHub Repo
+              <span className="text-accent">✓</span> {t("featureBasicRepo")}
             </li>
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> Basic Markdown
+              <span className="text-accent">✓</span> {t("featureBasicMarkdown")}
             </li>
             <li className="flex gap-3">
               <span className="text-text-tertiary">✓</span>{" "}
@@ -143,9 +142,17 @@ export default function PricingClient({
             </p>
             <div className="mt-6">
               <span className="text-4xl font-display font-bold">
-                {billingCycle === "yearly" ? "$9" : "$12"}
+                {billingCycle === "yearly" ? t("proYearlyPrice") : t("proMonthlyPrice")}
               </span>
               <span className="text-text-tertiary">{t("perMonth")}</span>
+              {billingCycle === "yearly" && (
+                <div className="mt-1.5 flex items-center gap-2">
+                  <span className="text-text-tertiary text-xs">{t("proYearlyTotal")}</span>
+                  <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full font-bold">
+                    {t("proDiscount")}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <ul className="space-y-4 mb-8 flex-1 text-sm text-text-primary">
@@ -154,17 +161,17 @@ export default function PricingClient({
             </li>
             <li className="flex gap-3">
               <span className="text-accent">✓</span>{" "}
-              <strong>Gemini 1.5 Pro</strong>
+              <strong>{t("featureProModel")}</strong>
             </li>
             <li className="flex gap-3">
               <span className="text-accent">✓</span>{" "}
-              <strong>No Watermark</strong>
+              <strong>{t("featureNoWatermark")}</strong>
             </li>
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> SEO Optimization
+              <span className="text-accent">✓</span> {t("featureSeo")}
             </li>
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> Custom Tone
+              <span className="text-accent">✓</span> {t("featureCustomTone")}
             </li>
           </ul>
           <button
@@ -189,9 +196,17 @@ export default function PricingClient({
             </p>
             <div className="mt-6">
               <span className="text-4xl font-display font-bold">
-                {billingCycle === "yearly" ? "$39" : "$49"}
+                {billingCycle === "yearly" ? t("bizYearlyPrice") : t("bizMonthlyPrice")}
               </span>
               <span className="text-text-tertiary">{t("perMonth")}</span>
+              {billingCycle === "yearly" && (
+                <div className="mt-1.5 flex items-center gap-2">
+                  <span className="text-text-tertiary text-xs">{t("bizYearlyTotal")}</span>
+                  <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full font-bold">
+                    {t("bizDiscount")}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <ul className="space-y-4 mb-8 flex-1 text-sm text-text-secondary">
@@ -199,13 +214,13 @@ export default function PricingClient({
               <span className="text-accent">✓</span> <strong>{t("featureUnlimited")}</strong>
             </li>
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> Team Integration
+              <span className="text-accent">✓</span> {t("featureTeam")}
             </li>
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> Brand Voice Training
+              <span className="text-accent">✓</span> {t("featureBrandVoice")}
             </li>
             <li className="flex gap-3">
-              <span className="text-accent">✓</span> Auto-Publishing
+              <span className="text-accent">✓</span> {t("featureAutoPublish")}
             </li>
           </ul>
           <button
