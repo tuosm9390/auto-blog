@@ -28,8 +28,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, ...result });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "결제 처리 중 오류가 발생했습니다.";
-    console.error("Billing key charge error:", message);
+    console.error("Billing key charge error (full):", JSON.stringify(error, null, 2));
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" && error !== null && "message" in error
+          ? String((error as Record<string, unknown>).message)
+          : "결제 처리 중 오류가 발생했습니다.";
     return apiError(message, 500);
   }
 }

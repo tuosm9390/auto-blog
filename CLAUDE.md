@@ -30,3 +30,20 @@
 ## ✅ 검증 (Validation)
 
 코드 수정 후 반드시 doc/rules/shared/tech-stack.md의 필수 명령어를 통해 빌드 성공 및 린트 준수 여부를 확인하십시오.
+
+## 📝 Git 커밋 메시지 형식 (Commit Convention)
+
+커밋 메시지는 **AI 분석에 최적화된 형식**으로 작성합니다. 상세 규칙은 `doc/rules/core/workflows.md` § 3을 참조하십시오.
+
+**필수 형식:**
+```
+<type>(<scope>): <한 줄 요약 — 무엇을, 왜>
+
+- <파일/레이어>: <변경 내용>
+
+Why: <근본 원인 또는 비즈니스 맥락>
+Impact: <영향 받는 기능/사용자 흐름>
+```
+
+**type**: `feat` / `fix` / `security` / `refactor` / `docs` / `chore` / `perf`
+**scope**: `billing` / `auth` / `csp` / `api` / `ui` / `db` 등 변경 도메인
