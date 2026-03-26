@@ -59,6 +59,7 @@ export interface GenerateRequest {
   since?: string;
   until?: string;
   commitShas?: string[];
+  userContext?: string;
 }
 
 export interface GenerateResult {
@@ -68,6 +69,7 @@ export interface GenerateResult {
   tags: string[];
   commits: string[];
   repo: string;
+  userContext?: string;
   id?: string;
   slug?: string;
   author?: string;
