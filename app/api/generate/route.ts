@@ -13,6 +13,7 @@ const generateSchema = z.object({
   since: z.string().optional(),
   until: z.string().optional(),
   commitShas: z.array(z.string()).optional().default([]),
+  userContext: z.string().max(500).optional(),
 });
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { owner, repo, since, until, commitShas } = parsedData.data;
+    const { owner, repo, since, until, commitShas, userContext } = parsedData.data;
 
     let shas: string[] = commitShas || [];
     if (shas.length === 0) {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     await incrementUsage(username);
 
-    runAIAnalysisBackground(job.id, owner, repo, shas, usage.tier).catch(console.error);
+    runAIAnalysisBackground(job.id, owner, repo, shas, usage.tier, userContext).catch(console.error);
 
     return apiSuccess({
       success: true,

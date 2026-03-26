@@ -88,7 +88,8 @@ export async function runAIAnalysisBackground(
   owner: string,
   repo: string,
   shas: string[],
-  tier: SubscriptionTier = "free"
+  tier: SubscriptionTier = "free",
+  userContext?: string
 ): Promise<void> {
   const { getCommitDiff } = await import("./github");
   const { analyzeCommits } = await import("./ai");
@@ -99,7 +100,7 @@ export async function runAIAnalysisBackground(
       shas.slice(0, 5).map((sha) => getCommitDiff(owner, repo, sha))
     );
     const repoFullName = `${owner}/${repo}`;
-    const result = await analyzeCommits(commitDiffs, repoFullName, tier);
+    const result = await analyzeCommits(commitDiffs, repoFullName, tier, userContext);
     await updateJobStatus(jobId, "completed", result);
     console.log(`Job ${jobId} completed successfully.`);
   };
