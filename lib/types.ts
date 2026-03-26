@@ -100,6 +100,7 @@ export interface SubscriptionInfo {
   monthlyLimit: number;
   remaining: number;
   resetDate: string | null;
+  billingCycle?: 'monthly' | 'yearly' | null;
 }
 
 export interface UserSettingsData {

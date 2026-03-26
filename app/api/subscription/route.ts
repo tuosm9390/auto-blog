@@ -1,6 +1,7 @@
 import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
 import { checkAndGetUsage, TIER_LIMITS } from "@/lib/subscription";
-import { cancelSubscription } from "@/lib/billing";
+import { cancelSubscription } from "@/lib/portone-billing";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET() {
   try {
@@ -8,12 +9,19 @@ export async function GET() {
 
     const usage = await checkAndGetUsage(username);
 
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("billing_cycle")
+      .eq("username", username)
+      .single();
+
     return apiSuccess({
       tier: usage.tier,
       usageCount: usage.usageCount,
       monthlyLimit: usage.monthlyLimit,
       remaining: usage.remaining,
       resetDate: usage.resetDate,
+      billingCycle: profile?.billing_cycle ?? null,
       limits: TIER_LIMITS[usage.tier],
     });
   } catch (error: unknown) {

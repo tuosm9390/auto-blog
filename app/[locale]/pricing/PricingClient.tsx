@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import PortOne from "@portone/browser-sdk/v2";
 
 interface PricingClientProps {
   currentTier: string;
@@ -37,25 +38,57 @@ export default function PricingClient({
       return;
     }
 
+    setIsLoading(tier);
     try {
-      setIsLoading(tier);
-      const res = await fetch("/api/checkout", {
+      const issueName =
+        tier === "pro"
+          ? billingCycle === "yearly"
+            ? "Synapso Pro 연간 구독"
+            : "Synapso Pro 월간 구독"
+          : billingCycle === "yearly"
+            ? "Synapso Business 연간 구독"
+            : "Synapso Business 월간 구독";
+
+      const response = await PortOne.requestIssueBillingKey({
+        storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID!,
+        channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY!,
+        billingKeyMethod: "CARD",
+        issueId: `billing-${tier}-${Date.now()}`,
+        issueName,
+      });
+
+      // 사용자가 팝업을 닫은 경우
+      if (!response) {
+        toast.info(t("paymentCancelled"));
+        return;
+      }
+
+      // PG 오류 발생
+      if (response.code) {
+        throw new Error(response.message || response.code);
+      }
+
+      // 빌링키 서버 저장 및 최초 결제
+      const res = await fetch("/api/portone/billing-key", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier, cycle: billingCycle }),
+        body: JSON.stringify({
+          billingKey: response.billingKey,
+          tier,
+          cycle: billingCycle,
+        }),
       });
 
       const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || "Failed to create checkout session");
+        throw new Error(data.error || "결제 처리 중 오류가 발생했습니다.");
       }
 
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      toast.success(t("subscribed"));
+      router.refresh();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : commonT("unknownError");
+      const errorMessage =
+        error instanceof Error ? error.message : commonT("unknownError");
       toast.error(commonT("error"), { description: errorMessage });
     } finally {
       setIsLoading(null);

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { toast } from "sonner";
 import { LoginRequired } from "@/components/ui/LoginRequired";
@@ -25,46 +24,15 @@ function SettingsContent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
-  const [portalLoading, setPortalLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelConfirming, setCancelConfirming] = useState(false);
 
   const username = session?.user?.username;
-  const searchParams = useSearchParams();
-
-  // Stripe 결제 성공 후 구독 활성화 검증
-  const verifyBilling = useCallback(async (sessionId: string) => {
-    try {
-      const res = await fetch("/api/subscription/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId }),
-      });
-      if (res.ok) {
-        toast.success("🎉 구독이 활성화되었습니다!");
-        // 구독 정보 새로고침
-        const subRes = await fetch("/api/subscription");
-        if (subRes.ok) {
-          const subData = await subRes.json();
-          setSubscription(subData);
-        }
-      }
-    } catch (err) {
-      console.error("Billing verify failed:", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    const billing = searchParams.get("billing");
-    const sessionId = searchParams.get("session_id");
-    if (billing === "success" && sessionId) {
-      verifyBilling(sessionId);
-    }
-  }, [searchParams, verifyBilling]);
 
   useEffect(() => {
     if (!username) return;
     if (settings) return;
-    
+
     let isMounted = true;
 
     const loadData = async () => {
@@ -75,7 +43,7 @@ function SettingsContent() {
           fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
           fetch("/api/subscription").then(r => r.ok ? r.json() : Promise.reject(`subscription: ${r.status}`)),
         ]);
-        
+
         if (!isMounted) return;
 
         if (settingsResult.status === "fulfilled" && settingsResult.value.settings) {
@@ -96,36 +64,31 @@ function SettingsContent() {
     };
 
     loadData();
-    
+
     return () => { isMounted = false; };
   }, [username, settings]);
 
-  const openPortal = async () => {
-    setPortalLoading(true);
-    try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      window.location.href = data.url;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to open portal";
-      toast.error(message);
-    } finally {
-      setPortalLoading(false);
-    }
+  const handleCancelRequest = () => {
+    setCancelConfirming(true);
   };
 
-  const cancelSubscription = async () => {
-    if (!confirm("Are you sure you want to cancel subscription and switch to Free plan?")) return;
+  const handleCancelAbort = () => {
+    setCancelConfirming(false);
+  };
+
+  const handleCancelConfirm = async () => {
     setCancelLoading(true);
     try {
       const res = await fetch("/api/subscription", { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      toast.success("Subscription cancelled. Switched to Free plan.");
-      setSubscription(prev => prev ? { ...prev, tier: "free", monthlyLimit: 3, remaining: 3 } : null);
+      toast.success(t("cancelSuccess"));
+      setCancelConfirming(false);
+      setSubscription(prev =>
+        prev ? { ...prev, tier: "free", monthlyLimit: 3, remaining: 3, billingCycle: null } : null,
+      );
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to cancel";
+      const message = err instanceof Error ? err.message : commonT("unknownError");
       toast.error(message);
     } finally {
       setCancelLoading(false);
@@ -136,13 +99,22 @@ function SettingsContent() {
     if (!settings) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ posting_mode: settings.posting_mode, auto_repos: settings.auto_repos, auto_schedule: settings.auto_schedule }) });
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          posting_mode: settings.posting_mode,
+          auto_repos: settings.auto_repos,
+          auto_schedule: settings.auto_schedule,
+        }),
+      });
       if (!res.ok) throw new Error("Save failed");
       toast.success(commonT("save") + " success");
     } catch {
       toast.error(commonT("save") + " failed");
+    } finally {
+      setSaving(false);
     }
-    finally { setSaving(false); }
   };
 
   const toggleMode = () => {
@@ -157,21 +129,23 @@ function SettingsContent() {
       toast.error(t("repoLimit"));
       return;
     }
-    const updated = current.includes(fullName) ? current.filter((r) => r !== fullName) : [...current, fullName];
+    const updated = current.includes(fullName)
+      ? current.filter((r) => r !== fullName)
+      : [...current, fullName];
     setSettings({ ...settings, auto_repos: updated });
   };
 
   if (!session?.user) {
-    return (
-      <LoginRequired />
-    );
+    return <LoginRequired />;
   }
 
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 animate-fade-in-up">
         <h1 className="text-3xl font-display font-bold mb-4">{t("title")}</h1>
-        <div className="border border-border-subtle rounded-xl p-8 text-center text-text-secondary">{t("loading")}</div>
+        <div className="border border-border-subtle rounded-xl p-8 text-center text-text-secondary">
+          {t("loading")}
+        </div>
       </div>
     );
   }
@@ -186,10 +160,11 @@ function SettingsContent() {
           {subscription && (
             <BillingSection
               subscription={subscription}
-              portalLoading={portalLoading}
+              cancelConfirming={cancelConfirming}
               cancelLoading={cancelLoading}
-              onOpenPortal={openPortal}
-              onCancel={cancelSubscription}
+              onCancelRequest={handleCancelRequest}
+              onCancelConfirm={handleCancelConfirm}
+              onCancelAbort={handleCancelAbort}
               t={t}
               pricingT={pricingT}
               commonT={commonT}
@@ -219,7 +194,11 @@ function SettingsContent() {
           )}
 
           <div className="flex justify-end">
-            <button onClick={saveSettings} disabled={saving} className="px-8 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer">
+            <button
+              onClick={saveSettings}
+              disabled={saving}
+              className="px-8 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer"
+            >
               {saving ? t("saving") : t("saveBtn")}
             </button>
           </div>
