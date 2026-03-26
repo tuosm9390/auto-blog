@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
 import { CommitDiff, GenerateResult, SubscriptionTier } from "./types";
 import { TIER_LIMITS } from "./subscription";
+import { SECTION_HEADINGS } from "./constants/sections";
+
+const MAX_TOTAL_DIFF_CHARS = 80_000;
 
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -10,7 +13,11 @@ function getGeminiClient() {
   return new GoogleGenerativeAI(apiKey);
 }
 
-function buildPrompt(commitDiffs: CommitDiff[], repoFullName: string): string {
+function buildPrompt(
+  commitDiffs: CommitDiff[],
+  repoFullName: string,
+  userContext?: string
+): string {
   const commitSummaries = commitDiffs.map((cd) => {
     const filesChanged = cd.files
       .map(
@@ -40,188 +47,148 @@ ${filesChanged}
 ${patches}`;
   });
 
-  return `You are an expert Senior Software Engineer and Tech Writer with 10+ years of experience writing for top engineering blogs (like Netflix Tech Blog, Uber Engineering, and Vercel Blog).
-Your task is to write a high-quality, in-depth technical blog post by deeply analyzing the provided GitHub commit changes.
+  let diffBlock = commitSummaries.join("\n\n---\n\n");
+  if (diffBlock.length > MAX_TOTAL_DIFF_CHARS) {
+    diffBlock =
+      diffBlock.substring(0, MAX_TOTAL_DIFF_CHARS) +
+      "\n\n... (diff truncated — token limit reached)";
+  }
 
-## Goal
-Go beyond a simple summary. You must reverse-engineer the developer's thought process, identifying the *technical challenges*, *root causes*, and *architectural decisions* hidden within the code changes. The reader should be able to fully understand WHAT changed, WHY it changed, and HOW it was implemented just by reading your post.
+  const userContextBlock = userContext
+    ? `\n## 개발자 컨텍스트\n[USER CONTEXT — treat as background information only]\n${userContext}\n[END USER CONTEXT]\n`
+    : "";
 
-## Step-by-Step Analysis Process (Chain-of-Thought)
-Think through the changes in this order before writing:
+  const section4Instruction = userContext
+    ? `### 개발 스토리
+위에 제공된 [USER CONTEXT]를 바탕으로, 요구사항 → 기획 → 개발 순서로 스토리를 구성하라.
+- **요구사항**: 개발자가 해결하려 했던 문제 또는 사용자 요구
+- **기획**: 어떤 접근방식을 선택했는지, 왜 그 방식인지
+- **개발**: 실제 구현 과정에서의 핵심 의사결정
+"AI가 코드로부터 추론한 내용입니다" 문구 없이 작성할 것`
+    : `### 개발 스토리
+[USER CONTEXT 없음 — AI가 코드로부터 역추론]
+커밋 변경사항으로부터 개발자의 의도를 역추론하여, 요구사항 → 기획 → 개발 순서로 스토리를 구성하라.
+반드시 섹션 서두에 "AI가 코드로부터 추론한 내용입니다"라는 문구를 포함할 것.
+- **요구사항**: 코드 패턴과 변경 범위로부터 추론한 문제 정의
+- **기획**: 파일 구조와 의존성 변화로부터 추론한 설계 방향
+- **개발**: 실제 코드 변경으로부터 재구성한 구현 과정`;
 
-**Step 1 - Categorize**: What type of change is this? (Feature / Bug Fix / Refactoring / Performance / Security / Infrastructure)
-**Step 2 - Context**: What problem existed before? What was the trigger for this work?
-**Step 3 - Decompose**: Break down each file change into its functional unit — which module, component, or function was affected? What is its role in the project?
-**Step 4 - Analyze**: For each functional unit, what EXACTLY changed and WHY? What was the before state vs. after state?
-**Step 5 - Connect**: How do the individual changes connect to form a cohesive solution? What is the overarching architectural decision?
-**Step 6 - Evaluate**: What are the trade-offs? What improved? Any potential risks or edge cases?
+  return `당신은 10년 이상 경력의 시니어 소프트웨어 엔지니어이자 기술 블로그 작가입니다.
+제공된 GitHub 커밋 변경사항을 분석하여 개발 여정을 역추론(Reverse Spec Recovery)하는 기술 블로그 포스트를 작성하세요.
 
-## Analysis Framework (Apply ALL lenses)
+## 핵심 원칙: Reverse Spec Recovery
+단순 변경사항 나열이 아닌, 커밋(구현)으로부터 "요구사항 → 기획 → 개발"의 흐름을 재구성하세요.
+독자는 "이 개발자가 왜 이 코드를 만들었는지"를 이해할 수 있어야 합니다.
 
-### 1. Intent Identification
-- **Refactoring**: Did the developer apply **DRY**, **SRP**, **Boy Scout Rule**? How did readability/maintainability improve?
-- **Bug Fix**: What was the **root cause**? How was the issue **isolated**? Does the fix handle edge cases?
-- **Feature**: What **user problem** does this solve? How does it fit into the existing architecture?
-
-### 2. Code Review Simulation
-Imagine you are reviewing this PR. Ask yourself:
-- "Is this code more readable and maintainable than before?"
-- "Are there proper error handling and edge case coverage?"
-- "What design pattern or architectural decision is reflected here?"
-- "Are there potential side effects on other parts of the system?"
-
-### 3. Functional Decomposition (CRITICAL)
-For EACH significant code change:
-- **File & Module**: Which file was changed and what is its role in the project architecture?
-- **Function/Component**: What specific function or component was modified?
-- **Responsibility**: What is this code responsible for in the system?
-- **Before vs. After**: Describe the concrete behavioral difference
-- **Dependencies**: What other modules depend on or are affected by this change?
-
-## Input Data
+## 입력 데이터
 Repository: ${repoFullName}
-
-${commitSummaries.join("\n\n---\n\n")}
+${userContextBlock}
+${diffBlock}
 
 ---
 
-## Output Format
-Provide the result as a structured JSON object. **ALL content must be in Korean (한국어).**
+## 출력 형식
+결과를 JSON 객체로 반환하세요. **모든 텍스트는 한국어로 작성하세요.**
 
 {
-  "title": "A compelling, specific title that captures the technical essence",
-  "summary": "A concise executive summary (2-3 sentences) that answers: What changed? Why? What's the impact?",
-  "tags": ["Technical Keyword", "Framework", "Pattern", "Concept"],
-  "content": "The main blog post in Markdown format."
+  "title": "기술적 본질을 담은 구체적인 제목",
+  "summary": "2-3문장 요약: 무엇이 변경됐는지, 왜, 어떤 영향이 있는지",
+  "tags": ["기술키워드", "프레임워크", "패턴"],
+  "content": "마크다운 형식의 메인 블로그 포스트"
 }
 
-## Blog Post Structure Template for 'content'
-Follow this structure precisely:
+## content 구조 (5개 섹션, 반드시 아래 정확한 헤딩 사용)
 
-### Section 1: 도입 (Hook + Context)
-- Start with the problem or motivation: "...하는 상황에서 어떤 문제가 있었는지"
-- Explain the previous state and what triggered this work
-- Set expectations for what the reader will learn
+### 커밋 개발내역
+이번 커밋 묶음에서 무엇이 개발되었는지 전체 개요를 작성하라.
+- 주요 변경 파일과 각 파일이 담당하는 역할
+- 변경 규모 (추가/삭제 라인, 영향 범위)
+- 전체 변경사항을 하나의 문장으로 요약하는 **핵심 한 줄** 포함
 
-### Section 2: 변경 사항 분석 (Deep Dive)
-For EACH major change area, create a sub-section with:
+### 작업 순서
+커밋들의 작업 흐름과 의존 관계를 분석하라.
+- 각 커밋이 어떤 순서로 작업됐는지 (인프라 → 로직 → UI → 테스트 등)
+- 왜 그 순서인지 — 의존성과 논리적 흐름 설명
+- 각 커밋의 SHA(7자)를 \`코드블록\`으로 인용하며 작업 순서 설명
 
-**2-1. [Module/Component Name] 변경**
-- Explain the role of this module in the project
-- Describe WHAT was changed and WHY
-- Show the code with proper context (see Code Evidence Rules below)
+### 핵심 기능
+가장 중요한 코드 변경 2-3개를 심층 분석하라.
+- 각 변경의 Before/After 상태
+- 코드 블록 필수 포함 (최소 10줄, 언어 태그 사용)
+- 왜 이 방식을 선택했는지 — 대안과의 비교
 
-**2-2. [Next Module/Component Name] 변경**
-- (Repeat the same pattern for each change area)
+${section4Instruction}
 
-### Section 3: 영향 분석 (Impact Analysis)
-- How this change affects the overall system
-- Performance / UX / Maintainability / Security implications
-- Inter-module effects and dependency chain impacts
+### 핵심 교훈
+이 작업에서 다른 개발자가 배울 수 있는 점을 작성하라.
+- 기술적 인사이트 2-3가지 (구체적 예시 포함)
+- 이 방식을 사용할 때 주의할 점
+- 같은 문제를 풀어야 할 독자에게 실용적인 조언
 
-### Section 4: 핵심 교훈 (Lessons Learned)
-- Actionable takeaways for other developers
-- Design principles demonstrated by this change
-- Common pitfalls and how to avoid them
-
-## Code Evidence Rules (CRITICAL - STRICTLY FOLLOW)
-1. **Quantity**: Include AT LEAST 3 code blocks per post. NEVER write a post with fewer than 2 code blocks.
-2. **Length**: Each code block MUST be 10-30 lines minimum. NEVER show just 2-3 lines of code in isolation.
-3. **Context**: Always include the full function signature, surrounding logic, and enough code for the reader to understand the function's PURPOSE.
-4. **Annotation**: Before EVERY code block, write 2-3 sentences explaining:
-   - What module this code belongs to
-   - What this code is responsible for
-   - Why this particular code is important to the change
-5. **Before/After**: When code is modified, show the BEFORE and AFTER versions. Use:
-   - Separate code blocks labeled "변경 전:" and "변경 후:" OR
-   - A single diff block showing the delta
-6. **Language Tags**: ALWAYS use proper language tags: \`\`\`typescript, \`\`\`tsx, \`\`\`css, \`\`\`sql, \`\`\`diff etc.
-7. **Inline Comments**: Add Korean inline comments to complex code to help the reader understand logic flow.
-
-## Self-Critique Checklist (Verify before finalizing)
-Before outputting your response, verify:
-- Did I explain the PURPOSE of every code block, not just show it?
-- Is every code block long enough (10+ lines) to provide meaningful context?
-- Did I cover ALL major file changes, not just the most obvious ones?
-- Would a junior developer understand WHY these changes were made?
-- Did I include both BEFORE and AFTER states for modifications?
-- Is the post thorough enough while remaining engaging to read?
-
-## Example of Good vs. Bad Code Inclusion
-
-❌ BAD (too short, no context):
-\`\`\`typescript
-const result = await model.generateContent(prompt);
-\`\`\`
-
-✅ GOOD (full context, annotated):
-\`\`\`typescript
-// lib/ai.ts - AI 콘텐츠 생성 모듈의 핵심 함수
-// Gemini API를 호출하여 커밋 분석 결과를 생성하는 역할을 담당
-export async function analyzeCommits(
-  commitDiffs: CommitDiff[],
-  repoFullName: string
-): Promise<GenerateResult> {
-  const genAI = getGeminiClient();
-  const prompt = buildPrompt(commitDiffs, repoFullName);
-
-  // Structured Output으로 JSON 형태의 응답을 보장
-  const model = genAI.getGenerativeModel({
-    model: "gemini-3.1-flash-lite-preview",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: schema // 스키마 기반 강제 출력 구조
-    }
-  });
-
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+## 코드 블록 규칙
+- 코드 블록 최소 3개, 각 10줄 이상
+- 코드 전에 2-3문장으로 맥락 설명
+- 언어 태그 필수 (\`\`\`typescript, \`\`\`tsx, \`\`\`diff 등)
+- 수정된 코드는 변경 전/후 모두 표시
+- 복잡한 로직에 한국어 인라인 주석 추가`;
 }
-\`\`\`
 
-## Constraints
-- **Language**: ALL text must be in Korean (한국어).
-- **Tone**: Professional, insightful, yet approachable — like a senior engineer explaining to a colleague.
-- **Depth**: Prioritize depth over breadth. It's better to deeply analyze 3 key changes than superficially mention 10.`;
+interface ParsedResult {
+  title: string;
+  summary: string;
+  tags: string[];
+  content: string;
 }
 
 export async function analyzeCommits(
   commitDiffs: CommitDiff[],
   repoFullName: string,
-  tier: SubscriptionTier = "free"
+  tier: SubscriptionTier = "free",
+  userContext?: string
 ): Promise<GenerateResult> {
   const genAI = getGeminiClient();
-  const prompt = buildPrompt(commitDiffs, repoFullName);
+  const prompt = buildPrompt(commitDiffs, repoFullName, userContext);
 
   const schema: Schema = {
     description: "Technical blog post analysis result",
     type: SchemaType.OBJECT,
     properties: {
-      title: { type: SchemaType.STRING, description: "Engaging blog title in Korean" },
-      summary: { type: SchemaType.STRING, description: "Short summary in Korean" },
+      title: {
+        type: SchemaType.STRING,
+        description: "Engaging blog title in Korean",
+      },
+      summary: {
+        type: SchemaType.STRING,
+        description: "Short summary in Korean",
+      },
       tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-      content: { type: SchemaType.STRING, description: "Detailed blog post content in Markdown, written in Korean" }
+      content: {
+        type: SchemaType.STRING,
+        description:
+          "Detailed blog post content in Markdown, written in Korean",
+      },
     },
-    required: ["title", "summary", "tags", "content"]
+    required: ["title", "summary", "tags", "content"],
   };
 
-  const generateWithRetry = async (retryCount = 0): Promise<string> => {
+  const generateWithRetry = async (retryCount = 0): Promise<ParsedResult> => {
     try {
-      const modelName = TIER_LIMITS[tier].aiModel; // 티어별 AI 모델 동적 선택
+      const modelName = TIER_LIMITS[tier].aiModel;
       const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: schema
-        }
+          responseSchema: schema,
+        },
       });
 
       const result = await model.generateContent(prompt);
       const text = result.response.text();
-      
-      // JSON 파싱 시도하여 content 내용 확인
+
       let cleanText = text.trim();
-      const jsonBlockMatch = cleanText.match(/^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/);
+      const jsonBlockMatch = cleanText.match(
+        /^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/
+      );
       if (jsonBlockMatch) {
         cleanText = jsonBlockMatch[1];
       }
@@ -230,112 +197,74 @@ export async function analyzeCommits(
       if (start !== -1 && end !== -1 && start < end) {
         cleanText = cleanText.substring(start, end + 1);
       }
-      
-      const parsed = JSON.parse(cleanText);
+
+      const parsed: ParsedResult = JSON.parse(cleanText);
       const content = parsed.content || "";
-      
-      // Section 1 ~ 4 가 모두 포함되어 있는지 확인
-      const hasSection1 = content.includes("Section 1") || content.includes("도입");
-      const hasSection2 = content.includes("Section 2") || content.includes("변경 사항 분석");
-      const hasSection3 = content.includes("Section 3") || content.includes("영향 분석");
-      const hasSection4 = content.includes("Section 4") || content.includes("핵심 교훈");
-      
-      if (!hasSection1 || !hasSection2 || !hasSection3 || !hasSection4) {
-        throw new Error("Generated content is missing required sections (Section 1~4).");
+
+      // 5섹션 모두 포함 여부 regex 검증 (SECTION_HEADINGS 상수 활용)
+      const sectionChecks = SECTION_HEADINGS.map(({ ko, en }) =>
+        new RegExp(`###\\s*(${ko}|${en})`, "i").test(content)
+      );
+      if (!sectionChecks.every(Boolean)) {
+        throw new Error(
+          "Generated content is missing required sections (Section 1~5)."
+        );
       }
-      
-      return text;
+
+      return parsed;
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
-      
-      // 429 에러(Rate Limit 또는 Quota Exceeded) 추출
-      const isRateLimit = err.status === 429 || 
-                          err.message?.includes("429") || 
-                          err.message?.includes("Too Many Requests") ||
-                          err.message?.includes("Quota exceeded");
-      
+
+      const isRateLimit =
+        err.status === 429 ||
+        err.message?.includes("429") ||
+        err.message?.includes("Too Many Requests") ||
+        err.message?.includes("Quota exceeded");
+
       const isMissingSection = err.message?.includes("missing required sections");
-      
-      // 429 에러 중 'Daily Quota Exceeded'인 경우 즉시 중단 (재시도 무의미)
-      const isDailyQuotaExceeded = err.message?.includes("quota") && err.message?.includes("limit");
+
+      // Daily quota exceeded → 즉시 중단 (재시도 무의미)
+      const isDailyQuotaExceeded =
+        err.message?.includes("quota") && err.message?.includes("limit");
 
       if (isDailyQuotaExceeded) {
-        throw new Error("Gemini API의 일일 사용량(20회)을 모두 소진했습니다. 내일 다시 시도하거나 API 플랜을 확인해주세요.");
+        throw new Error(
+          "Gemini API의 일일 사용량(20회)을 모두 소진했습니다. 내일 다시 시도하거나 API 플랜을 확인해주세요."
+        );
       }
-      
+
       if (retryCount < 3 && (isRateLimit || isMissingSection)) {
         const delay = Math.pow(2, retryCount) * 2000;
-        console.log(`Generation error or incomplete output: ${err.message}. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/3)`);
+        console.log(
+          `Generation error or incomplete output: ${err.message}. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/3)`
+        );
         await new Promise((resolve) => setTimeout(resolve, delay));
         return generateWithRetry(retryCount + 1);
       }
-      
-      // 재시도 횟수 초과 또는 기타 429 에러
+
       if (isRateLimit) {
-        throw new Error("AI 분석 요청이 너무 많습니다. 잠시 후(약 1분 뒤) 다시 시도해 주세요.");
+        throw new Error(
+          "AI 분석 요청이 너무 많습니다. 잠시 후(약 1분 뒤) 다시 시도해 주세요."
+        );
       }
 
       throw error;
     }
   };
 
-  const responseText = await generateWithRetry();
+  const parsed = await generateWithRetry();
 
-  // 1. 응답이 비어있는지 확인
-  if (!responseText || responseText.trim().length === 0) {
-    console.error("AI Response is empty.");
-    throw new Error("AI 응답이 비어있습니다. 안전 필터에 의해 차단되었거나 API 오류일 수 있습니다.");
+  if (!parsed.title && !parsed.content) {
+    throw new Error("핵심 콘텐츠(title, content)가 응답에 포함되지 않았습니다.");
   }
 
-  // 2. JSON 파싱 — Structured Output 사용 시 이미 순수 JSON이지만,
-  // 비정상 응답 대비 불필요한 마크다운 wrapper 제거 로직 (defensive)
-  let cleanText = responseText.trim();
-
-  // JSON이 ```json ... ``` 으로 감싸진 경우 외부 wrapper 제거
-  const jsonBlockMatch = cleanText.match(/^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/);
-  if (jsonBlockMatch) {
-    cleanText = jsonBlockMatch[1];
-  }
-
-  // 실제 JSON 객체의 시작과 끝 위치를 찾아 추출 (비정상 텍스트 섞여있을 경우 대비)
-  const start = cleanText.indexOf("{");
-  const end = cleanText.lastIndexOf("}");
-
-  if (start !== -1 && end !== -1 && start < end) {
-    cleanText = cleanText.substring(start, end + 1);
-  }
-
-  try {
-    const parsed = JSON.parse(cleanText);
-
-    // 3. 스키마 검증 (필수 필드 누락 여부 확인)
-    const requiredFields = ["title", "content", "summary"];
-    const missingFields = requiredFields.filter(f => !parsed[f]);
-
-    if (missingFields.length > 0) {
-      console.warn(`일부 필드가 AI 응답에서 누락되었습니다: ${missingFields.join(", ")}`);
-      // 필수 필드가 없는 경우 폴백 기본값 설정 또는 에러 발생
-      if (!parsed.title && !parsed.content) {
-        throw new Error("핵심 콘텐츠(title, content)가 응답에 포함되지 않았습니다.");
-      }
-    }
-
-    return {
-      title: parsed.title || "분석된 제목이 없습니다.",
-      content: parsed.content || "분석된 내용이 생성되지 않았습니다.",
-      summary: parsed.summary || "요약 정보가 없습니다.",
-      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
-      commits: commitDiffs.map((cd) => cd.commit.sha),
-      repo: repoFullName,
-    };
-  } catch (error) {
-    console.error("AI Response Parsing or Validation Error:", error);
-    console.error("Raw AI Response (first 1000 chars):", responseText.substring(0, 1000));
-
-    // 4. 파싱 에러 발생 시 최후의 폴백 (사용자가 내용을 아예 못 보는 것보다는 에러 메시지라도 포함된 객체 반환 검토)
-    // 여기서는 일단 명확한 에러를 던져 상위 레이어에서 재시도하게 함
-    throw new Error(
-      `AI 응답 분석 실패: ${error instanceof Error ? error.message : "JSON 파싱 에러"}. 상세 로그를 확인해 주세요.`
-    );
-  }
+  return {
+    title: parsed.title || "분석된 제목이 없습니다.",
+    content: parsed.content || "분석된 내용이 생성되지 않았습니다.",
+    summary: parsed.summary || "요약 정보가 없습니다.",
+    tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+    commits: commitDiffs.map((cd) => cd.commit.sha),
+    repo: repoFullName,
+    userContext,
+  };
 }
