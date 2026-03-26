@@ -134,7 +134,11 @@
     "generating": "AI 분석 중...",
     "preview": "미리보기",
     "publish": "게시하기",
-    "viewPost": "글 보기 →"
+    "viewPost": "글 보기 →",
+    "contextLabel": "개발 배경 입력 (선택사항)",
+    "contextBanner": "작업 의도를 직접 입력하면 AI 분석 정확도가 향상됩니다.",
+    "contextPlaceholder": "예: 로그인 성능 개선을 위해 세션 캐시 전략을 변경했습니다...",
+    "contextWarning": "개발 배경을 입력하지 않으면 AI가 코드에서만 추론합니다. 계속 진행하시겠습니까?"
   },
   "Jobs": {
     "title": "작업 현황",
@@ -158,7 +162,9 @@
     "noDrafts": "초안이 없습니다",
     "noDraftsDesc": "생성된 초안은 여기에 표시됩니다",
     "publish": "✓ 게시하기",
-    "delete": "삭제"
+    "delete": "삭제",
+    "aiInferredBadge": "AI 추론 결과",
+    "userContextBadge": "사용자 컨텍스트 반영됨"
   },
   "Settings": {
     "title": "설정",

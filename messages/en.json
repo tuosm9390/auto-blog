@@ -134,7 +134,11 @@
     "generating": "AI Analyzing...",
     "preview": "Preview",
     "publish": "Publish",
-    "viewPost": "View Post →"
+    "viewPost": "View Post →",
+    "contextLabel": "Development Background (Optional)",
+    "contextBanner": "Enter your intent directly for better AI analysis accuracy.",
+    "contextPlaceholder": "e.g. Changed session cache strategy to improve login performance...",
+    "contextWarning": "No context provided — AI will infer from code only. Continue anyway?"
   },
   "Jobs": {
     "title": "Jobs",
@@ -158,7 +162,9 @@
     "noDrafts": "No drafts found",
     "noDraftsDesc": "Generated drafts will appear here",
     "publish": "✓ Publish",
-    "delete": "Delete"
+    "delete": "Delete",
+    "aiInferredBadge": "AI Inferred",
+    "userContextBadge": "Context Applied"
   },
   "Settings": {
     "title": "Settings",
