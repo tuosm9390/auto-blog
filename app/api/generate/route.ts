@@ -14,6 +14,7 @@ const generateSchema = z.object({
   until: z.string().optional(),
   commitShas: z.array(z.string()).optional().default([]),
   userContext: z.string().max(500).optional(),
+  isPublic: z.boolean().optional().default(true),
 });
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { owner, repo, since, until, commitShas, userContext } = parsedData.data;
+    const { owner, repo, since, until, commitShas, userContext, isPublic } = parsedData.data;
 
     let shas: string[] = commitShas || [];
     if (shas.length === 0) {
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       return apiError("분석할 커밋이 없습니다.", 400);
     }
 
-    const job = await createJob(username, `${owner}/${repo}`, shas);
+    const job = await createJob(username, `${owner}/${repo}`, shas, isPublic);
 
     await incrementUsage(username);
 

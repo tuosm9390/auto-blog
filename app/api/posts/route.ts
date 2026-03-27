@@ -14,6 +14,7 @@ const createPostSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
   status: z.enum(["draft", "published"]).optional().default("published"),
   jobId: z.string().optional(),
+  is_public: z.boolean().optional().default(true),
 });
 
 export async function GET() {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
       return apiError("잘못된 입력값입니다.", 400);
     }
 
-    const { title, content, summary, repo, commits, tags, status, jobId } = parsedData.data;
+    const { title, content, summary, repo, commits, tags, status, jobId, is_public } = parsedData.data;
 
     const { id, slug } = await createPost(title, content, {
       summary,
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
       tags,
       status,
       author: username,
+      is_public,
     });
 
     if (repo && commits.length > 0) {
