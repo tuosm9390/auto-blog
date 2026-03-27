@@ -138,13 +138,13 @@ export default async function RootLayout({
         name="google-site-verification"
         content="MDjk5WdTY8Pl_7kx3O84WmAebWeKmh2-1BK39ZzeGWA"
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c") }}
-      />
       <body
         className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} bg-canvas text-text-primary font-body min-h-screen flex flex-col`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026") }}
+        />
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <ConfirmProvider>
