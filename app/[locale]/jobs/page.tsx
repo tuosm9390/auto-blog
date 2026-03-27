@@ -96,9 +96,9 @@ export default function JobsPage() {
     if (publishing) return;
 
     const isConfirmed = await confirm({
-      title: "Create Draft",
-      description: "✨ Do you want to create a draft from this result?",
-      confirmText: "Create",
+      title: t("createDraftTitle"),
+      description: t("createDraftDesc"),
+      confirmText: t("createDraftConfirm"),
     });
     if (!isConfirmed) return;
 
@@ -126,9 +126,9 @@ export default function JobsPage() {
 
   const handleDeleteJob = async (id: string) => {
     const isConfirmed = await confirm({
-      title: "Delete Record",
-      description: "🚨 Are you sure you want to delete this record permanentally?",
-      confirmText: "Delete",
+      title: t("deleteJobTitle"),
+      description: t("deleteJobDesc"),
+      confirmText: t("deleteJobConfirm"),
       destructive: true,
     });
     if (!isConfirmed) return;
@@ -221,7 +221,7 @@ export default function JobsPage() {
       <JobTabs activeTab={activeTab} onTabChange={handleTabChange} draftsCount={drafts.length} t={t} />
 
       {activeTab === "jobs" && (
-        <>
+        <div id="tabpanel-jobs" role="tabpanel">
           {loading && jobs.length === 0 ? (
             <div className="text-center py-20 text-text-secondary">{t("loading")}</div>
           ) : jobs.length === 0 ? (
@@ -248,11 +248,11 @@ export default function JobsPage() {
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
 
       {activeTab === "drafts" && (
-        <>
+        <div id="tabpanel-drafts" role="tabpanel">
           {loading && drafts.length === 0 ? (
             <div className="text-center py-20 text-text-secondary">{t("loading")}</div>
           ) : drafts.length === 0 ? (
@@ -265,21 +265,21 @@ export default function JobsPage() {
           ) : (
             <div className="space-y-4">
               {drafts.map((draft) => (
-                <DraftCard 
-                  key={draft.id} 
-                  draft={draft} 
-                  locale={locale} 
-                  expandedDraft={expandedDraft} 
-                  onToggleExpand={(id) => setExpandedDraft(expandedDraft === id ? null : id)} 
+                <DraftCard
+                  key={draft.id}
+                  draft={draft}
+                  locale={locale}
+                  expandedDraft={expandedDraft}
+                  onToggleExpand={(id) => setExpandedDraft(expandedDraft === id ? null : id)}
                   onPublish={handlePublishDraft}
                   onDelete={handleDeleteDraft}
                   publishing={publishing}
-                  t={t} 
+                  t={t}
                 />
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

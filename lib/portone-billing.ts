@@ -1,15 +1,11 @@
 import { PaymentClient } from "@portone/server-sdk";
-import { getNextResetDate } from "@/lib/subscription";
+import { getNextResetDate, TIER_LIMITS } from "@/lib/subscription";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { SubscriptionTier } from "@/lib/types";
 
 const paymentClient = PaymentClient({
   secret: process.env.PORTONE_API_SECRET!,
 });
-
-const TIER_AMOUNTS: Record<string, Record<string, number>> = {
-  pro: { monthly: 6900, yearly: 58800 },
-  business: { monthly: 29900, yearly: 274800 },
-};
 
 function getOrderName(tier: string, cycle: string): string {
   const tierName = tier === "pro" ? "Pro" : "Business";
@@ -25,7 +21,7 @@ export async function saveBillingKeyAndCharge(
 ) {
   if (!username) throw new Error("username이 필요합니다.");
 
-  const amount = TIER_AMOUNTS[tier]?.[cycle];
+  const amount = TIER_LIMITS[tier as SubscriptionTier]?.price[cycle];
   if (!amount) throw new Error("유효하지 않은 요금제입니다.");
 
   const paymentId = `${username}-init-${Date.now()}`;
@@ -75,7 +71,7 @@ export async function chargeWithBillingKey(
 ) {
   if (!username) throw new Error("username이 필요합니다.");
 
-  const amount = TIER_AMOUNTS[tier]?.[cycle];
+  const amount = TIER_LIMITS[tier as SubscriptionTier]?.price[cycle];
   if (!amount) throw new Error("유효하지 않은 요금제입니다.");
 
   const paymentId = `${username}-renew-${Date.now()}`;

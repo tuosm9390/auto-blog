@@ -7,24 +7,28 @@ export const TIER_LIMITS: Record<SubscriptionTier, {
   aiModel: string;
   watermark: boolean;
   maxAutoRepos: number;
+  price: { monthly: number; yearly: number };
 }> = {
   free: {
     monthlyLimit: 3,
     aiModel: "gemini-3.1-flash-lite-preview",
     watermark: true,
     maxAutoRepos: 1,
+    price: { monthly: 0, yearly: 0 },
   },
   pro: {
     monthlyLimit: 30,
     aiModel: "gemini-3-flash-preview",
     watermark: false,
     maxAutoRepos: Infinity,
+    price: { monthly: 6900, yearly: 58800 },
   },
   business: {
     monthlyLimit: Infinity,
     aiModel: "gemini-3.1-pro-preview",
     watermark: false,
     maxAutoRepos: Infinity,
+    price: { monthly: 29900, yearly: 274800 },
   },
 };
 
