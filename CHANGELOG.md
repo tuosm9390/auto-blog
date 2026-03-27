@@ -4,6 +4,25 @@ All notable changes to Synapso.dev are documented in this file.
 
 ---
 
+## [0.2.1] - 2026-03-27
+
+### Added
+
+- **JSON-LD 구조화 데이터 (GEO+SEO):** Schema.org 마크업 전 페이지 적용
+  - `WebSite` + `SearchAction` — 루트 레이아웃 (모든 페이지 공통)
+  - `BlogPosting` + `BreadcrumbList` — 포스트 상세 페이지
+  - `ProfilePage` + `Person` — 유저 프로필 페이지
+- **`components/KeyTakeaways.tsx`:** 포스트 요약을 AI 엔진 인용에 최적화된 핵심 요약 블록으로 노출
+- **canonical URL + og:url:** 포스트 및 프로필 메타데이터에 중복 콘텐츠 방지용 canonical 추가
+
+### Fixed
+
+- **sitemap.ts:** 개별 포스트 URL 누락 버그 수정 — 저자 프로필 URL만 포함되던 것을 포스트 개별 URL도 포함하도록 수정
+- **sitemap.ts:** 빈 author/slug 포스트의 무효 URL 삽입 방지 + Invalid Date 처리 강화
+- **JSON-LD XSS 방어:** `dangerouslySetInnerHTML` 내 `<`, `>`, `&` 이스케이프로 스크립트 인젝션 방지
+
+---
+
 ## [0.2.0] - 2026-03-26
 
 ### Added
