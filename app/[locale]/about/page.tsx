@@ -71,7 +71,7 @@ export default async function LandingPage({
             {samplePosts.map((post) => (
               <Link
                 key={post.id}
-                href={`/posts/${post.slug}`}
+                href={`/@${post.author}/${post.slug}`}
                 className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary py-1.5 transition-colors"
               >
                 <span className="text-accent text-xs">→</span>

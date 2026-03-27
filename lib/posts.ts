@@ -289,12 +289,13 @@ export async function getAllRepos(): Promise<string[]> {
   return Array.from(repos).sort();
 }
 
-export async function getRecentPublishedPosts(limit: number = 3): Promise<{ id: string; slug: string; title: string }[]> {
+export async function getRecentPublishedPosts(limit: number = 3): Promise<{ id: string; slug: string; title: string; author: string }[]> {
   const { data, error } = await supabase
     .from("posts")
-    .select("id, slug, title")
+    .select("id, slug, title, author")
     .eq("status", "published")
     .is("deletedAt", null)
+    .not("author", "is", null)
     .order("createdAt", { ascending: false })
     .limit(limit);
 
