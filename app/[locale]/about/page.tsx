@@ -2,6 +2,7 @@ import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { reviewsKo, reviewsEn } from "../data/reviews";
+import { getRecentPublishedPosts } from "@/lib/posts";
 
 export default async function LandingPage({
   params,
@@ -28,6 +29,7 @@ export default async function LandingPage({
       : "/tester-apply";
 
   const reviews = locale === "ko" ? reviewsKo : reviewsEn;
+  const samplePosts = await getRecentPublishedPosts(3);
 
   return (
     <div className="max-w-6xl mx-auto px-4 animate-fade-in-up">
@@ -60,6 +62,24 @@ export default async function LandingPage({
             {t("ctaHow")}
           </Link>
         </div>
+
+        {samplePosts.length > 0 && (
+          <div className="mt-8 border border-accent/20 bg-accent/5 rounded-xl px-6 py-4 max-w-lg w-full text-left">
+            <p className="text-xs text-accent font-semibold uppercase tracking-wider mb-3">
+              ✦ {t("samplePostsLabel")}
+            </p>
+            {samplePosts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/posts/${post.slug}`}
+                className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary py-1.5 transition-colors"
+              >
+                <span className="text-accent text-xs">→</span>
+                {post.title}
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* [NEW] Project Introduction Section (일반 유저/비로그인 전용) */}
@@ -108,7 +128,7 @@ export default async function LandingPage({
                       <h3 className="font-semibold text-text-primary mb-1">
                         {t(`diff${i}Title` as any)}
                       </h3>
-                      <p className="text-sm text-text-secondary leading-relaxed">
+                      <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
                         {t(`diff${i}Desc` as any)}
                       </p>
                     </div>

@@ -30,6 +30,20 @@ interface DbPost {
   deleted_by?: string | null;
 }
 
+function mapDbPost(post: DbPost, defaultStatus: PostStatus = "published"): Post {
+  return {
+    ...post,
+    slug: post.slug || post.id,
+    summary: post.summary || "",
+    repo: post.repo || "",
+    commits: post.commits || [],
+    tags: post.tags || [],
+    status: post.status || defaultStatus,
+    author: post.author || "",
+    date: post.createdAt,
+  };
+}
+
 export async function getAllPosts(options?: {
   query?: string;
   tag?: string;
@@ -68,17 +82,8 @@ export async function getAllPosts(options?: {
 
   const stripContent = !options?.includeContent;
   return posts.map((post: DbPost) => ({
-    ...post,
-    id: post.id,
-    slug: post.slug || post.id,
+    ...mapDbPost(post),
     content: stripContent ? "" : post.content,
-    summary: post.summary || "",
-    repo: post.repo || "",
-    commits: post.commits || [],
-    tags: post.tags || [],
-    status: post.status || "published",
-    author: post.author || "",
-    date: post.createdAt,
   }));
 }
 
@@ -92,16 +97,7 @@ export const getPostById = cache(async function getPostById(id: string): Promise
 
   if (error || !post) return null;
 
-  return {
-    ...post,
-    summary: post.summary || "",
-    repo: post.repo || "",
-    commits: post.commits || [],
-    tags: post.tags || [],
-    status: post.status || "published",
-    author: post.author || "",
-    date: post.createdAt,
-  };
+  return mapDbPost(post);
 });
 
 export const getPostByUsernameAndSlug = cache(async function getPostByUsernameAndSlug(username: string, slug: string): Promise<Post | null> {
@@ -121,16 +117,7 @@ export const getPostByUsernameAndSlug = cache(async function getPostByUsernameAn
   const { data: post, error } = await query.single();
   if (error || !post) return null;
 
-  return {
-    ...post,
-    summary: post.summary || "",
-    repo: post.repo || "",
-    commits: post.commits || [],
-    tags: post.tags || [],
-    status: post.status || "published",
-    author: post.author || "",
-    date: post.createdAt,
-  };
+  return mapDbPost(post);
 });
 
 export async function createPost(
@@ -248,18 +235,7 @@ export async function getDraftsByAuthor(author: string): Promise<Post[]> {
     .order("createdAt", { ascending: false });
 
   if (error || !posts) return [];
-  return posts.map((post: DbPost) => ({
-    ...post,
-    id: post.id,
-    slug: post.slug || post.id,
-    summary: post.summary || "",
-    repo: post.repo || "",
-    commits: post.commits || [],
-    tags: post.tags || [],
-    status: post.status || "draft",
-    author: post.author || "",
-    date: post.createdAt,
-  }));
+  return posts.map((post: DbPost) => mapDbPost(post, "draft"));
 }
 
 export async function getLastPostDate(author: string, repo: string): Promise<Date | null> {
@@ -307,6 +283,19 @@ export async function getAllRepos(): Promise<string[]> {
     if (post.repo) repos.add(post.repo);
   });
   return Array.from(repos).sort();
+}
+
+export async function getRecentPublishedPosts(limit: number = 3): Promise<{ id: string; slug: string; title: string }[]> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("id, slug, title")
+    .eq("status", "published")
+    .is("deletedAt", null)
+    .order("createdAt", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+  return data;
 }
 
 
