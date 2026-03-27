@@ -15,13 +15,32 @@ export function JobTabs({
   t: any;
 }) {
   return (
-    <div className="flex gap-1 border-b border-border-subtle mb-6">
-      <button onClick={() => onTabChange("jobs")} className={`px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === "jobs" ? "text-text-primary border-b-2 border-accent" : "text-text-tertiary hover:text-text-secondary"}`}>
+    <div
+      role="tablist"
+      className="flex overflow-x-auto scrollbar-none border-b border-border-subtle mb-6"
+    >
+      <button
+        role="tab"
+        aria-selected={activeTab === "jobs"}
+        aria-controls="tabpanel-jobs"
+        onClick={() => onTabChange("jobs")}
+        className={`flex-shrink-0 whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px ${activeTab === "jobs" ? "text-text-primary border-accent" : "border-transparent text-text-tertiary hover:text-text-secondary"}`}
+      >
         {t("tabJobs")}
       </button>
-      <button onClick={() => onTabChange("drafts")} className={`px-4 py-2 text-sm font-medium transition-colors cursor-pointer flex items-center gap-2 ${activeTab === "drafts" ? "text-text-primary border-b-2 border-accent" : "text-text-tertiary hover:text-text-secondary"}`}>
+      <button
+        role="tab"
+        aria-selected={activeTab === "drafts"}
+        aria-controls="tabpanel-drafts"
+        onClick={() => onTabChange("drafts")}
+        className={`flex-shrink-0 whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-2 ${activeTab === "drafts" ? "text-text-primary border-accent" : "border-transparent text-text-tertiary hover:text-text-secondary"}`}
+      >
         {t("tabDrafts")}
-        {draftsCount > 0 && <span className="px-1.5 py-0.5 bg-accent text-black text-xs rounded-full font-bold">{draftsCount}</span>}
+        {draftsCount > 0 && (
+          <span className="px-1.5 py-0.5 bg-accent text-black text-xs rounded-full font-bold">
+            {draftsCount}
+          </span>
+        )}
       </button>
     </div>
   );

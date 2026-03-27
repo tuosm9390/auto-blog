@@ -51,7 +51,7 @@ export default function PostCard({ post, index, href }: PostCardProps) {
         </div>
         {displayRepo && (
           <span
-            className={`px-2 py-0.5 bg-surface-subtle border border-border-subtle rounded text-text-tertiary font-semibold ${isAutoPost ? "mr-16" : ""}`}
+            className={`px-2 py-0.5 bg-elevated border border-border-subtle rounded text-text-tertiary font-semibold ${isAutoPost ? "mr-16" : ""}`}
           >
             {displayRepo}
           </span>
@@ -74,7 +74,7 @@ export default function PostCard({ post, index, href }: PostCardProps) {
           {displayTags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="text-xs text-text-tertiary bg-surface-subtle px-1.5 py-0.5 rounded"
+              className="text-xs text-text-tertiary bg-elevated px-1.5 py-0.5 rounded"
             >
               #{tag}
             </span>

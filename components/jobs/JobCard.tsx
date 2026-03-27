@@ -109,6 +109,7 @@ export function JobCard({
             onClick={() => onDelete(job.id)}
             className="p-2 text-text-tertiary hover:text-error transition-colors cursor-pointer"
             title={t("deleteJob")}
+            aria-label={t("deleteJob")}
           >
             <svg
               height="18"

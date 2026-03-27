@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 interface Application {
   id: string;
@@ -26,6 +27,7 @@ export default function TesterManagementClient() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const t = useTranslations("TesterApply");
+  const confirm = useConfirm();
 
   useEffect(() => {
     fetchApplications();
@@ -53,7 +55,13 @@ export default function TesterManagementClient() {
         : status === "rejected"
           ? "거절"
           : "초기화";
-    if (!confirm(`${confirmMsg}하시겠습니까?`)) return;
+    const isConfirmed = await confirm({
+      title: confirmMsg,
+      description: `${confirmMsg}하시겠습니까?`,
+      confirmText: confirmMsg,
+      destructive: status === "rejected",
+    });
+    if (!isConfirmed) return;
 
     try {
       const res = await fetch(`/api/admin/testers/` + id, {
@@ -117,7 +125,13 @@ export default function TesterManagementClient() {
                       </p>
                     </div>
                     <div
-                      className={`ml-auto px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}
+                      className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        app.status === "approved"
+                          ? "bg-success/20 text-success border border-success/30"
+                          : app.status === "rejected"
+                            ? "bg-error/20 text-error border border-error/30"
+                            : "bg-elevated text-text-tertiary border border-border-subtle"
+                      }`}
                     >
                       {app.status}
                     </div>

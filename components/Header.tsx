@@ -106,11 +106,12 @@ export default async function Header() {
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 {session.user.image && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={session.user.image}
                     alt={session.user.name ?? "Profile"}
-                    className="w-7 h-7 rounded-full object-cover border border-border-subtle"
+                    width={28}
+                    height={28}
+                    className="rounded-full object-cover border border-border-subtle"
                   />
                 )}
                 <span className="text-sm font-medium text-text-primary flex items-center">

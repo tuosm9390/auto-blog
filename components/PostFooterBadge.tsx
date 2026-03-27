@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SITE_URL } from '@/lib/constants/site';
 
 interface PostFooterBadgeProps {
   locale?: string;
@@ -16,7 +17,7 @@ export function PostFooterBadge({ locale = 'ko' }: PostFooterBadgeProps) {
       <p className="text-sm text-neutral-500 dark:text-neutral-400">
         {text}{' '}
         <Link
-          href="https://synapso.dev"
+          href={SITE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-neutral-700 dark:hover:text-neutral-200"

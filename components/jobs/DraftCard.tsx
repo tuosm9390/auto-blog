@@ -26,7 +26,7 @@ export function DraftCard({
     <div className="border border-border-subtle rounded-xl p-6 space-y-4">
       <div>
         <div className="flex items-center gap-2 mb-2 text-xs">
-          <span className="px-2 py-0.5 bg-accent text-black rounded-full font-semibold">Draft</span>
+          <span className="px-2 py-0.5 bg-accent text-black rounded-full text-[10px] font-bold uppercase tracking-wider">{t("draftBadge")}</span>
           {draft.repo && <span className="px-2 py-0.5 border border-border-subtle rounded-full text-text-tertiary">{draft.repo}</span>}
           <span className="text-text-tertiary">{formatDateTime(draft.date || new Date(), locale)}</span>
         </div>
@@ -48,14 +48,16 @@ export function DraftCard({
           <button
             onClick={() => onDelete(draft.id)}
             disabled={publishing === draft.id}
-            className="px-4 py-1.5 border border-red-500/30 text-red-400 text-sm rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-1.5 border border-error/30 text-error text-sm rounded-lg hover:bg-error/10 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("delete")}
           </button>
         </div>
       </div>
       {expandedDraft === draft.id && (
-        <div className="bg-elevated rounded-lg p-4"><PostContent content={draft.content} /></div>
+        <div className="bg-elevated rounded-lg p-4 animate-in slide-in-from-top-4 duration-300">
+          <PostContent content={draft.content} />
+        </div>
       )}
     </div>
   );

@@ -7,6 +7,7 @@ import { CommitInfo, Repo, SubscriptionInfo as UsageInfo } from "@/lib/types";
 import { formatShortDate } from "@/lib/date";
 import { useTranslations, useLocale } from "next-intl";
 import { LoginRequired } from "@/components/ui/LoginRequired";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 type Status =
   | "idle"
@@ -24,6 +25,7 @@ export default function GenerateForm() {
   const t = useTranslations("Generate");
   const commonT = useTranslations("Common");
   const { data: session } = useSession();
+  const confirm = useConfirm();
 
   const [repos, setRepos] = useState<Repo[]>([]);
   const [repo, setRepo] = useState("");
@@ -96,7 +98,7 @@ export default function GenerateForm() {
 
   const fetchCommits = async () => {
     if (!repo) {
-      setError("Please select a repository.");
+      setError(t("selectRepoError"));
       return;
     }
     const selectedRepo = repos.find((r) => r.name === repo);
@@ -139,14 +141,18 @@ export default function GenerateForm() {
 
   const generatePost = async () => {
     if (selectedShas.length === 0) {
-      setError("Select at least 1 commit.");
+      setError(t("selectCommitError"));
       return;
     }
 
     // 컨텍스트 미입력 시 소프트 경고
     if (!userContext.trim()) {
-      const confirmed = window.confirm(t("contextWarning"));
-      if (!confirmed) {
+      const isConfirmed = await confirm({
+        title: t("contextLabel"),
+        description: t("contextWarning"),
+        confirmText: t("generateBtn"),
+      });
+      if (!isConfirmed) {
         document.getElementById("synapso-user-context")?.focus();
         return;
       }
@@ -255,7 +261,7 @@ export default function GenerateForm() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Repository</label>
+              <label className="text-sm font-medium">{t("repoLabel")}</label>
               <select
                 className="w-full bg-surface border border-border-subtle rounded-lg px-4 py-3 text-sm text-text-secondary focus:outline-none focus:border-border-strong cursor-pointer"
                 value={repo}
@@ -317,7 +323,16 @@ export default function GenerateForm() {
               return (
                 <div
                   key={commit.sha}
+                  role="checkbox"
+                  aria-checked={selected}
+                  tabIndex={0}
                   onClick={() => toggleCommit(commit.sha)}
+                  onKeyDown={(e) => {
+                    if (e.key === " " || e.key === "Enter") {
+                      e.preventDefault();
+                      toggleCommit(commit.sha);
+                    }
+                  }}
                   className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                     selected
                       ? "border-border-strong bg-elevated"
