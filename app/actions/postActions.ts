@@ -26,6 +26,7 @@ const createSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
   status: z.enum(["draft", "published"]).optional().default("published"),
   jobId: z.string().optional(),
+  is_public: z.boolean().optional().default(true),
 });
 
 export async function createPostAction(formData: z.infer<typeof createSchema>) {
@@ -39,7 +40,7 @@ export async function createPostAction(formData: z.infer<typeof createSchema>) {
     return { error: "입력값이 올바르지 않습니다." };
   }
 
-  const { title, content, summary, repo, commits, tags, status, jobId } = parsed.data;
+  const { title, content, summary, repo, commits, tags, status, jobId, is_public } = parsed.data;
 
   try {
     const { id, slug } = await createPost(title, content, {
@@ -49,6 +50,7 @@ export async function createPostAction(formData: z.infer<typeof createSchema>) {
       tags,
       status,
       author: session.user.username,
+      is_public,
     });
 
     if (repo && commits.length > 0) {

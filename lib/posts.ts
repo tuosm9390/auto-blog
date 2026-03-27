@@ -28,6 +28,7 @@ interface DbPost {
   updatedAt?: string;
   deletedAt?: string | null;
   deleted_by?: string | null;
+  is_public: boolean | null;
 }
 
 function mapDbPost(post: DbPost, defaultStatus: PostStatus = "published"): Post {
@@ -41,6 +42,7 @@ function mapDbPost(post: DbPost, defaultStatus: PostStatus = "published"): Post 
     status: post.status || defaultStatus,
     author: post.author || "",
     date: post.createdAt,
+    is_public: post.is_public ?? true,
   };
 }
 
@@ -130,6 +132,7 @@ export async function createPost(
     tags: string[];
     status?: PostStatus;
     author?: string;
+    is_public?: boolean;
   }
 ): Promise<{ id: string; slug: string }> {
   const slug = slugify(title);
@@ -163,6 +166,7 @@ export async function createPost(
       tags: metadata.tags,
       status: metadata.status || "published",
       author: metadata.author || "",
+      is_public: metadata.is_public ?? true,
     })
     .select("id, slug")
     .single();

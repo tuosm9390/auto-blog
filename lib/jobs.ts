@@ -4,7 +4,8 @@ import { AIJob, JobStatus, GenerateResult, SubscriptionTier } from "./types";
 export async function createJob(
   githubUsername: string,
   repo: string,
-  commitShas: string[]
+  commitShas: string[],
+  isPublic: boolean = true
 ): Promise<AIJob> {
   const { data, error } = await supabase
     .from("jobs")
@@ -13,6 +14,7 @@ export async function createJob(
       repo,
       commit_shas: commitShas,
       status: "pending" as JobStatus,
+      is_public: isPublic,
     })
     .select()
     .single();

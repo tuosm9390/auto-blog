@@ -174,6 +174,7 @@ export default function GenerateForm() {
           repo,
           commitShas: selectedShas,
           userContext: userContext.trim() || undefined,
+          isPublic: !(selectedRepo?.private ?? false),
         }),
       });
       const data = await res.json();

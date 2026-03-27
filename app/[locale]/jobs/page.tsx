@@ -107,7 +107,7 @@ export default function JobsPage() {
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...job.result, status: "draft", jobId: job.id }),
+        body: JSON.stringify({ ...job.result, status: "draft", jobId: job.id, is_public: job.is_public ?? true }),
       });
 
       if (!res.ok) {

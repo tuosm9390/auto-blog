@@ -41,6 +41,7 @@ export interface Post {
   tags: string[];
   status: PostStatus;
   author: string;
+  is_public: boolean;
 }
 
 export interface UserSettings {
@@ -86,6 +87,7 @@ export interface AIJob {
   error?: string;
   created_at: string;
   updated_at: string;
+  is_public: boolean;
 }
 
 export interface Repo {
@@ -128,4 +130,5 @@ export const DemoPostSchema = z.object({
   author: z.literal(""),
   repo: z.literal(""),
   status: z.literal("published"),
+  is_public: z.boolean().default(true),
 });

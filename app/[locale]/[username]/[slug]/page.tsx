@@ -140,17 +140,26 @@ export default async function PostPage({ params }: PageProps) {
             {t("relatedCommits")}
           </div>
           <div className="flex gap-2 flex-wrap">
-            {post.commits.map((sha) => (
-              <a
-                key={sha}
-                href={`https://github.com/${post.repo}/commit/${sha}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-2 py-1 bg-elevated rounded font-mono text-xs text-text-secondary hover:text-accent transition-colors"
-              >
-                {sha.substring(0, 7)}
-              </a>
-            ))}
+            {post.commits.map((sha) =>
+              isOwner || post.is_public ? (
+                <a
+                  key={sha}
+                  href={`https://github.com/${post.repo}/commit/${sha}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-1 bg-elevated rounded font-mono text-xs text-text-secondary hover:text-accent transition-colors"
+                >
+                  {sha.substring(0, 7)}
+                </a>
+              ) : (
+                <span
+                  key={sha}
+                  className="px-2 py-1 bg-elevated rounded font-mono text-xs text-text-secondary"
+                >
+                  {sha.substring(0, 7)}
+                </span>
+              )
+            )}
           </div>
         </div>
       )}
