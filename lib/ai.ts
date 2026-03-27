@@ -16,13 +16,13 @@ function getGeminiClient() {
 function buildPrompt(
   commitDiffs: CommitDiff[],
   repoFullName: string,
-  userContext?: string
+  userContext?: string,
 ): string {
   const commitSummaries = commitDiffs.map((cd) => {
     const filesChanged = cd.files
       .map(
         (f) =>
-          `  - ${f.filename} (${f.status}: +${f.additions}/-${f.deletions})`
+          `  - ${f.filename} (${f.status}: +${f.additions}/-${f.deletions})`,
       )
       .join("\n");
 
@@ -144,7 +144,7 @@ export async function analyzeCommits(
   commitDiffs: CommitDiff[],
   repoFullName: string,
   tier: SubscriptionTier = "free",
-  userContext?: string
+  userContext?: string,
 ): Promise<GenerateResult> {
   const genAI = getGeminiClient();
   const prompt = buildPrompt(commitDiffs, repoFullName, userContext);
@@ -187,7 +187,7 @@ export async function analyzeCommits(
 
       let cleanText = text.trim();
       const jsonBlockMatch = cleanText.match(
-        /^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/
+        /^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/,
       );
       if (jsonBlockMatch) {
         cleanText = jsonBlockMatch[1];
@@ -203,11 +203,11 @@ export async function analyzeCommits(
 
       // 5섹션 모두 포함 여부 regex 검증 (SECTION_HEADINGS 상수 활용)
       const sectionChecks = SECTION_HEADINGS.map(({ ko, en }) =>
-        new RegExp(`###\\s*(${ko}|${en})`, "i").test(content)
+        new RegExp(`###\\s*(${ko}|${en})`, "i").test(content),
       );
       if (!sectionChecks.every(Boolean)) {
         throw new Error(
-          "Generated content is missing required sections (Section 1~5)."
+          "Generated content is missing required sections (Section 1~5).",
         );
       }
 
@@ -221,7 +221,9 @@ export async function analyzeCommits(
         err.message?.includes("Too Many Requests") ||
         err.message?.includes("Quota exceeded");
 
-      const isMissingSection = err.message?.includes("missing required sections");
+      const isMissingSection = err.message?.includes(
+        "missing required sections",
+      );
 
       // Daily quota exceeded → 즉시 중단 (재시도 무의미)
       const isDailyQuotaExceeded =
@@ -229,14 +231,14 @@ export async function analyzeCommits(
 
       if (isDailyQuotaExceeded) {
         throw new Error(
-          "Gemini API의 일일 사용량(20회)을 모두 소진했습니다. 내일 다시 시도하거나 API 플랜을 확인해주세요."
+          "Gemini API의 일일 사용량(20회)을 모두 소진했습니다. 내일 다시 시도하거나 API 플랜을 확인해주세요.",
         );
       }
 
       if (retryCount < 3 && (isRateLimit || isMissingSection)) {
         const delay = Math.pow(2, retryCount) * 2000;
         console.log(
-          `Generation error or incomplete output: ${err.message}. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/3)`
+          `Generation error or incomplete output: ${err.message}. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/3)`,
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
         return generateWithRetry(retryCount + 1);
@@ -244,7 +246,7 @@ export async function analyzeCommits(
 
       if (isRateLimit) {
         throw new Error(
-          "AI 분석 요청이 너무 많습니다. 잠시 후(약 1분 뒤) 다시 시도해 주세요."
+          "AI 분석 요청이 너무 많습니다. 잠시 후(약 1분 뒤) 다시 시도해 주세요.",
         );
       }
 
@@ -255,7 +257,9 @@ export async function analyzeCommits(
   const parsed = await generateWithRetry();
 
   if (!parsed.title && !parsed.content) {
-    throw new Error("핵심 콘텐츠(title, content)가 응답에 포함되지 않았습니다.");
+    throw new Error(
+      "핵심 콘텐츠(title, content)가 응답에 포함되지 않았습니다.",
+    );
   }
 
   return {

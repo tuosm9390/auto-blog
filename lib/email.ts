@@ -2,12 +2,13 @@ import { Resend } from "resend";
 import { createElement } from "react";
 import TesterApplyConfirm from "@/emails/TesterApplyConfirm";
 import TesterApproved from "@/emails/TesterApproved";
+import { FROM_EMAIL } from "@/lib/constants/site";
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const FROM = "Synapso.dev <noreply@synapso.dev>";
+const FROM = FROM_EMAIL;
 
 export async function sendTesterApplyConfirmEmail(
   to: string,

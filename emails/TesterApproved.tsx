@@ -41,7 +41,7 @@ export default function TesterApproved({ githubUsername }: Props) {
             지금 바로 서비스에 접속하여 새로운 기능을 경험해 보세요!
           </Text>
           <Button
-            href="https://synapso.dev"
+            href={process.env.NEXT_PUBLIC_SITE_URL ?? "https://synapso.dev"}
             style={{
               display: "inline-block",
               background: "#0f172a",

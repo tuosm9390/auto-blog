@@ -11,7 +11,7 @@ const DEVTO_API_URL = 'https://dev.to/api/articles';
 const POWERED_BY_BADGE = `
 
 ---
-*이 포스트는 [Synapso](https://synapso.dev)로 자동 생성되었습니다.*`;
+*이 포스트는 [Synapso](${process.env.NEXT_PUBLIC_SITE_URL ?? "https://synapso.dev"})로 자동 생성되었습니다.*`;
 
 interface DevtoArticle {
   id: number;
