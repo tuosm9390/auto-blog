@@ -4,6 +4,7 @@ import { getPostByUsernameAndSlug } from "@/lib/posts";
 import { getProfileByUsername } from "@/lib/profiles";
 import PostContent from "@/components/PostContent";
 import UserProfileBox from "@/components/UserProfileBox";
+import KeyTakeaways from "@/components/KeyTakeaways";
 import { format } from "date-fns";
 import { ko, enUS } from "date-fns/locale";
 import { Metadata } from "next";
@@ -28,14 +29,17 @@ export async function generateMetadata({
 
   const post = await getPostByUsernameAndSlug(plainUsername, slug);
   if (!post) return { title: "Post not found" };
+  const postUrl = `https://synapso-dev.vercel.app/@${plainUsername}/${slug}`;
   return {
     title: `${post.title} — ${plainUsername}`,
     description: post.summary,
     keywords: post.tags,
+    alternates: { canonical: postUrl },
     openGraph: {
       title: post.title,
       description: post.summary,
       type: "article",
+      url: postUrl,
       publishedTime: post.date,
       authors: [plainUsername],
       tags: post.tags,
@@ -83,8 +87,46 @@ export default async function PostPage({ params }: PageProps) {
 
   const isOwner = session?.user?.username === plainUsername;
 
+  const postUrl = `https://synapso-dev.vercel.app/@${plainUsername}/${slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.summary,
+        datePublished: post.date,
+        dateModified: post.date,
+        author: {
+          "@type": "Person",
+          name: plainUsername,
+          url: `https://synapso-dev.vercel.app/@${plainUsername}`,
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "Synapso.Dev",
+          url: "https://synapso-dev.vercel.app",
+        },
+        keywords: post.tags.join(", "),
+        mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Synapso.Dev", item: "https://synapso-dev.vercel.app" },
+          { "@type": "ListItem", position: 2, name: `@${plainUsername}`, item: `https://synapso-dev.vercel.app/@${plainUsername}` },
+          { "@type": "ListItem", position: 3, name: post.title, item: postUrl },
+        ],
+      },
+    ],
+  };
+
   return (
     <article className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026") }}
+      />
       {/* 상단 네비게이션 */}
       <div className="flex items-center justify-between mb-8">
         <Link
@@ -133,6 +175,8 @@ export default async function PostPage({ params }: PageProps) {
           ))}
         </div>
       )}
+
+      <KeyTakeaways summary={post.summary} />
 
       {post.commits.length > 0 && post.repo && (
         <div className="border border-border-subtle rounded-xl p-4 mb-8 bg-surface/50">
