@@ -229,6 +229,15 @@
     animation-play-state: paused;
   }
 
+  /* 스크롤바 숨김 — 좌우 스크롤은 동작하되 스크롤바 UI 미표시 */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Custom Scrollbar for list */
   .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
