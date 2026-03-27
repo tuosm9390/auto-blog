@@ -90,6 +90,8 @@ import Footer from "@/components/Footer";
 import ConfirmProvider from "@/components/ConfirmProvider";
 import { Toaster } from "sonner";
 
+const BASE_URL = "https://synapso-dev.vercel.app";
+
 export default async function RootLayout({
   children,
   params,
@@ -109,11 +111,36 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages();
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${BASE_URL}/#website`,
+    url: BASE_URL,
+    name: "Synapso.Dev",
+    description:
+      locale === "ko"
+        ? "AI 기반 코드 분석, 기술 트렌드, 자동화 아키텍처 및 소프트웨어 엔지니어링 인사이트를 다루는 전문가의 기술 블로그입니다."
+        : "Expert tech blog focusing on AI-powered code analysis, tech trends, automation architecture, and software engineering insights.",
+    inLanguage: locale === "ko" ? "ko-KR" : "en-US",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${BASE_URL}/?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang={locale}>
       <meta
         name="google-site-verification"
         content="MDjk5WdTY8Pl_7kx3O84WmAebWeKmh2-1BK39ZzeGWA"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c") }}
       />
       <body
         className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} bg-canvas text-text-primary font-body min-h-screen flex flex-col`}

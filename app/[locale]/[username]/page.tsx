@@ -21,9 +21,17 @@ export async function generateMetadata({
   const profile = await getProfileByUsername(plainUsername);
   const displayName = profile?.name || plainUsername;
 
+  const profileUrl = `https://synapso-dev.vercel.app/@${plainUsername}`;
   return {
     title: `${displayName} (@${plainUsername}) — Synapso.dev`,
     description: profile?.bio || `${plainUsername}님의 기술 블로그입니다.`,
+    alternates: { canonical: profileUrl },
+    openGraph: {
+      title: `${displayName} (@${plainUsername}) — Synapso.dev`,
+      description: profile?.bio || `${plainUsername}님의 기술 블로그입니다.`,
+      url: profileUrl,
+      type: "profile",
+    },
   };
 }
 
@@ -61,8 +69,24 @@ export default async function UserProfilePage({ params }: PageProps) {
     new Set(userPosts.map((p) => p.repo).filter(Boolean)),
   );
 
+  const profileJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    mainEntity: {
+      "@type": "Person",
+      name: profile.name || plainUsername,
+      url: `https://synapso-dev.vercel.app/@${plainUsername}`,
+      ...(profile.bio ? { description: profile.bio } : {}),
+      ...(profile.avatar_url ? { image: profile.avatar_url } : {}),
+    },
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileJsonLd).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026") }}
+      />
       {/* 유저 프로필 헤더 */}
       <UserProfileBox profile={profile} variant="large" isOwner={isOwner} />
 
