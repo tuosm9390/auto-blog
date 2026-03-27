@@ -17,14 +17,14 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 });
     }
 
     const body = await request.json();
     const parsedData = testerApplySchema.safeParse(body);
 
     if (!parsedData.success) {
-      return NextResponse.json({ error: "Invalid data", details: parsedData.error.format() }, { status: 400 });
+      return NextResponse.json({ error: "입력값이 올바르지 않습니다.", details: parsedData.error.format() }, { status: 400 });
     }
 
     const { data, error } = await supabase
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Supabase error:", { code: error.code, message: error.message, details: error.details, hint: error.hint });
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
+      return NextResponse.json({ error: "데이터베이스 오류가 발생했습니다." }, { status: 500 });
     }
 
     // 신청 접수 확인 이메일 발송 (fire-and-forget)
@@ -51,6 +51,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
   }
 }

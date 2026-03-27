@@ -6,9 +6,9 @@ Synapso.dev 코드베이스(19개 컴포넌트 ~1,484줄, 17개 API 라우트 ~1
 
 ---
 
-## Phase 1: 기반 유틸리티 및 타입 정리
+## Phase 1: 기반 유틸리티 및 타입 정리 ✅ 완료
 
-### 1-1. 인라인 타입을 `lib/types.ts`로 통합
+### 1-1. 인라인 타입을 `lib/types.ts`로 통합 ✅
 
 `lib/types.ts`에 추가:
 
@@ -32,7 +32,7 @@ export interface SubscriptionInfo {
 - `components/GenerateForm.tsx` — 인라인 `Repo`, `UsageInfo` 제거 → `lib/types.ts` import
 - `app/[locale]/settings/page.tsx` — 인라인 `Repo`, `UserSettingsData`, `SubscriptionInfo` 제거 → import
 
-### 1-2. 날짜 포맷 유틸리티 추출
+### 1-2. 날짜 포맷 유틸리티 추출 ✅
 
 신규: `lib/date.ts`
 
@@ -47,7 +47,7 @@ export interface SubscriptionInfo {
 - `app/[locale]/jobs/page.tsx` — 동일
 - `app/[locale]/[username]/[slug]/page.tsx` — 동일
 
-### 1-3. nextResetDate 유틸리티
+### 1-3. nextResetDate 유틸리티 ✅
 
 `lib/subscription.ts`에 `getNextResetDate()` 함수 추가, 3곳의 인라인 계산 대체:
 
@@ -57,65 +57,63 @@ export interface SubscriptionInfo {
 
 ---
 
-## Phase 2: 공통 UI 컴포넌트 추출
+## Phase 2: 공통 UI 컴포넌트 추출 ✅ 완료
 
 신규 디렉토리: `components/ui/`
 
-### 2-1. `Button.tsx`
+### 2-1. `Button.tsx` ✅
 
 - variant: `primary` | `secondary` | `destructive` | `ghost`
 - size: `sm` | `md` | `lg`
 - 영향: 9개 파일 16회 이상의 인라인 버튼 className 대체
 
-### 2-2. `SelectFilter.tsx` (TagFilter + RepoFilter 통합)
+### 2-2. `SelectFilter.tsx` (TagFilter + RepoFilter 통합) ✅
 
 - props: `options`, `activeValue`, `onChange`, `labelAll`, `formatOption?`
-- 삭제: `components/TagFilter.tsx`, `components/RepoFilter.tsx`
+- 삭제: `components/TagFilter.tsx`, `components/RepoFilter.tsx` (삭제 완료)
 - 수정: `components/PostsClient.tsx` — import 변경
 
-### 2-3. `LoginRequired.tsx`
+### 2-3. `LoginRequired.tsx` ✅
 
 - 4곳 중복 대체: `GenerateForm.tsx`, `settings/page.tsx`, `jobs/page.tsx`, `profile/page.tsx`
 
-### 2-4. `Checkbox.tsx`
+### 2-4. `Checkbox.tsx` ✅
 
 - 2곳 중복 대체: `GenerateForm.tsx`, `settings/page.tsx`
 
-### 2-5. `Card.tsx`
+### 2-5. `Card.tsx` ✅
 
 - `border border-border-subtle rounded-xl` + padding variant
 - 10회 이상 반복 패턴 대체
 
-### 2-6. `PageContainer.tsx`
+### 2-6. `PageContainer.tsx` ✅
 
 - maxWidth: `sm`(`3xl`) | `md`(`4xl`) | `lg`(`5xl`) | `xl`(`6xl`)
 - 13곳의 페이지 래퍼 패턴 대체
 
-### 배럴 export
+### 배럴 export ✅
 
 `components/ui/index.ts` — 모든 UI 컴포넌트 re-export
 
 ---
 
-## Phase 3: 중복 컴포넌트 제거
+## Phase 3: 중복 컴포넌트 제거 ✅ 완료
 
-### 3-1. ScrollToTop 중복 제거
+### 3-1. ScrollToTop 중복 제거 ✅
 
-- `components/Footer.tsx` — scroll-to-top 로직(1~27줄) 및 버튼 JSX(32~60줄) 제거
-- Footer를 서버 컴포넌트로 전환: `"use client"` 제거, `useTranslations` → `getTranslations`
+- `components/Footer.tsx` — 인라인 scroll-to-top 로직 제거, `<ScrollToTopButton />` import하여 배치
 - `ScrollToTopButton.tsx`는 그대로 유지 (이미 `[slug]/page.tsx`에서 사용 중)
-- Footer 내부에서 `<ScrollToTopButton />` import하여 배치 (서버 컴포넌트 안에 클라이언트 컴포넌트 가능)
 
-### 3-2. about 리뷰 데이터 분리
+### 3-2. about 리뷰 데이터 분리 ✅
 
-- 신규: `data/reviews.ts` — `reviewsKo`, `reviewsEn` 배열 이동
-- 수정: `app/[locale]/about/page.tsx` — import로 대체
+- 실제 위치: `app/[locale]/data/reviews.ts` — `reviewsKo`, `reviewsEn` 배열 (계획서의 `data/reviews.ts`와 경로 상이)
+- 수정: `app/[locale]/about/page.tsx` — import로 대체 완료
 
 ---
 
-## Phase 4: 거대 페이지 파일 분리
+## Phase 4: 거대 페이지 파일 분리 ✅ 완료
 
-### 4-1. settings/page.tsx (342줄 → ~80줄 + 4개 하위 컴포넌트)
+### 4-1. settings/page.tsx (342줄 → ~80줄 + 4개 하위 컴포넌트) ✅
 
 신규 디렉토리: `components/settings/`
 
@@ -126,19 +124,20 @@ export interface SubscriptionInfo {
 
 `SettingsContent`는 상태 관리 + 섹션 컴포넌트 조합만 담당.
 
-### 4-2. jobs/page.tsx (300줄 → ~100줄 + 3개 하위 컴포넌트)
+### 4-2. jobs/page.tsx (300줄 → ~100줄 + 3개 하위 컴포넌트) ✅
 
 신규 디렉토리: `components/jobs/`
 
 - `JobCard.tsx` — 개별 작업 카드 (상태 뱃지, 확장/축소, 발행/삭제)
 - `DraftCard.tsx` — 개별 초안 카드
 - `JobTabs.tsx` — 탭 네비게이션
+- `CommitTimeline.tsx` — 추가 구현됨 (계획서 외)
 
 ---
 
-## Phase 5: API 리팩토링
+## Phase 5: API 리팩토링 ⚠️ 부분 완료
 
-### 5-1. 공통 API 유틸리티
+### 5-1. 공통 API 유틸리티 ✅
 
 신규: `lib/api-utils.ts`
 
@@ -153,7 +152,7 @@ requirePostOwnership(); // 포스트 소유권 검증 (4곳 중복 통합)
 
 수정: 모든 인증 필요 API 라우트 (15개)
 
-### 5-2. Stripe 비즈니스 로직 분리
+### 5-2. Stripe/결제 비즈니스 로직 분리 ✅
 
 신규: `lib/billing.ts`
 
@@ -165,20 +164,18 @@ requirePostOwnership(); // 포스트 소유권 검증 (4곳 중복 통합)
 
 효과: 5개 API 라우트에서 `supabaseAdmin` 직접 import 제거, `lib/` 아키텍처 원칙 준수
 
-### 5-3. 입력 검증 Zod 확대
+### 5-3. 입력 검증 Zod 확대 ⚠️ 부분 완료
 
 추가 스키마 (기존 4곳 → 7곳):
 
-- `checkoutSchema` — `app/api/checkout/route.ts` (현재 수동 `!tier || !cycle`)
-- `settingsSchema` — `app/api/settings/route.ts` (현재 수동 if문)
-- `bioSchema` — `app/api/profiles/[username]/bio/route.ts` (현재 수동 typeof)
+- [x] `billingKeySchema` — `app/api/portone/billing-key/route.ts` ✅ (구 `checkoutSchema` — Stripe→PortOne 마이그레이션으로 라우트 대체됨)
+- [x] `settingsSchema` — `app/api/settings/route.ts` ✅
+- [x] `bioSchema` — `app/api/profiles/[username]/bio/route.ts` ✅
 
-### 5-4. 에러 메시지 한국어 통일
+### 5-4. 에러 메시지 한국어 통일 ✅ 완료
 
-- `"Unauthorized"` → `"인증이 필요합니다."`
-- `"Forbidden"` → `"권한이 없습니다."`
-- `"Internal server error"` → `"서버 오류가 발생했습니다."`
-- 기타 영어 에러 메시지 → 한국어
+- `app/api/cron/billing/route.ts` — `"Unauthorized"` → `"인증이 필요합니다."` ✅
+- `app/api/tester-apply/route.ts` — `"Unauthorized"`, `"Invalid data"`, `"Database error"`, `"Internal server error"` → 한국어 ✅
 
 ---
 
@@ -234,6 +231,6 @@ Phase 5 (API 리팩토링)   ← Phase 1의 유틸리티 사용, 독립 진행 �
 
 - stripe_events 테이블을 통한 중복 이벤트 처리 방지 로직 적용.
 
-### [진행 예정] DB RLS 정책 실제 적용
+### [완료] DB RLS 정책 실제 적용
 
-- scripts/fix-security-rls.sql을 실행하여 DB 레벨 보안 완성 필요.
+- `scripts/fix-security-rls.sql` Supabase SQL Editor에서 실행 완료 (2026-03-27).
