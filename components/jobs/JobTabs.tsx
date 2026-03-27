@@ -17,7 +17,7 @@ export function JobTabs({
   return (
     <div
       role="tablist"
-      className="flex overflow-x-auto scrollbar-none border-b border-border-subtle mb-6"
+      className="flex overflow-x-auto scrollbar-none border-b border-border-subtle mb-6 pb-px"
     >
       <button
         role="tab"

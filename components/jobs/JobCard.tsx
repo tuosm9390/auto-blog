@@ -135,7 +135,7 @@ export function JobCard({
 
           {/* 탭 내비게이션 */}
           <div
-            className="flex overflow-x-auto scrollbar-none border-b border-border-subtle mb-4"
+            className="flex overflow-x-auto scrollbar-none border-b border-border-subtle mb-4 pb-px"
             role="tablist"
           >
             {tabs.map((section) => (

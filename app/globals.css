@@ -229,15 +229,6 @@
     animation-play-state: paused;
   }
 
-  /* 스크롤바 숨김 — 좌우 스크롤은 동작하되 스크롤바 UI 미표시 */
-  .scrollbar-none {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-
   /* Custom Scrollbar for list */
   .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
@@ -255,4 +246,13 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--color-border-strong);
   }
+}
+
+/* 스크롤바 숨김 — @layer 밖 전역 적용 (최고 특이성) */
+.scrollbar-none {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
 }
