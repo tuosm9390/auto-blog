@@ -19,9 +19,11 @@ const createPostSchema = z.object({
 
 export async function GET() {
   try {
-    const posts = await getAllPosts({ includeContent: true });
+    const { username } = await requireAuth();
+    const posts = await getAllPosts({ author: username });
     return apiSuccess({ posts });
   } catch (error: unknown) {
+    if (isAuthError(error)) return apiError(error.message, 401);
     const message = error instanceof Error ? error.message : "서버 오류가 발생했습니다.";
     return apiError(message, 500);
   }

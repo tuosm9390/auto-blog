@@ -30,12 +30,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, ...result });
   } catch (error: unknown) {
     console.error("Billing key charge error (full):", JSON.stringify(error, null, 2));
-    const message =
-      error instanceof Error
-        ? error.message
-        : typeof error === "object" && error !== null && "message" in error
-          ? String((error as Record<string, unknown>).message)
-          : "결제 처리 중 오류가 발생했습니다.";
-    return apiError(message, 500);
+    return apiError("결제 처리 중 오류가 발생했습니다. 카드 정보를 확인하거나 다른 카드를 사용해주세요.", 500);
   }
 }

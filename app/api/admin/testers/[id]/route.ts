@@ -47,7 +47,12 @@ export async function PATCH(
 
       if (roleError) {
         console.error("User role update error:", roleError);
-        // 신청 상태는 업데이트되었으나 권한 변경 실패 시 로깅만 하고 응답은 보냄
+        // 역할 변경 실패 시 신청 상태를 다시 pending으로 롤백하여 일관성 보장
+        await supabase
+          .from("tester_applications")
+          .update({ status: "pending", updated_at: new Date().toISOString() })
+          .eq("id", id);
+        return apiError("역할 변경에 실패했습니다. 다시 시도해주세요.", 500);
       }
 
       // 승인 안내 이메일 발송 (fire-and-forget)

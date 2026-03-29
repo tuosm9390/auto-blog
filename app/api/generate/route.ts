@@ -2,7 +2,7 @@
 import { getRecentCommits } from "@/lib/github";
 import { createJob, runAIAnalysisBackground } from "@/lib/jobs";
 import { checkAndGetUsage, incrementUsage } from "@/lib/subscription";
-import { requirePrivilegedAuth, apiError, apiSuccess, parseJsonBody, isAuthError } from "@/lib/api-utils";
+import { requirePrivilegedAuth, getServerAccessToken, apiError, apiSuccess, parseJsonBody, isAuthError } from "@/lib/api-utils";
 import { z } from "zod";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -31,7 +31,8 @@ if (redisUrl && redisToken) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, accessToken } = await requirePrivilegedAuth();
+    const { username } = await requirePrivilegedAuth();
+    const accessToken = await getServerAccessToken(request);
 
     if (ratelimit) {
       const { success } = await ratelimit.limit(`generate_${username}`);
@@ -91,9 +92,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     if (isAuthError(error)) return apiError(error.message, 401);
-    const message = error instanceof Error ? error.message : "알 수 없는 오류";
     console.error("Generate error:", error);
-    return apiError(message, 500);
+    return apiError("AI 분석 요청 처리 중 오류가 발생했습니다.", 500);
   }
 }
 

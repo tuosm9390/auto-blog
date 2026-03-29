@@ -1,9 +1,11 @@
-import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { requireAuth, getServerAccessToken, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
 import { getUserRepos } from "@/lib/github";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const { accessToken } = await requireAuth();
+    await requireAuth();
+    const accessToken = await getServerAccessToken(request);
     const repos = await getUserRepos(accessToken);
     return apiSuccess({ repos });
   } catch (error: unknown) {

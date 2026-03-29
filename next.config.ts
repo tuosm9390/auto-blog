@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
           key: "Content-Security-Policy",
           value: [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.portone.io",
+            "script-src 'self' 'unsafe-inline' https://cdn.portone.io",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https://avatars.githubusercontent.com",
             "font-src 'self'",

@@ -8,7 +8,6 @@ declare module 'next-auth' {
       id?: string
       username?: string
       avatar_url?: string | null
-      accessToken?: string
       role?: string
     } & DefaultSession['user']
   }

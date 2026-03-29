@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
 import { getRecentCommits } from "@/lib/github";
 import { getProcessedCommitShas } from "@/lib/settings";
-import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
+import { requireAuth, getServerAccessToken, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
   try {
-    const { username, accessToken } = await requireAuth();
+    const { username } = await requireAuth();
+    const accessToken = await getServerAccessToken(request);
 
     const searchParams = request.nextUrl.searchParams;
     const owner = searchParams.get("owner");
@@ -24,7 +25,6 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Github API error:", error);
     if (isAuthError(error)) return apiError(error.message, 401);
-    const message = error instanceof Error ? error.message : "서버 오류가 발생했습니다.";
-    return apiError(message, 500);
+    return apiError("커밋 정보를 가져오는 중 오류가 발생했습니다.", 500);
   }
 }
