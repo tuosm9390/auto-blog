@@ -45,13 +45,6 @@ export default async function Footer() {
               >
                 {t("terms")}
               </Link>
-              <span className="text-border-strong text-xs">·</span>
-              <Link
-                href="/pricing"
-                className="text-text-tertiary hover:text-text-secondary text-xs transition-colors"
-              >
-                {t("pricing")}
-              </Link>
             </div>
           </div>
         </div>

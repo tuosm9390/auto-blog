@@ -13,20 +13,9 @@ export default async function LandingPage({
   const t = await getTranslations("About");
   const { locale } = await params;
 
-  const role = (session?.user as any)?.role || "user";
-  const isPrivileged = role === "admin" || role === "tester";
-
   // CTA 텍스트 및 링크 결정
-  const ctaText = !session
-    ? t("ctaFree")
-    : isPrivileged
-      ? t("ctaManage")
-      : t("ctaTesterApply");
-  const ctaHref = !session
-    ? "/login"
-    : isPrivileged
-      ? "/jobs"
-      : "/tester-apply";
+  const ctaText = !session ? t("ctaFree") : t("ctaManage");
+  const ctaHref = !session ? "/login" : "/generate";
 
   const reviews = locale === "ko" ? reviewsKo : reviewsEn;
   const samplePosts = await getRecentPublishedPosts(3);
@@ -82,8 +71,8 @@ export default async function LandingPage({
         )}
       </section>
 
-      {/* [NEW] Project Introduction Section (일반 유저/비로그인 전용) */}
-      {!isPrivileged && (
+      {/* [NEW] Project Introduction Section (비로그인 전용) */}
+      {!session && (
         <section className="py-24 border-t border-border-subtle">
           <div className="max-w-3xl mx-auto space-y-16">
             {/* 인사의 글 */}

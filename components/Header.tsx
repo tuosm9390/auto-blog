@@ -22,8 +22,6 @@ export default async function Header() {
 
   const role = (session?.user as any)?.role || "user";
   const isAdmin = role === "admin";
-  const isTester = role === "tester";
-  const isPrivileged = isAdmin || isTester;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border-subtle bg-canvas/80 backdrop-blur-md">
@@ -37,8 +35,8 @@ export default async function Header() {
 
         {/* 데스크탑 nav */}
         <nav className="hidden sm:flex items-center gap-4">
-          {/* 1. 권한 있는 유저 전용 메뉴 (테스터/관리자 공통) */}
-          {isPrivileged && (
+          {/* 1. 로그인한 유저 메뉴 */}
+          {session?.user && (
             <>
               <Link
                 href="/generate"
@@ -72,28 +70,12 @@ export default async function Header() {
             </Link>
           )}
 
-          {/* 3. 일반 유저 전용 메뉴 (테스터 신청) */}
-          {session?.user && !isPrivileged && (
-            <Link
-              href="/tester-apply"
-              className="text-sm text-accent bg-accent/10 px-3 py-1.5 rounded-full hover:bg-accent/20 transition-all font-semibold border border-accent/20"
-            >
-              {t("testerApply")}
-            </Link>
-          )}
-
-          {/* 4. 공통 메뉴 */}
+          {/* 3. 공통 메뉴 */}
           <Link
             href="/about"
             className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
           >
             {t("about")}
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
-          >
-            {t("pricing")}
           </Link>
 
           <div className="h-4 w-[1px] bg-border-subtle mx-1" />

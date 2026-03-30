@@ -10,7 +10,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, {
   price: { monthly: number; yearly: number };
 }> = {
   free: {
-    monthlyLimit: 3,
+    monthlyLimit: 20,
     aiModel: "gemini-3.1-flash-lite-preview",
     watermark: true,
     maxAutoRepos: 1,

@@ -25,8 +25,6 @@ export default function MobileMenu({
   const t = useTranslations("Header");
 
   const isAdmin = role === "admin";
-  const isTester = role === "tester";
-  const isPrivileged = isAdmin || isTester;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -108,43 +106,28 @@ export default function MobileMenu({
                   </Link>
                 )}
 
-                {/* 권한 있는 사용자 전용 메뉴 */}
-                {isPrivileged && (
-                  <>
-                    <Link
-                      href="/generate"
-                      onClick={close}
-                      className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-medium"
-                    >
-                      {t("generate")}
-                    </Link>
-                    <Link
-                      href="/jobs"
-                      onClick={close}
-                      className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
-                    >
-                      {t("jobs")}
-                    </Link>
-                    <Link
-                      href="/settings"
-                      onClick={close}
-                      className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
-                    >
-                      {t("settings")}
-                    </Link>
-                  </>
-                )}
-
-                {/* 일반 유저 테스터 신청 버튼 */}
-                {!isPrivileged && (
-                  <Link
-                    href="/tester-apply"
-                    onClick={close}
-                    className="mx-4 my-2 px-4 py-2 text-center text-sm text-accent bg-accent/10 rounded-full hover:bg-accent/20 transition-all font-semibold border border-accent/20"
-                  >
-                    {t("testerApply")}
-                  </Link>
-                )}
+                {/* 로그인한 유저 메뉴 */}
+                <Link
+                  href="/generate"
+                  onClick={close}
+                  className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-medium"
+                >
+                  {t("generate")}
+                </Link>
+                <Link
+                  href="/jobs"
+                  onClick={close}
+                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
+                >
+                  {t("jobs")}
+                </Link>
+                <Link
+                  href="/settings"
+                  onClick={close}
+                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
+                >
+                  {t("settings")}
+                </Link>
 
                 <Link
                   href="/about"
@@ -152,13 +135,6 @@ export default function MobileMenu({
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
                   {t("about")}
-                </Link>
-                <Link
-                  href="/pricing"
-                  onClick={close}
-                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
-                >
-                  {t("pricing")}
                 </Link>
 
                 {/* 로그아웃 */}
@@ -174,13 +150,6 @@ export default function MobileMenu({
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
                 >
                   {t("about")}
-                </Link>
-                <Link
-                  href="/pricing"
-                  onClick={close}
-                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
-                >
-                  {t("pricing")}
                 </Link>
                 <div className="px-4 py-2.5 border-t border-border-subtle mt-1">
                   <SignIn />

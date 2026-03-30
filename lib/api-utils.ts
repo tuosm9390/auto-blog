@@ -24,14 +24,9 @@ export async function requireAuth() {
 export async function requirePrivilegedAuth() {
   const session = await auth();
   const role = (session?.user as any)?.role || 'user';
-  const isPrivileged = role === 'admin' || role === 'tester';
 
   if (!session?.user?.username || !session?.user?.accessToken) {
     throw new AuthError("인증이 필요합니다.");
-  }
-
-  if (!isPrivileged) {
-    throw new AuthError("권한이 없습니다. 테스터 신청 후 이용 가능합니다.");
   }
 
   return { session, username: session.user.username, accessToken: session.user.accessToken, role };

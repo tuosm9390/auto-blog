@@ -118,12 +118,12 @@ export default async function DemoPostPage({ params }: PageProps) {
         {/* 전환 유도 하단 바 */}
         <div className="mt-16 p-8 border border-accent/20 rounded-3xl bg-accent/5 text-center">
           <h3 className="text-xl font-bold mb-3">나의 코드로 이런 포스트를 만들고 싶나요?</h3>
-          <p className="text-text-secondary mb-6">지금 바로 베타 테스터로 신청하고 AI의 마법을 경험해보세요.</p>
+          <p className="text-text-secondary mb-6">지금 바로 시작해서 AI의 마법을 경험해보세요.</p>
           <Link
-            href="/tester-apply"
+            href="/generate"
             className="inline-flex items-center justify-center px-8 py-3 bg-accent text-white font-bold rounded-full hover:bg-accent-hover transition-all"
           >
-            ✦ 테스터 신청하기
+            ✦ 지금 시작하기
           </Link>
         </div>
 

@@ -25,6 +25,8 @@ export function BillingSection({
   pricingT: TFunction;
   commonT: TFunction;
 }) {
+  return null;
+
   const billingCycleLabel =
     subscription.billingCycle === "yearly"
       ? " (연간)"

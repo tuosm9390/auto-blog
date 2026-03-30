@@ -118,12 +118,6 @@ export default function DemoResultPage() {
           >
             LinkedIn에 공유
           </button>
-          <Link
-            href="/pricing"
-            className="px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
-          >
-            Pro로 전체 기능 사용하기 →
-          </Link>
         </div>
       </div>
     </div>

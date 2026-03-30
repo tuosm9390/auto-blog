@@ -2,7 +2,7 @@
 import { getRecentCommits } from "@/lib/github";
 import { createJob, runAIAnalysisBackground } from "@/lib/jobs";
 import { checkAndGetUsage, incrementUsage } from "@/lib/subscription";
-import { requirePrivilegedAuth, apiError, apiSuccess, parseJsonBody, isAuthError } from "@/lib/api-utils";
+import { requireAuth, apiError, apiSuccess, parseJsonBody, isAuthError } from "@/lib/api-utils";
 import { z } from "zod";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -31,7 +31,7 @@ if (redisUrl && redisToken) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, accessToken } = await requirePrivilegedAuth();
+    const { username, accessToken } = await requireAuth();
 
     if (ratelimit) {
       const { success } = await ratelimit.limit(`generate_${username}`);
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (usage.remaining <= 0) {
       return NextResponse.json(
         {
-          error: `이번 달 AI 생성 횟수(${usage.monthlyLimit === 999999 ? "무제한" : usage.monthlyLimit}회)를 모두 사용했습니다. Pro 플랜으로 업그레이드하면 월 30회까지 사용할 수 있습니다.`,
+          error: `이번 달 무료 사용량(${usage.monthlyLimit === 999999 ? "무제한" : usage.monthlyLimit}회)을 모두 사용했습니다. 다음 달 초에 초기화됩니다.`,
           quota_exceeded: true,
           tier: usage.tier,
           used: usage.usageCount,

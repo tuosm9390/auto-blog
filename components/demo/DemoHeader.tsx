@@ -23,10 +23,10 @@ export default async function DemoHeader() {
           <LanguageSwitcher />
           
           <Link
-            href="/tester-apply"
+            href="/generate"
             className="hidden sm:flex text-sm text-white bg-accent hover:bg-accent-hover px-5 py-2 rounded-full transition-all font-bold shadow-lg shadow-accent/20 items-center gap-1.5"
           >
-            {t("testerApply")}
+            {t("generate")}
           </Link>
 
           {/* 모바일에서는 버튼 대신 심플하게 처리 (이미 헤더에 LanguageSwitcher가 있으므로 충분) */}

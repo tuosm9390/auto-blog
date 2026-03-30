@@ -18,9 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const isLoggedIn = !!auth?.user;
       const role = (auth?.user as any)?.role || 'user';
       const isAdmin = role === 'admin';
-      const isTester = role === 'tester';
-      const isPrivileged = isAdmin || isTester;
-      
+
       const pathname = nextUrl.pathname;
 
       // 로케일 접두사 제거 (e.g. /ko/@username → /@username)
@@ -33,6 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         cleanPath === '/' ||
         cleanPath.startsWith('/about') ||
         cleanPath.startsWith('/pricing') ||
+        cleanPath.startsWith('/tester-apply') ||
         cleanPath.startsWith('/terms') ||
         cleanPath.startsWith('/login') ||
         cleanPath.startsWith('/demo') ||
@@ -48,22 +47,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // 3. 로그인 필수 체크
       if (!isLoggedIn) return false;
 
-      // 4. 테스터 신청 페이지는 일반 유저(권한 없음)만 접근 가능
-      if (cleanPath.includes('/tester-apply')) {
-        return !isPrivileged;
-      }
-
-      // 5. 핵심 기능 및 설정 페이지 (관리자/테스터 전용)
+      // 4. 핵심 기능 및 설정 페이지 (로그인 유저 전체 허용)
       const isRestrictedPage =
         cleanPath.includes('/generate') ||
         cleanPath.includes('/jobs') ||
         cleanPath.includes('/settings');
 
       if (isRestrictedPage) {
-        return isPrivileged;
+        return isLoggedIn;
       }
 
-      // 6. 관리자 전용 페이지 (startsWith로 정밀 매칭 — /@admin-user 같은 username 오탐 방지)
+      // 5. 관리자 전용 페이지 (startsWith로 정밀 매칭 — /@admin-user 같은 username 오탐 방지)
       if (cleanPath.startsWith('/admin') || cleanPath.startsWith('/admin-portal-v5-secret')) {
         return isAdmin;
       }

@@ -223,12 +223,6 @@ export default async function PostPage({ params }: PageProps) {
             </Link>
             {t("watermarkSuffix")}
           </p>
-          <Link
-            href="/pricing"
-            className="text-xs text-text-tertiary hover:text-text-secondary transition-colors"
-          >
-            {t("removeWatermark")}
-          </Link>
         </div>
       )}
 
