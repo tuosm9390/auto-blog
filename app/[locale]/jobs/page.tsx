@@ -16,7 +16,7 @@ import { DraftCard } from "@/components/jobs/DraftCard";
 type Tab = "jobs" | "drafts";
 
 export default function JobsPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
   const confirm = useConfirm();
@@ -198,6 +198,26 @@ export default function JobsPage() {
     }
   };
 
+  if (status === "loading") {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 md:py-16 animate-pulse">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <div className="h-9 w-48 bg-surface-subtle rounded-md mb-2" />
+            <div className="h-4 w-64 bg-surface-subtle rounded-md" />
+          </div>
+          <div className="h-9 w-24 bg-surface-subtle rounded-lg" />
+        </div>
+        <div className="h-10 w-64 bg-surface-subtle rounded-lg mb-6" />
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-24 bg-surface/50 border border-border-subtle rounded-2xl p-6" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <LoginRequired />
@@ -223,7 +243,11 @@ export default function JobsPage() {
       {activeTab === "jobs" && (
         <div id="tabpanel-jobs" role="tabpanel">
           {loading && jobs.length === 0 ? (
-            <div className="text-center py-20 text-text-secondary">{t("loading")}</div>
+            <div className="space-y-4 animate-pulse">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-24 bg-surface/50 border border-border-subtle rounded-2xl p-6" />
+              ))}
+            </div>
           ) : jobs.length === 0 ? (
             <div className="border border-border-subtle rounded-2xl p-20 text-center">
               <div className="text-5xl mb-4 opacity-50">⏳</div>
@@ -254,7 +278,11 @@ export default function JobsPage() {
       {activeTab === "drafts" && (
         <div id="tabpanel-drafts" role="tabpanel">
           {loading && drafts.length === 0 ? (
-            <div className="text-center py-20 text-text-secondary">{t("loading")}</div>
+            <div className="space-y-4 animate-pulse">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-20 bg-surface/50 border border-border-subtle rounded-xl p-6" />
+              ))}
+            </div>
           ) : drafts.length === 0 ? (
             <div className="border border-border-subtle rounded-xl p-12 text-center">
               <div className="text-5xl opacity-50 mb-4">📝</div>

@@ -24,7 +24,7 @@ export default function GenerateForm() {
   const locale = useLocale();
   const t = useTranslations("Generate");
   const commonT = useTranslations("Common");
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const confirm = useConfirm();
 
   const [repos, setRepos] = useState<Repo[]>([]);
@@ -79,6 +79,21 @@ export default function GenerateForm() {
       // localStorage 사용 불가 시 무시
     }
   }, [repo]);
+
+  if (sessionStatus === "loading") {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12 md:py-16 animate-pulse">
+        <div className="h-9 w-56 bg-surface-subtle rounded-md mb-2" />
+        <div className="h-4 w-80 bg-surface-subtle rounded-md mb-8" />
+        <div className="space-y-4">
+          <div className="h-12 w-full bg-surface-subtle rounded-lg" />
+          <div className="h-12 w-full bg-surface-subtle rounded-lg" />
+          <div className="h-32 w-full bg-surface-subtle rounded-lg" />
+          <div className="h-12 w-40 bg-surface-subtle rounded-lg" />
+        </div>
+      </div>
+    );
+  }
 
   if (!session) {
     return <LoginRequired />;

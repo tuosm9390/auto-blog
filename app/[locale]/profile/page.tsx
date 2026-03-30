@@ -5,7 +5,20 @@ import Image from "next/image";
 import { LoginRequired } from "@/components/ui/LoginRequired";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return (
+      <div className="profile-page animate-pulse">
+        <div className="h-9 w-36 bg-surface-subtle rounded-md mb-6" />
+        <div className="profile-card items-center flex flex-col">
+          <div className="w-[100px] h-[100px] rounded-full bg-surface-subtle mb-4" />
+          <div className="h-6 w-40 bg-surface-subtle rounded mb-2" />
+          <div className="h-4 w-56 bg-surface-subtle rounded" />
+        </div>
+      </div>
+    );
+  }
 
   if (!session?.user) {
     return (

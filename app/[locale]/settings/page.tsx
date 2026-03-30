@@ -14,7 +14,7 @@ import { ScheduleSection } from "@/components/settings/ScheduleSection";
 import { RepoSelector } from "@/components/settings/RepoSelector";
 
 function SettingsContent() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const t = useTranslations("Settings");
   const pricingT = useTranslations("Pricing");
   const commonT = useTranslations("Common");
@@ -135,19 +135,25 @@ function SettingsContent() {
     setSettings({ ...settings, auto_repos: updated });
   };
 
-  if (!session?.user) {
-    return <LoginRequired />;
-  }
-
-  if (loading) {
+  if (status === "loading" || (status === "authenticated" && loading)) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 animate-fade-in-up">
-        <h1 className="text-3xl font-display font-bold mb-4">{t("title")}</h1>
-        <div className="border border-border-subtle rounded-xl p-8 text-center text-text-secondary">
-          {t("loading")}
+      <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 animate-pulse">
+        <div className="h-9 w-32 bg-surface-subtle rounded-md mb-2" />
+        <div className="h-4 w-80 bg-surface-subtle rounded-md mb-6" />
+        <div className="space-y-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="border border-border-subtle rounded-xl p-6">
+              <div className="h-5 w-40 bg-surface-subtle rounded mb-4" />
+              <div className="h-10 w-full bg-surface-subtle rounded-lg" />
+            </div>
+          ))}
         </div>
       </div>
     );
+  }
+
+  if (!session?.user) {
+    return <LoginRequired />;
   }
 
   return (
