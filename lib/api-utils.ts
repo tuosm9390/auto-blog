@@ -1,7 +1,6 @@
 ﻿import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { getPostById } from "@/lib/posts";
-import { getToken } from "next-auth/jwt";
 
 export class AuthError extends Error {
   constructor(message: string = "인증이 필요합니다.") {
@@ -16,10 +15,10 @@ export function isAuthError(error: unknown): error is AuthError {
 
 export async function requireAuth() {
   const session = await auth();
-  if (!session?.user?.username) {
+  if (!session?.user?.username || !session?.user?.accessToken) {
     throw new AuthError("인증이 필요합니다.");
   }
-  return { session, username: session.user.username };
+  return { session, username: session.user.username, accessToken: session.user.accessToken };
 }
 
 export async function requirePrivilegedAuth() {
@@ -27,7 +26,7 @@ export async function requirePrivilegedAuth() {
   const role = (session?.user as any)?.role || 'user';
   const isPrivileged = role === 'admin' || role === 'tester';
 
-  if (!session?.user?.username) {
+  if (!session?.user?.username || !session?.user?.accessToken) {
     throw new AuthError("인증이 필요합니다.");
   }
 
@@ -35,17 +34,7 @@ export async function requirePrivilegedAuth() {
     throw new AuthError("권한이 없습니다. 테스터 신청 후 이용 가능합니다.");
   }
 
-  return { session, username: session.user.username, role };
-}
-
-// GitHub accessToken은 세션에 포함하지 않고 JWT(서버 전용)에서 직접 조회
-// GitHub API 호출이 필요한 route handler에서만 사용 (request 객체 필요)
-export async function getServerAccessToken(req: Request): Promise<string> {
-  const token = await getToken({ req: req as any });
-  if (!token?.accessToken) {
-    throw new AuthError("인증이 필요합니다.");
-  }
-  return token.accessToken as string;
+  return { session, username: session.user.username, accessToken: session.user.accessToken, role };
 }
 
 export async function requireAdminAuth() {

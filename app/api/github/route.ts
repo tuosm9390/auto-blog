@@ -1,12 +1,11 @@
 import { NextRequest } from "next/server";
 import { getRecentCommits } from "@/lib/github";
 import { getProcessedCommitShas } from "@/lib/settings";
-import { requireAuth, getServerAccessToken, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
+import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
   try {
-    const { username } = await requireAuth();
-    const accessToken = await getServerAccessToken(request);
+    const { username, accessToken } = await requireAuth();
 
     const searchParams = request.nextUrl.searchParams;
     const owner = searchParams.get("owner");

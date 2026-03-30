@@ -118,8 +118,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub;
         session.user.username = token.username;
         session.user.avatar_url = token.avatar_url;
-        // accessToken은 세션에 포함하지 않음 — JWT(서버 전용)에만 보관
-        // 필요 시 서버에서 getToken()으로 직접 조회
+        session.user.accessToken = token.accessToken;
         session.user.role = token.role;
       }
       return session;

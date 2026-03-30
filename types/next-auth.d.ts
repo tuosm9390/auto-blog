@@ -8,6 +8,8 @@ declare module 'next-auth' {
       id?: string
       username?: string
       avatar_url?: string | null
+      /** @server-only GitHub OAuth 토큰 — 클라이언트 컴포넌트에서 사용 금지 */
+      accessToken?: string
       role?: string
     } & DefaultSession['user']
   }
