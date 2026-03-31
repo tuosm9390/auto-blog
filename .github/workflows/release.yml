@@ -1,0 +1,33 @@
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: orhun/git-cliff-action@v3
+        id: cliff
+        with:
+          config: .github/cliff.toml
+          args: --latest --strip header
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: context.ref.replace("refs/tags/", ""),
+              name: context.ref.replace("refs/tags/", ""),
+              body: process.env.CLIFF_OUTPUT,
+              draft: false,
+              prerelease: false,
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLIFF_OUTPUT: ${{ steps.cliff.outputs.content }}

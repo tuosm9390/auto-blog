@@ -1,0 +1,19 @@
+[changelog]
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+## {{ group }}
+{% for commit in commits %}- {{ commit.message | trim }}
+{% endfor %}
+{% endfor %}
+"""
+trim = true
+
+[git]
+conventional_commits = true
+commit_parsers = [
+  { message = "^feat", group = "🚀 새 기능" },
+  { message = "^fix", group = "🐛 버그 수정" },
+  { message = "^security", group = "🔒 보안" },
+  { message = "^refactor", group = "♻️ 리팩토링" },
+  { message = "^chore|^docs|^perf", skip = true },
+]

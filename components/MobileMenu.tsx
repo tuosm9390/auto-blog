@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { SignIn, SignOut } from "./auth-components";
 import { useTranslations } from "next-intl";
+import type { ReleaseEntry } from "@/lib/changelog";
 
 interface MobileMenuProps {
   isLoggedIn: boolean;
@@ -11,6 +12,7 @@ interface MobileMenuProps {
   userImage?: string | null;
   userName?: string | null;
   role?: string;
+  changelogLatest?: ReleaseEntry | null;
 }
 
 export default function MobileMenu({
@@ -19,10 +21,20 @@ export default function MobileMenu({
   userImage,
   userName,
   role = "user",
+  changelogLatest = null,
 }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showChangelogBadge, setShowChangelogBadge] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("Header");
+  const ct = useTranslations("Changelog");
+
+  useEffect(() => {
+    if (changelogLatest) {
+      const lastSeen = localStorage.getItem("synapso_last_seen_version");
+      setShowChangelogBadge(lastSeen !== changelogLatest.version);
+    }
+  }, [changelogLatest]);
 
   const isAdmin = role === "admin";
 
@@ -130,6 +142,19 @@ export default function MobileMenu({
                 </Link>
 
                 <Link
+                  href="/changelog"
+                  onClick={close}
+                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors flex items-center gap-2"
+                >
+                  {ct("title")}
+                  {showChangelogBadge && (
+                    <span className="px-1 py-0.5 text-[9px] font-bold bg-red-500 text-white rounded-sm uppercase tracking-tight">
+                      {ct("newBadge")}
+                    </span>
+                  )}
+                </Link>
+
+                <Link
                   href="/about"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
@@ -144,6 +169,19 @@ export default function MobileMenu({
               </>
             ) : (
               <>
+                <Link
+                  href="/changelog"
+                  onClick={close}
+                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors flex items-center gap-2"
+                >
+                  {ct("title")}
+                  {showChangelogBadge && (
+                    <span className="px-1 py-0.5 text-[9px] font-bold bg-red-500 text-white rounded-sm uppercase tracking-tight">
+                      {ct("newBadge")}
+                    </span>
+                  )}
+                </Link>
+
                 <Link
                   href="/about"
                   onClick={close}

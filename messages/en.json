@@ -340,6 +340,17 @@
     "step2": "AI Analysis",
     "step3": "Preview Post"
   },
+  "Changelog": {
+    "title": "What's New",
+    "subtitle": "Synapso.dev release notes",
+    "viewAll": "View all",
+    "features": "New Features",
+    "fixes": "Bug Fixes",
+    "security": "Security",
+    "other": "Other",
+    "newBadge": "NEW",
+    "empty": "Unable to load update history."
+  },
   "Admin": {
     "Menu": {
       "Testers": "Testers",

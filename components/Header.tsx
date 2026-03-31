@@ -7,6 +7,16 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import { headers } from "next/headers";
 import DemoHeader from "./demo/DemoHeader";
 import Image from "next/image";
+import { getReleases } from "@/lib/changelog";
+import ChangelogDropdown from "./ChangelogDropdown";
+
+const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
+  Promise.race([
+    p,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), ms)
+    ),
+  ]);
 
 export default async function Header() {
   const headerList = await headers();
@@ -19,6 +29,7 @@ export default async function Header() {
 
   const session = await auth();
   const t = await getTranslations("Header");
+  const releases = await withTimeout(getReleases(), 5000).catch(() => []);
 
   const role = (session?.user as any)?.role || "user";
   const isAdmin = role === "admin";
@@ -71,6 +82,13 @@ export default async function Header() {
           )}
 
           {/* 3. 공통 메뉴 */}
+          {releases.length > 0 && (
+            <ChangelogDropdown
+              releases={releases.slice(0, 2)}
+              latestVersion={releases[0].version}
+            />
+          )}
+
           <Link
             href="/about"
             className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
@@ -121,6 +139,7 @@ export default async function Header() {
             userImage={session?.user?.image}
             userName={session?.user?.name}
             role={role}
+            changelogLatest={releases[0] ?? null}
           />
         </div>
       </div>

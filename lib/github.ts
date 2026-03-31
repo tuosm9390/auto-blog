@@ -56,7 +56,7 @@ function shouldExcludeFile(filename: string): boolean {
   });
 }
 
-function getOctokit(token?: string) {
+export function getOctokit(token?: string) {
   const authToken = token || process.env.GITHUB_TOKEN;
   if (!authToken) {
     throw new Error("GITHUB_TOKEN 환경변수가 설정되지 않았고, 사용자 토큰도 제공되지 않았습니다.");
