@@ -10,7 +10,6 @@ import rehypeHighlight from "rehype-highlight";
 import rehypeSanitize from "rehype-sanitize";
 
 // highlight.js — 자주 사용되는 언어만 선택적 import (번들 크기 대폭 축소)
-import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
 import python from "highlight.js/lib/languages/python";
@@ -23,26 +22,15 @@ import diff from "highlight.js/lib/languages/diff";
 import yaml from "highlight.js/lib/languages/yaml";
 import markdown from "highlight.js/lib/languages/markdown";
 
-hljs.registerLanguage("javascript", javascript);
-hljs.registerLanguage("js", javascript);
-hljs.registerLanguage("typescript", typescript);
-hljs.registerLanguage("ts", typescript);
-hljs.registerLanguage("tsx", typescript);
-hljs.registerLanguage("jsx", javascript);
-hljs.registerLanguage("python", python);
-hljs.registerLanguage("bash", bash);
-hljs.registerLanguage("shell", bash);
-hljs.registerLanguage("sh", bash);
-hljs.registerLanguage("json", json);
-hljs.registerLanguage("css", css);
-hljs.registerLanguage("html", xml);
-hljs.registerLanguage("xml", xml);
-hljs.registerLanguage("sql", sql);
-hljs.registerLanguage("diff", diff);
-hljs.registerLanguage("yaml", yaml);
-hljs.registerLanguage("yml", yaml);
-hljs.registerLanguage("markdown", markdown);
-hljs.registerLanguage("md", markdown);
+const rehypeHighlightOptions = {
+  languages: {
+    javascript, js: javascript, jsx: javascript,
+    typescript, ts: typescript, tsx: typescript,
+    python, bash, shell: bash, sh: bash,
+    json, css, html: xml, xml, sql, diff,
+    yaml, yml: yaml, markdown, md: markdown,
+  },
+};
 
 interface PostContentProps {
   content: string;
@@ -71,7 +59,7 @@ export default function PostContent({ content }: PostContentProps) {
     <div className="markdown-content">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight, rehypeSanitize]}
+        rehypePlugins={[[rehypeHighlight, rehypeHighlightOptions], rehypeSanitize]}
       >
         {normalizedContent}
       </ReactMarkdown>
