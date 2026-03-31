@@ -45,6 +45,12 @@ export default async function Footer() {
               >
                 {t("terms")}
               </Link>
+              <Link
+                href="/changelog"
+                className="text-text-tertiary hover:text-text-secondary text-xs transition-colors"
+              >
+                {t("changelog")}
+              </Link>
             </div>
           </div>
         </div>
