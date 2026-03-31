@@ -28,7 +28,7 @@ export default async function HomePage() {
       </section>
 
       {/* 포스트 리스트 (PostsClient 재사용) */}
-      <PostsClient initialPosts={posts} tags={tags} repos={repos} />
+      <PostsClient initialPosts={posts} tags={tags} repos={repos} showRepoFilter={false} />
     </div>
   );
 }

@@ -11,12 +11,14 @@ interface PostsClientProps {
   initialPosts: Post[];
   tags: string[];
   repos?: string[];
+  showRepoFilter?: boolean;
 }
 
 export default function PostsClient({
   initialPosts,
   tags,
   repos,
+  showRepoFilter = true,
 }: PostsClientProps) {
   const [query, setValue] = useState("");
   const [activeTag, setActiveTag] = useState("");
@@ -28,7 +30,7 @@ export default function PostsClient({
       post.title.toLowerCase().includes(query.toLowerCase()) ||
       post.summary.toLowerCase().includes(query.toLowerCase());
     const matchesTag = activeTag === "" || post.tags.includes(activeTag);
-    const matchesRepo = activeRepo === "" || post.repo === activeRepo;
+    const matchesRepo = !showRepoFilter || activeRepo === "" || post.repo === activeRepo;
     return matchesQuery && matchesTag && matchesRepo;
   });
 
@@ -40,7 +42,7 @@ export default function PostsClient({
           <SearchInput initialValue={query} onSearch={setValue} />
 
           <div className="flex gap-3 w-full md:w-auto">
-            {repos && repos.length > 0 && (
+            {showRepoFilter && repos && repos.length > 0 && (
               <SelectFilter
                 options={repos}
                 activeValue={activeRepo}
