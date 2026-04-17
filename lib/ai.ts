@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { CommitDiff, GenerateResult, SubscriptionTier } from "./types";
 import { TIER_LIMITS } from "./subscription";
 import { SECTION_HEADINGS } from "./constants/sections";
@@ -10,7 +10,7 @@ function getGeminiClient() {
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY 환경변수가 설정되지 않았습니다.");
   }
-  return new GoogleGenerativeAI(apiKey);
+  return new GoogleGenAI({ apiKey });
 }
 
 function buildPrompt(
@@ -146,26 +146,25 @@ export async function analyzeCommits(
   tier: SubscriptionTier = "free",
   userContext?: string,
 ): Promise<GenerateResult> {
-  const genAI = getGeminiClient();
+  const ai = getGeminiClient();
   const prompt = buildPrompt(commitDiffs, repoFullName, userContext);
 
-  const schema: Schema = {
+  const schema = {
     description: "Technical blog post analysis result",
-    type: SchemaType.OBJECT,
+    type: Type.OBJECT,
     properties: {
       title: {
-        type: SchemaType.STRING,
+        type: Type.STRING,
         description: "Engaging blog title in Korean",
       },
       summary: {
-        type: SchemaType.STRING,
+        type: Type.STRING,
         description: "Short summary in Korean",
       },
-      tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+      tags: { type: Type.ARRAY, items: { type: Type.STRING } },
       content: {
-        type: SchemaType.STRING,
-        description:
-          "Detailed blog post content in Markdown, written in Korean",
+        type: Type.STRING,
+        description: "Detailed blog post content in Markdown, written in Korean",
       },
     },
     required: ["title", "summary", "tags", "content"],
@@ -174,16 +173,16 @@ export async function analyzeCommits(
   const generateWithRetry = async (retryCount = 0): Promise<ParsedResult> => {
     try {
       const modelName = TIER_LIMITS[tier].aiModel;
-      const model = genAI.getGenerativeModel({
+      const response = await ai.models.generateContent({
         model: modelName,
-        generationConfig: {
+        contents: prompt,
+        config: {
           responseMimeType: "application/json",
           responseSchema: schema,
         },
       });
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      const text = response.text ?? "";
 
       let cleanText = text.trim();
       const jsonBlockMatch = cleanText.match(

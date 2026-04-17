@@ -66,9 +66,8 @@ async function generatePostContent(
     };
   }
 
-  const { GoogleGenerativeAI } = await import("@google/generative-ai");
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const { GoogleGenAI } = await import("@google/genai");
+  const ai = new GoogleGenAI({ apiKey });
 
   const commitText = commits
     .map((c) => `[${c.repo}] ${c.sha.substring(0, 7)}: ${c.message} (${c.date.substring(0, 10)})`)
@@ -76,8 +75,11 @@ async function generatePostContent(
 
   const prompt = `다음은 GitHub 사용자 "${username}"의 최근 90일 커밋 목록입니다.\n\n${commitText}\n\n이 커밋들을 분석하여 한국어 기술 블로그 포스트를 작성해주세요.\n포스트는 마크다운 형식으로, 개발자의 성장과 주요 작업을 중심으로 서술하세요.\n응답 형식: {"title": "제목", "content": "마크다운 내용"}`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
+  const response = await ai.models.generateContent({
+    model: "gemini-3.1-flash-lite-preview",
+    contents: prompt,
+  });
+  const text = (response.text ?? "").trim();
 
   // JSON 블록 추출
   const jsonMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/) || text.match(/(\{[\s\S]*\})/);
