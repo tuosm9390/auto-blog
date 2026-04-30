@@ -1,6 +1,7 @@
 ﻿import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { getPostById } from "@/lib/posts";
+import { getProjectById } from "@/lib/projects";
 
 export class AuthError extends Error {
   constructor(message: string = "인증이 필요합니다.") {
@@ -80,4 +81,15 @@ export async function requireJobOwnership(jobId: string, username: string) {
     throw new AuthError("권한이 없습니다.");
   }
   return job;
+}
+
+export async function requireProjectOwnership(projectId: string, userId: string) {
+  const project = await getProjectById(projectId);
+  if (!project) {
+    throw new Error("Project not found");
+  }
+  if (project.owner_id !== userId) {
+    throw new AuthError("권한이 없습니다.");
+  }
+  return project;
 }

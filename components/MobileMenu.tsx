@@ -54,6 +54,8 @@ export default function MobileMenu({
     setIsOpen(false);
   }
 
+  const profileHref = isLoggedIn ? "/projects" : "/";
+
   return (
     <div ref={menuRef} className="relative">
       {/* 햄버거 버튼 */}
@@ -83,7 +85,7 @@ export default function MobileMenu({
                 {/* 프로필 영역 */}
                 {(userImage || userName || username) && (
                   <Link
-                    href={"/"}
+                    href={profileHref}
                     onClick={close}
                     className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle hover:bg-elevated transition-colors"
                   >
@@ -120,9 +122,16 @@ export default function MobileMenu({
 
                 {/* 로그인한 유저 메뉴 */}
                 <Link
-                  href="/generate"
+                  href="/projects"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-medium"
+                >
+                  Projects
+                </Link>
+                <Link
+                  href="/generate"
+                  onClick={close}
+                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors font-medium"
                 >
                   {t("generate")}
                 </Link>

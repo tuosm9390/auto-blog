@@ -117,6 +117,94 @@ export interface DemoPost extends Omit<Post, 'author' | 'repo'> {
   repo: "";
 }
 
+export type ProjectStatus = "active" | "paused" | "archived";
+export type AnalysisRunStatus = "pending" | "processing" | "completed" | "failed";
+export type PlanItemStatus = "not_started" | "in_progress" | "done" | "at_risk" | "changed";
+export type DriftType = "strategic" | "scope" | "execution";
+
+export interface Project {
+  id: string;
+  owner_id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  original_thesis: string | null;
+  current_thesis: string | null;
+  status: ProjectStatus;
+  github_repo_owner: string | null;
+  github_repo_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectPlan {
+  id: string;
+  project_id: string;
+  title: string;
+  content_markdown: string;
+  summary: string | null;
+  version: number;
+  is_current: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlanProgressItem {
+  label: string;
+  status: PlanItemStatus | string;
+  evidence?: string;
+  notes?: string;
+}
+
+export interface DriftItem {
+  title: string;
+  drift_type?: DriftType | string;
+  original: string;
+  current: string;
+  why: string;
+  evidence_refs?: string[];
+}
+
+export interface EvidenceItem {
+  type: string;
+  title: string;
+  ref?: string | null;
+  url?: string | null;
+}
+
+export interface StateSnapshot {
+  id: string;
+  project_id: string;
+  analysis_run_id: string | null;
+  summary: string;
+  progress_percent: number;
+  current_phase: string;
+  blocker_count: number;
+  risk_count: number;
+  drift_count: number;
+  watch_next: string[];
+  plan_progress_json: PlanProgressItem[];
+  drift_json: DriftItem[];
+  evidence_json: EvidenceItem[];
+  raw_output_json: Record<string, unknown>;
+  generated_at: string;
+  created_at: string;
+}
+
+export interface AnalysisRun {
+  id: string;
+  project_id: string;
+  status: AnalysisRunStatus;
+  triggered_by: string | null;
+  input_summary: string | null;
+  source_window_days: number;
+  latest_snapshot_id: string | null;
+  error_message: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
 import { z } from "zod";
 
 export const DemoPostSchema = z.object({

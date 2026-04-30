@@ -33,11 +33,12 @@ export default async function Header() {
 
   const role = (session?.user as any)?.role || "user";
   const isAdmin = role === "admin";
+  const homeHref = session?.user ? "/projects" : "/";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border-subtle bg-canvas/80 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href={homeHref} className="flex items-center gap-2 group">
           <Image src="/favicon.png" alt="Synapso.dev" width={32} height={32} className="rounded-md" />
           <span className="font-display font-semibold text-lg tracking-tight group-hover:text-accent transition-colors">
             Synapso.dev
@@ -50,8 +51,14 @@ export default async function Header() {
           {session?.user && (
             <>
               <Link
-                href="/generate"
+                href="/projects"
                 className="text-sm text-accent hover:text-accent-hover transition-colors font-medium"
+              >
+                Projects
+              </Link>
+              <Link
+                href="/generate"
+                className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium"
               >
                 {t("generate")}
               </Link>

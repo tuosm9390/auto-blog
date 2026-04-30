@@ -49,6 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       // 4. 핵심 기능 및 설정 페이지 (로그인 유저 전체 허용)
       const isRestrictedPage =
+        cleanPath.includes('/projects') ||
         cleanPath.includes('/generate') ||
         cleanPath.includes('/jobs') ||
         cleanPath.includes('/settings');
