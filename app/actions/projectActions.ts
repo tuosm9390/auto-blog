@@ -11,6 +11,7 @@ import {
 } from "@/lib/projects";
 import { ProjectStatus } from "@/lib/types";
 import { redirect } from "@/i18n/routing";
+import { unstable_rethrow } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -88,6 +89,8 @@ export async function refreshProjectStateAction(locale: string, projectId: strin
     revalidatePath(`/${locale}/projects/${projectId}/runs`);
     redirect({ href: `/projects/${projectId}`, locale });
   } catch (error) {
+    unstable_rethrow(error);
+
     const message =
       error instanceof Error ? error.message : "상태 새로고침 중 오류가 발생했습니다.";
 
