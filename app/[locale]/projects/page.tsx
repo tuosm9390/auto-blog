@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect, Link } from "@/i18n/routing";
+import { getTranslations } from "next-intl/server";
 import {
   getLatestStateSnapshot,
   getProjectMemorySetupState,
@@ -19,6 +20,7 @@ export default async function ProjectsPage({
     redirect({ href: "/login", locale });
   }
   const safeUserId = userId as string;
+  const t = await getTranslations("Projects");
 
   const [setupState, projects] = await Promise.all([
     getProjectMemorySetupState(),
@@ -42,71 +44,79 @@ export default async function ProjectsPage({
       <section className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent mb-2">
-            Projects
+            {t("index.tag")}
           </p>
           <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-2">
-            Track state across active projects
+            {t("index.title")}
           </h1>
           <p className="text-text-secondary max-w-2xl">
-            Portfolio-level view for project progress, drift, blockers, and what needs attention next.
+            {t("index.description")}
           </p>
         </div>
         <Link
           href="/projects/new"
           className="px-5 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors"
         >
-          New project
+          {t("shared.newProject")}
         </Link>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-        <SummaryCard label="Active projects" value={String(activeProjects)} meta="Current active portfolio" />
-        <SummaryCard label="Blocked" value={String(blockedProjects)} meta="Projects with blockers" />
-        <SummaryCard label="High drift" value={String(highDriftProjects)} meta="Projects with 3+ drift items" />
-        <SummaryCard label="Needs review" value={String(needsReviewProjects)} meta="Projects without a snapshot" />
+        <SummaryCard label={t("index.metrics.activeProjects")} value={String(activeProjects)} meta={t("index.metrics.activeProjectsMeta")} />
+        <SummaryCard label={t("index.metrics.blocked")} value={String(blockedProjects)} meta={t("index.metrics.blockedMeta")} />
+        <SummaryCard label={t("index.metrics.highDrift")} value={String(highDriftProjects)} meta={t("index.metrics.highDriftMeta")} />
+        <SummaryCard label={t("index.metrics.needsReview")} value={String(needsReviewProjects)} meta={t("index.metrics.needsReviewMeta")} />
       </section>
 
       {setupState.ready ? (
         <section className="grid gap-4 xl:grid-cols-[1.1fr_1fr] mb-8">
           <section className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
             <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="text-lg font-semibold">First-run checklist</h2>
-              <span className="text-xs text-text-tertiary">Use this once</span>
+              <h2 className="text-lg font-semibold">{t("index.firstRunChecklist")}</h2>
+              <span className="text-xs text-text-tertiary">{t("index.firstRunChecklistMeta")}</span>
             </div>
             <div className="space-y-3">
               <ChecklistRow
-                label="Create one project"
-                detail={hasProjects ? "At least one project exists" : "Start with a single real project"}
+                label={t("index.checklist.createProject")}
+                detail={hasProjects ? t("index.checklist.createProjectDone") : t("index.checklist.createProjectTodo")}
                 ready={hasProjects}
+                readyLabel={t("shared.done")}
+                pendingLabel={t("shared.next")}
               />
               <ChecklistRow
-                label="Attach a current plan"
-                detail={hasProjects ? "Add or refine the PRD from the project edit page" : "You will add this when creating the project"}
+                label={t("index.checklist.attachPlan")}
+                detail={hasProjects ? t("index.checklist.attachPlanTodo") : t("index.checklist.attachPlanCreate")}
                 ready={projectsWithState.some((item) => Boolean(item.project.current_thesis || item.project.description))}
+                readyLabel={t("shared.done")}
+                pendingLabel={t("shared.next")}
               />
               <ChecklistRow
-                label="Connect a GitHub repo"
-                detail={hasProjects ? "Repo owner/name can be edited later too" : "You can do this during project creation"}
+                label={t("index.checklist.connectRepo")}
+                detail={hasProjects ? t("index.checklist.connectRepoTodo") : t("index.checklist.connectRepoCreate")}
                 ready={projectsWithState.some((item) => Boolean(item.project.github_repo_owner && item.project.github_repo_name))}
+                readyLabel={t("shared.done")}
+                pendingLabel={t("shared.next")}
               />
               <ChecklistRow
-                label="Run the first refresh"
-                detail={needsReviewProjects > 0 ? "Projects without snapshots still need the first run" : "At least one snapshot already exists"}
+                label={t("index.checklist.runRefresh")}
+                detail={needsReviewProjects > 0 ? t("index.checklist.runRefreshTodo") : t("index.checklist.runRefreshDone")}
                 ready={projectsWithState.some((item) => Boolean(item.snapshot))}
+                readyLabel={t("shared.done")}
+                pendingLabel={t("shared.next")}
               />
             </div>
           </section>
 
           <section className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
             <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="text-lg font-semibold">What to verify next</h2>
-              <span className="text-xs text-text-tertiary">After the first refresh</span>
+              <h2 className="text-lg font-semibold">{t("index.verifyNext")}</h2>
+              <span className="text-xs text-text-tertiary">{t("index.verifyNextMeta")}</span>
             </div>
             <ul className="space-y-2 text-sm text-text-secondary">
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`fallbackReason` should be empty if GitHub activity was included.</span></li>
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`PRD preview` should reflect the current plan instead of generic text.</span></li>
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`Commit coverage`, `PR evidence`, and `Issue evidence` should all feel believable.</span></li>
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`Watch next` should give concrete follow-up, not generic filler.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("index.verifyItems.fallbackReason")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("index.verifyItems.prdPreview")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("index.verifyItems.evidence")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("index.verifyItems.watchNext")}</span></li>
             </ul>
           </section>
         </section>
@@ -115,13 +125,13 @@ export default async function ProjectsPage({
       {!setupState.ready ? (
         <section className="mb-8 border border-yellow-500/30 rounded-2xl p-5 bg-yellow-500/10">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-yellow-500 mb-2">
-            Setup required
+            {t("shared.setupRequired")}
           </p>
           <p className="text-sm text-text-secondary leading-7">
-            {setupState.message} After running the SQL, reload this page and create your first project.
+            {setupState.message} {t("index.setupReload")}
           </p>
           <p className="mt-3 text-xs text-text-tertiary">
-            SQL file: <span className="text-text-primary">scripts/add-project-memory-core.sql</span>
+            {t("index.sqlFile")}: <span className="text-text-primary">scripts/add-project-memory-core.sql</span>
           </p>
         </section>
       ) : null}
@@ -129,15 +139,15 @@ export default async function ProjectsPage({
       {projectsWithState.length === 0 ? (
         <section className="border border-border-subtle rounded-2xl p-10 md:p-16 text-center bg-surface/30">
           <div className="text-5xl mb-4 opacity-50">🗂️</div>
-          <h2 className="text-2xl font-semibold mb-2">No projects yet</h2>
+          <h2 className="text-2xl font-semibold mb-2">{t("index.emptyTitle")}</h2>
           <p className="text-text-secondary max-w-xl mx-auto mb-6">
-            Create your first project, attach a plan, and start turning GitHub activity into a state board instead of another pile of notes.
+            {t("index.emptyDescription")}
           </p>
           <Link
             href="/projects/new"
             className="inline-flex px-6 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors"
           >
-            Create first project
+            {t("index.createFirstProject")}
           </Link>
         </section>
       ) : (
@@ -152,24 +162,24 @@ export default async function ProjectsPage({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <h2 className="text-xl font-semibold">{project.name}</h2>
-                    <StatusPill label={project.status} tone="neutral" />
-                    {snapshot?.drift_count ? <StatusPill label={`${snapshot.drift_count} drift`} tone="accent" /> : null}
-                    {snapshot?.blocker_count ? <StatusPill label={`${snapshot.blocker_count} blocked`} tone="danger" /> : null}
+                    <StatusPill label={t(`shared.status.${project.status}`)} tone="neutral" />
+                    {snapshot?.drift_count ? <StatusPill label={t("index.labels.driftCount", {count: snapshot.drift_count})} tone="accent" /> : null}
+                    {snapshot?.blocker_count ? <StatusPill label={t("index.labels.blockedCount", {count: snapshot.blocker_count})} tone="danger" /> : null}
                   </div>
                   <p className="text-sm text-text-secondary mb-3">
-                    {project.current_thesis || project.description || "No current thesis yet"}
+                    {project.current_thesis || project.description || t("shared.noCurrentThesis")}
                   </p>
                   <div className="text-xs text-text-tertiary flex flex-wrap gap-x-4 gap-y-2">
-                    <span>Repo: {project.github_repo_owner && project.github_repo_name ? `${project.github_repo_owner}/${project.github_repo_name}` : "not connected"}</span>
-                    <span>Updated: {new Date(project.updated_at).toLocaleDateString()}</span>
+                    <span>{t("shared.repo")}: {project.github_repo_owner && project.github_repo_name ? `${project.github_repo_owner}/${project.github_repo_name}` : t("shared.notConnected")}</span>
+                    <span>{t("shared.updated")}: {new Date(project.updated_at).toLocaleDateString()}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3 lg:w-[420px]">
-                  <MetricTile label="Progress" value={snapshot ? `${snapshot.progress_percent}%` : "—"} />
-                  <MetricTile label="Phase" value={snapshot?.current_phase || "No snapshot"} />
-                  <MetricTile label="Risks" value={snapshot ? String(snapshot.risk_count) : "—"} />
-                  <MetricTile label="Watch next" value={snapshot?.watch_next?.[0] || "Refresh state"} />
+                  <MetricTile label={t("shared.progress")} value={snapshot ? `${snapshot.progress_percent}%` : "—"} />
+                  <MetricTile label={t("shared.phase")} value={snapshot?.current_phase || t("shared.noSnapshot")} />
+                  <MetricTile label={t("shared.risks")} value={snapshot ? String(snapshot.risk_count) : "—"} />
+                  <MetricTile label={t("shared.watchNext")} value={snapshot?.watch_next?.[0] || t("shared.refreshState")} />
                 </div>
               </div>
             </Link>
@@ -184,17 +194,21 @@ function ChecklistRow({
   label,
   detail,
   ready,
+  readyLabel,
+  pendingLabel,
 }: {
   label: string;
   detail: string;
   ready: boolean;
+  readyLabel: string;
+  pendingLabel: string;
 }) {
   return (
     <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30 flex items-start justify-between gap-4">
-      <div>
-        <p className="font-medium mb-1">{label}</p>
-        <p className="text-sm text-text-secondary">{detail}</p>
-      </div>
+        <div>
+          <p className="font-medium mb-1">{label}</p>
+          <p className="text-sm text-text-secondary">{detail}</p>
+        </div>
       <span
         className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
           ready
@@ -202,7 +216,7 @@ function ChecklistRow({
             : "bg-elevated text-text-secondary border border-border-subtle"
         }`}
       >
-        {ready ? "done" : "next"}
+        {ready ? readyLabel : pendingLabel}
       </span>
     </div>
   );

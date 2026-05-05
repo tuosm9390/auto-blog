@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect, Link } from "@/i18n/routing";
+import { getTranslations } from "next-intl/server";
 import {
   getAnalysisRunsByProject,
   getLatestStateSnapshot,
@@ -19,6 +20,7 @@ export default async function ProjectRunsPage({
     redirect({ href: "/login", locale });
   }
   const safeUserId = userId as string;
+  const t = await getTranslations("Projects");
 
   const [project, runs, latestSnapshot] = await Promise.all([
     getProjectById(id),
@@ -36,47 +38,47 @@ export default async function ProjectRunsPage({
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       <section className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent mb-2">Analysis runs</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent mb-2">{t("runs.tag")}</p>
           <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-2">
             {currentProject.name}
           </h1>
           <p className="text-text-secondary max-w-3xl">
-            Inspect refresh runs, failure states, and the latest raw snapshot output without guessing what the model did.
+            {t("runs.description")}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href={`/projects/${currentProject.id}`}
             className="px-5 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors text-center"
-          >
-            Back to state
+        >
+            {t("shared.backToState")}
           </Link>
           <Link
             href={`/projects/${currentProject.id}/drift`}
             className="px-5 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors text-center"
-          >
-            Review drift
+        >
+            {t("shared.reviewDrift")}
           </Link>
         </div>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-        <MetricCard label="Total runs" value={String(runs.length)} meta="Refresh attempts for this project" />
-        <MetricCard label="Completed" value={String(runs.filter((run) => run.status === "completed").length)} meta="Successful state refreshes" />
-        <MetricCard label="Failed" value={String(runs.filter((run) => run.status === "failed").length)} meta="Runs that need inspection" />
-        <MetricCard label="Latest snapshot" value={latestSnapshot ? new Date(latestSnapshot.generated_at).toLocaleDateString() : "None"} meta="Most recent saved state" />
+        <MetricCard label={t("runs.metrics.totalRuns")} value={String(runs.length)} meta={t("runs.metrics.totalRunsMeta")} />
+        <MetricCard label={t("runs.metrics.completed")} value={String(runs.filter((run) => run.status === "completed").length)} meta={t("runs.metrics.completedMeta")} />
+        <MetricCard label={t("runs.metrics.failed")} value={String(runs.filter((run) => run.status === "failed").length)} meta={t("runs.metrics.failedMeta")} />
+        <MetricCard label={t("runs.metrics.latestSnapshot")} value={latestSnapshot ? new Date(latestSnapshot.generated_at).toLocaleDateString() : t("shared.none")} meta={t("runs.metrics.latestSnapshotMeta")} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.15fr_1fr]">
         <section className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
           <div className="flex items-center justify-between gap-4 mb-4">
-            <h2 className="text-lg font-semibold">Run history</h2>
-            <span className="text-xs text-text-tertiary">Newest first</span>
+            <h2 className="text-lg font-semibold">{t("runs.runHistory")}</h2>
+            <span className="text-xs text-text-tertiary">{t("runs.newestFirst")}</span>
           </div>
 
           {runs.length === 0 ? (
             <p className="text-sm text-text-secondary leading-7">
-              No runs yet. Go back to the state page and trigger <span className="text-text-primary font-medium">Refresh state</span>.
+              {t("runs.noRunsPrefix")} <span className="text-text-primary font-medium">{t("shared.refreshState")}</span>.
             </p>
           ) : (
             <div className="space-y-3">
@@ -89,7 +91,7 @@ export default async function ProjectRunsPage({
                     <div>
                       <p className="font-medium">{run.id.slice(0, 8)}</p>
                       <p className="text-xs text-text-tertiary mt-1">
-                        Created {new Date(run.created_at).toLocaleString()}
+                        {t("shared.created")} {new Date(run.created_at).toLocaleString()}
                       </p>
                     </div>
                     <StatusPill status={run.status} />
@@ -98,22 +100,22 @@ export default async function ProjectRunsPage({
                   <div className="grid gap-3 sm:grid-cols-2 text-sm text-text-secondary">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-1">
-                        Input summary
+                        {t("runs.inputSummary")}
                       </p>
-                      <p>{run.input_summary || "No summary recorded"}</p>
+                      <p>{run.input_summary || t("runs.noSummaryRecorded")}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-1">
-                        Source window
+                        {t("runs.sourceWindow")}
                       </p>
-                      <p>{run.source_window_days} day(s)</p>
+                      <p>{t("shared.days", {count: run.source_window_days})}</p>
                     </div>
                   </div>
 
                   {run.error_message ? (
                     <div className="mt-3 border border-error/30 bg-error/10 rounded-lg p-3">
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-error mb-1">
-                        Error
+                        {t("shared.error")}
                       </p>
                       <p className="text-sm text-text-secondary">{run.error_message}</p>
                     </div>
@@ -126,44 +128,44 @@ export default async function ProjectRunsPage({
 
         <section className="space-y-4">
           <section className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
-            <h2 className="text-lg font-semibold mb-4">Latest snapshot summary</h2>
+            <h2 className="text-lg font-semibold mb-4">{t("runs.latestSnapshotSummary")}</h2>
             {latestSnapshot ? (
               <div className="space-y-4 text-sm text-text-secondary">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-1">
-                    Summary
+                    {t("shared.summary")}
                   </p>
                   <p className="leading-7">{latestSnapshot.summary}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <MiniMetric label="Progress" value={`${latestSnapshot.progress_percent}%`} />
-                  <MiniMetric label="Phase" value={latestSnapshot.current_phase} />
-                  <MiniMetric label="Drift" value={String(latestSnapshot.drift_count)} />
-                  <MiniMetric label="Risks" value={String(latestSnapshot.risk_count)} />
+                  <MiniMetric label={t("shared.progress")} value={`${latestSnapshot.progress_percent}%`} />
+                  <MiniMetric label={t("shared.phase")} value={latestSnapshot.current_phase} />
+                  <MiniMetric label={t("shared.drift")} value={String(latestSnapshot.drift_count)} />
+                  <MiniMetric label={t("shared.risks")} value={String(latestSnapshot.risk_count)} />
                 </div>
                 <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">
-                    Snapshot source
+                    {t("runs.snapshotSource")}
                   </p>
-                  <SnapshotSourceSummary rawOutput={latestSnapshot.raw_output_json} />
+                  <SnapshotSourceSummary rawOutput={latestSnapshot.raw_output_json} t={t} />
                 </div>
               </div>
             ) : (
               <p className="text-sm text-text-secondary leading-7">
-                No snapshot saved yet.
+                {t("runs.noSnapshotSaved")}
               </p>
             )}
           </section>
 
           <section className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
-            <h2 className="text-lg font-semibold mb-4">Latest raw output</h2>
+            <h2 className="text-lg font-semibold mb-4">{t("runs.latestRawOutput")}</h2>
             {latestSnapshot ? (
               <pre className="overflow-x-auto rounded-xl border border-border-subtle bg-canvas/40 p-4 text-xs text-text-secondary whitespace-pre-wrap break-words">
                 {JSON.stringify(latestSnapshot.raw_output_json, null, 2)}
               </pre>
             ) : (
               <p className="text-sm text-text-secondary leading-7">
-                Raw output appears here after the first completed refresh.
+                {t("runs.rawOutputHint")}
               </p>
             )}
           </section>
@@ -175,8 +177,10 @@ export default async function ProjectRunsPage({
 
 function SnapshotSourceSummary({
   rawOutput,
+  t,
 }: {
   rawOutput: Record<string, unknown>;
+  t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   const mode = typeof rawOutput.mode === "string" ? rawOutput.mode : "unknown";
   const repoConfigured = Boolean(rawOutput.repoConfigured);
@@ -222,52 +226,52 @@ function SnapshotSourceSummary({
   return (
     <div className="space-y-2 text-sm text-text-secondary">
       <p>
-        Mode: <span className="text-text-primary">{mode}</span>
+        {t("runs.mode")}: <span className="text-text-primary">{mode}</span>
       </p>
       <p>
-        Plan attached: <span className="text-text-primary">{generatedFromPlan ? "yes" : "no"}</span>
+        {t("runs.planAttached")}: <span className="text-text-primary">{generatedFromPlan ? t("shared.yes") : t("shared.no")}</span>
       </p>
       <p>
-        Repo configured: <span className="text-text-primary">{repoConfigured ? "yes" : "no"}</span>
+        {t("runs.repoConfigured")}: <span className="text-text-primary">{repoConfigured ? t("shared.yes") : t("shared.no")}</span>
       </p>
       <p>
-        Token available: <span className="text-text-primary">{tokenAvailable ? "yes" : "no"}</span>
+        {t("runs.tokenAvailable")}: <span className="text-text-primary">{tokenAvailable ? t("shared.yes") : t("shared.no")}</span>
       </p>
       <p>
-        GitHub evidence:{" "}
+        {t("runs.githubEvidence")}:{" "}
         <span className="text-text-primary">
-          {generatedFromGithub ? `${commitCount} commit(s)` : "not included"}
+          {generatedFromGithub ? t("runs.commitCount", {count: commitCount}) : t("runs.notIncluded")}
         </span>
       </p>
       {fallbackReason ? (
         <p>
-          Fallback reason: <span className="text-text-primary">{fallbackReason}</span>
+          {t("runs.fallbackReason")}: <span className="text-text-primary">{fallbackReason}</span>
         </p>
       ) : null}
       {planSummary?.objective ? (
         <p>
-          PRD objective: <span className="text-text-primary">{planSummary.objective}</span>
+          {t("runs.prdObjective")}: <span className="text-text-primary">{planSummary.objective}</span>
         </p>
       ) : null}
       {commitCoverage?.analyzedCommitRefs?.length ? (
         <p>
-          Commit refs:{" "}
+          {t("runs.commitRefs")}:{" "}
           <span className="text-text-primary">{commitCoverage.analyzedCommitRefs.join(", ")}</span>
         </p>
       ) : null}
       {typeof commitCoverage?.touchedFileCount === "number" ? (
         <p>
-          Touched files: <span className="text-text-primary">{commitCoverage.touchedFileCount}</span>
+          {t("runs.touchedFiles")}: <span className="text-text-primary">{commitCoverage.touchedFileCount}</span>
         </p>
       ) : null}
       {pullRequestCount > 0 ? (
         <p>
-          Linked PRs: <span className="text-text-primary">{pullRequestCount}</span>
+          {t("runs.linkedPrs")}: <span className="text-text-primary">{pullRequestCount}</span>
         </p>
       ) : null}
       {pullRequests.length > 0 ? (
         <p>
-          PR refs:{" "}
+          {t("runs.prRefs")}:{" "}
           <span className="text-text-primary">
             {pullRequests.slice(0, 3).map((pull) => `#${pull.number} ${pull.title || ""}`.trim()).join(", ")}
           </span>
@@ -275,12 +279,12 @@ function SnapshotSourceSummary({
       ) : null}
       {issueCount > 0 ? (
         <p>
-          Linked issues: <span className="text-text-primary">{issueCount}</span>
+          {t("runs.linkedIssues")}: <span className="text-text-primary">{issueCount}</span>
         </p>
       ) : null}
       {issues.length > 0 ? (
         <p>
-          Issue refs:{" "}
+          {t("runs.issueRefs")}:{" "}
           <span className="text-text-primary">
             {issues.slice(0, 3).map((issue) => `#${issue.number} ${issue.title || ""}`.trim()).join(", ")}
           </span>

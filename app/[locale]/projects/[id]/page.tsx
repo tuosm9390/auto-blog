@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect, Link } from "@/i18n/routing";
 import { refreshProjectStateAction } from "@/app/actions/projectActions";
+import { getTranslations } from "next-intl/server";
 import {
   getAnalysisRunsByProject,
   getCurrentProjectPlan,
@@ -23,6 +24,7 @@ export default async function ProjectStatePage({
   }
   const safeUserId = userId as string;
   const hasAccessToken = Boolean((session?.user as { accessToken?: string } | undefined)?.accessToken);
+  const t = await getTranslations("Projects");
 
   const [project, plan, snapshot, runs, snapshots] = await Promise.all([
     getProjectById(id),
@@ -95,24 +97,24 @@ export default async function ProjectStatePage({
   const issues = rawMeta.issues ?? [];
   const readinessChecks = [
     {
-      label: "Plan attached",
+      label: t("state.checks.planAttached"),
       ready: Boolean(plan?.content_markdown?.trim()),
-      detail: plan ? plan.title : "No current plan yet",
+      detail: plan ? plan.title : t("state.noCurrentPlan"),
     },
     {
-      label: "Repo connected",
+      label: t("state.checks.repoConnected"),
       ready: Boolean(currentProject.github_repo_owner && currentProject.github_repo_name),
       detail:
         currentProject.github_repo_owner && currentProject.github_repo_name
           ? `${currentProject.github_repo_owner}/${currentProject.github_repo_name}`
-          : "GitHub repository is not connected",
+          : t("state.checks.connectRepo"),
     },
     {
-      label: "GitHub activity in snapshot",
+      label: t("state.checks.githubActivityInSnapshot"),
       ready: Boolean(rawMeta.generatedFromGithub),
       detail: rawMeta.generatedFromGithub
-        ? `${rawMeta.commitCount ?? 0} commit(s) analyzed`
-        : "Latest snapshot was created without GitHub activity",
+        ? t("runs.commitCount", {count: rawMeta.commitCount ?? 0})
+        : t("state.githubActivityMissing"),
     },
   ];
   const hasSnapshot = Boolean(snapshot);
@@ -121,17 +123,17 @@ export default async function ProjectStatePage({
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
       <section className="mb-8 flex flex-col xl:flex-row xl:items-end justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent mb-2">Project state</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent mb-2">{t("state.tag")}</p>
           <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-2">
             {currentProject.name}
           </h1>
           <p className="text-text-secondary max-w-3xl">
-            {currentProject.current_thesis || currentProject.description || "No current thesis yet"}
+            {currentProject.current_thesis || currentProject.description || t("shared.noCurrentThesis")}
           </p>
           <div className="mt-3 text-xs text-text-tertiary flex flex-wrap gap-x-4 gap-y-2">
-            <span>Original thesis: {currentProject.original_thesis || "Not set"}</span>
-            <span>Repo: {currentProject.github_repo_owner && currentProject.github_repo_name ? `${currentProject.github_repo_owner}/${currentProject.github_repo_name}` : "not connected"}</span>
-            <span>Status: {currentProject.status}</span>
+            <span>{t("shared.originalThesis")}: {currentProject.original_thesis || t("shared.notSet")}</span>
+            <span>{t("shared.repo")}: {currentProject.github_repo_owner && currentProject.github_repo_name ? `${currentProject.github_repo_owner}/${currentProject.github_repo_name}` : t("shared.notConnected")}</span>
+            <span>{t("shared.statusLabel")}: {t(`shared.status.${currentProject.status}`)}</span>
           </div>
         </div>
 
@@ -140,87 +142,93 @@ export default async function ProjectStatePage({
             href={`/projects/${currentProject.id}/edit`}
             className="px-5 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors text-center"
           >
-            Edit project
+            {t("shared.editProject")}
           </Link>
           <Link
             href={`/projects/${currentProject.id}/runs`}
             className="px-5 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors text-center"
           >
-            View runs
+            {t("shared.viewRuns")}
           </Link>
           <Link
             href={`/projects/${currentProject.id}/drift`}
             className="px-5 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors text-center"
           >
-            Review drift
+            {t("shared.reviewDrift")}
           </Link>
           <form action={refreshAction}>
             <button
               type="submit"
               className="w-full px-5 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors"
             >
-              Refresh state
+              {t("shared.refreshState")}
             </button>
           </form>
         </div>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-        <MetricCard label="Progress" value={snapshot ? `${snapshot.progress_percent}%` : "—"} meta={snapshot ? "Latest snapshot" : "No snapshot yet"} />
-        <MetricCard label="Current phase" value={snapshot?.current_phase || "Not analyzed"} meta="State board status" />
-        <MetricCard label="Plan drift" value={snapshot ? String(snapshot.drift_count) : "—"} meta="Changed decisions detected" />
-        <MetricCard label="Blocked / Risks" value={snapshot ? `${snapshot.blocker_count} / ${snapshot.risk_count}` : "—"} meta="Open blockers and risks" />
+        <MetricCard label={t("shared.progress")} value={snapshot ? `${snapshot.progress_percent}%` : "—"} meta={snapshot ? t("state.metrics.latestSnapshot") : t("state.metrics.noSnapshotYet")} />
+        <MetricCard label={t("shared.currentPhase")} value={snapshot?.current_phase || t("state.metrics.notAnalyzed")} meta={t("state.metrics.stateBoardStatus")} />
+        <MetricCard label={t("state.metrics.planDrift")} value={snapshot ? String(snapshot.drift_count) : "—"} meta={t("state.metrics.planDriftMeta")} />
+        <MetricCard label={t("state.metrics.blockedRisks")} value={snapshot ? `${snapshot.blocker_count} / ${snapshot.risk_count}` : "—"} meta={t("state.metrics.blockedRisksMeta")} />
       </section>
 
       {!hasSnapshot ? (
         <section className="grid gap-4 xl:grid-cols-[1.05fr_1fr] mb-8">
-          <Panel title="Before first refresh">
+        <Panel title={t("state.beforeFirstRefresh")}>
             <div className="space-y-3">
               <ChecklistRow
-                label="Plan attached"
-                detail={plan ? `Current plan: ${plan.title}` : "Add a PRD or rough markdown plan from Edit project"}
+                label={t("state.checks.planAttached")}
+                detail={plan ? t("state.checks.currentPlan", {title: plan.title}) : t("state.checks.addPlan")}
                 ready={Boolean(plan?.content_markdown?.trim())}
+                readyLabel={t("shared.ready")}
+                pendingLabel={t("shared.check")}
               />
               <ChecklistRow
-                label="Repo connected"
+                label={t("state.checks.repoConnected")}
                 detail={
                   currentProject.github_repo_owner && currentProject.github_repo_name
                     ? `${currentProject.github_repo_owner}/${currentProject.github_repo_name}`
-                    : "Connect the GitHub repository from Edit project"
+                    : t("state.checks.connectRepo")
                 }
                 ready={Boolean(currentProject.github_repo_owner && currentProject.github_repo_name)}
+                readyLabel={t("shared.ready")}
+                pendingLabel={t("shared.check")}
               />
               <ChecklistRow
-                label="Auth token available"
-                detail="If the refresh falls back to baseline, check the latest run and GitHub auth state."
+                label={t("state.checks.authToken")}
+                detail={t("state.checks.authTokenDetail")}
                 ready={hasAccessToken}
+                readyLabel={t("shared.ready")}
+                pendingLabel={t("shared.check")}
               />
             </div>
           </Panel>
 
-          <Panel title="What a good first result looks like">
+          <Panel title={t("state.goodFirstResult")}>
             <ul className="space-y-2 text-sm text-text-secondary">
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`Current snapshot` mentions actual work instead of generic setup text.</span></li>
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`Commit coverage` shows multiple refs and touched files.</span></li>
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`PR evidence` or `Issue evidence` shows linked context when available.</span></li>
-              <li className="flex gap-2"><span className="text-accent">•</span><span>`Watch next` gives concrete next actions you would actually take.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.goodFirstResultItems.snapshot")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.goodFirstResultItems.commitCoverage")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.goodFirstResultItems.evidence")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.goodFirstResultItems.watchNext")}</span></li>
             </ul>
           </Panel>
         </section>
       ) : null}
 
       <section className="grid gap-4 xl:grid-cols-[1.4fr_1fr] mb-8">
-        <Panel title="Current snapshot">
+        <Panel title={t("state.currentSnapshot")}>
           {snapshot ? (
             <p className="text-sm text-text-secondary leading-7">{snapshot.summary}</p>
           ) : (
             <EmptyText>
-              No state snapshot yet. Run <span className="text-text-primary font-medium">Refresh state</span> to create a baseline board.
+              {t("state.noSnapshotPrefix")} <span className="text-text-primary font-medium">{t("shared.refreshState")}</span> {t("state.noSnapshotSuffix")}
             </EmptyText>
           )}
         </Panel>
 
-        <Panel title="Watch next">
+        <Panel title={t("shared.watchNext")}>
           {snapshot?.watch_next?.length ? (
             <ul className="space-y-2 text-sm text-text-secondary">
               {snapshot.watch_next.map((item) => (
@@ -232,14 +240,14 @@ export default async function ProjectStatePage({
             </ul>
           ) : (
             <EmptyText>
-              Attach a plan, connect the repo, and create the first snapshot.
+              {t("state.attachPlanHint")}
             </EmptyText>
           )}
         </Panel>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.15fr_1fr] mb-8">
-        <Panel title="Data quality checks">
+        <Panel title={t("state.dataQualityChecks")}>
           <div className="space-y-3">
             {readinessChecks.map((item) => (
               <div
@@ -257,58 +265,58 @@ export default async function ProjectStatePage({
                       : "bg-error/10 text-error border border-error/30"
                   }`}
                 >
-                  {item.ready ? "ready" : "missing"}
+                  {item.ready ? t("shared.ready") : t("shared.missing")}
                 </span>
               </div>
             ))}
           </div>
         </Panel>
 
-        <Panel title="Last refresh">
+        <Panel title={t("state.lastRefresh")}>
           {latestRun ? (
             <div className="space-y-4 text-sm text-text-secondary">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-medium text-text-primary">Run {latestRun.id.slice(0, 8)}</p>
+                <p className="font-medium text-text-primary">{t("shared.run")} {latestRun.id.slice(0, 8)}</p>
                 <RunStatusPill status={latestRun.status} />
               </div>
               <div className="space-y-2">
-                <p>Created: {new Date(latestRun.created_at).toLocaleString()}</p>
-                <p>Window: {latestRun.source_window_days} day(s)</p>
+                <p>{t("shared.created")}: {new Date(latestRun.created_at).toLocaleString()}</p>
+                <p>{t("shared.window")}: {t("shared.days", {count: latestRun.source_window_days})}</p>
                 <p>
-                  Snapshot mode:{" "}
+                  {t("state.snapshotMode")}:{" "}
                   <span className="text-text-primary">
-                    {rawMeta.mode === "project_state_analysis" ? "GitHub + plan analysis" : "Plan-only baseline"}
+                    {rawMeta.mode === "project_state_analysis" ? t("state.snapshotModeGithubPlan") : t("state.snapshotModeBaseline")}
                   </span>
                 </p>
                 {rawMeta.fallbackReason ? (
                   <p>
-                    Fallback reason: <span className="text-text-primary">{rawMeta.fallbackReason}</span>
+                    {t("state.fallbackReason")}: <span className="text-text-primary">{rawMeta.fallbackReason}</span>
                   </p>
                 ) : null}
               </div>
               {latestRun.error_message ? (
                 <div className="border border-error/30 bg-error/10 rounded-lg p-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-error mb-1">Error</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-error mb-1">{t("shared.error")}</p>
                   <p>{latestRun.error_message}</p>
                 </div>
               ) : null}
             </div>
           ) : (
             <EmptyText>
-              No refresh run yet. The first run will show whether this board is using GitHub activity or only a baseline plan.
+              {t("state.noRefreshRun")}
             </EmptyText>
           )}
         </Panel>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.1fr_1fr] mb-8">
-        <Panel title="PRD preview" headerAction={rawMeta.planTitle || plan?.title || "No plan title"}>
+        <Panel title={t("state.prdPreview")} headerAction={rawMeta.planTitle || plan?.title || t("state.noPlanTitle")}>
           {planPreviewLines.length > 0 || planObjective ? (
             <div className="space-y-4 text-sm text-text-secondary">
               {planObjective ? (
                 <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">
-                    Objective
+                    {t("state.objective")}
                   </p>
                   <p>{planObjective}</p>
                 </div>
@@ -325,23 +333,23 @@ export default async function ProjectStatePage({
             </div>
           ) : (
             <EmptyText>
-              Attach a PRD or working plan to give the state board stronger product context.
+              {t("state.attachPrdHint")}
             </EmptyText>
           )}
         </Panel>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1fr_1fr] mb-8">
-        <Panel title="Commit coverage">
+        <Panel title={t("state.commitCoverage")}>
           {rawMeta.generatedFromGithub ? (
             <div className="space-y-4 text-sm text-text-secondary">
               <div className="grid grid-cols-2 gap-3">
-                <MiniInfoCard label="Commits analyzed" value={String(rawMeta.commitCount ?? 0)} />
-                <MiniInfoCard label="Touched files" value={String(touchedFileCount)} />
+                <MiniInfoCard label={t("state.commitsAnalyzed")} value={String(rawMeta.commitCount ?? 0)} />
+                <MiniInfoCard label={t("state.touchedFiles")} value={String(touchedFileCount)} />
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">
-                  Commit refs
+                  {t("state.commitRefs")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {commitRefs.map((ref) => (
@@ -353,7 +361,7 @@ export default async function ProjectStatePage({
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">
-                  File sample
+                  {t("state.fileSample")}
                 </p>
                 <div className="space-y-2">
                   {touchedFilesSample.map((file) => (
@@ -366,17 +374,17 @@ export default async function ProjectStatePage({
             </div>
           ) : (
             <EmptyText>
-              GitHub-backed commit coverage appears after a refresh run with repo connection and token access.
+              {t("state.commitCoverageHint")}
             </EmptyText>
           )}
         </Panel>
 
-        <Panel title="PR evidence">
+        <Panel title={t("state.prEvidence")}>
           {pullRequests.length > 0 ? (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <MiniInfoCard label="PRs linked" value={String(rawMeta.pullRequestCount ?? pullRequests.length)} />
-                <MiniInfoCard label="Merged" value={String(pullRequests.filter((pull) => pull.merged).length)} />
+                <MiniInfoCard label={t("state.prsLinked")} value={String(rawMeta.pullRequestCount ?? pullRequests.length)} />
+                <MiniInfoCard label={t("state.merged")} value={String(pullRequests.filter((pull) => pull.merged).length)} />
               </div>
               {pullRequests.slice(0, 3).map((pull) => (
                 <div key={`${pull.number}-${pull.title}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
@@ -386,27 +394,27 @@ export default async function ProjectStatePage({
                       #{pull.number}
                     </span>
                   </div>
-                  <p className="text-sm text-text-secondary">
-                    {pull.author || "unknown"} · {pull.merged ? "merged" : pull.state || "open"}
+                    <p className="text-sm text-text-secondary">
+                    {pull.author || t("shared.unknown")} · {pull.merged ? t("state.mergedLower") : pull.state || t("state.open")}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
             <EmptyText>
-              PR-backed reasoning appears when recent commits can be associated with pull requests.
+              {t("state.prEvidenceHint")}
             </EmptyText>
           )}
         </Panel>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1fr_1fr] mb-8">
-        <Panel title="Issue evidence">
+        <Panel title={t("state.issueEvidence")}>
           {issues.length > 0 ? (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <MiniInfoCard label="Issues linked" value={String(rawMeta.issueCount ?? issues.length)} />
-                <MiniInfoCard label="Open issues" value={String(rawMeta.issueCoverage?.openIssueCount ?? 0)} />
+                <MiniInfoCard label={t("state.issuesLinked")} value={String(rawMeta.issueCount ?? issues.length)} />
+                <MiniInfoCard label={t("state.openIssues")} value={String(rawMeta.issueCoverage?.openIssueCount ?? 0)} />
               </div>
               {issues.slice(0, 3).map((issue) => (
                 <div key={`${issue.number}-${issue.title}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
@@ -417,19 +425,19 @@ export default async function ProjectStatePage({
                     </span>
                   </div>
                   <p className="text-sm text-text-secondary">
-                    {issue.author || "unknown"} · {issue.state || "unknown"}
+                    {issue.author || t("shared.unknown")} · {issue.state || t("shared.unknown")}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
             <EmptyText>
-              Issue-backed reasoning appears when commit or PR text references GitHub issues.
+              {t("state.issueEvidenceHint")}
             </EmptyText>
           )}
         </Panel>
 
-        <Panel title="Evidence summary">
+        <Panel title={t("state.evidenceSummary")}>
           {snapshot?.evidence_json?.length ? (
             <div className="space-y-3">
               {snapshot.evidence_json.slice(0, 6).map((item, index) => {
@@ -438,21 +446,21 @@ export default async function ProjectStatePage({
                   <div key={`${evidence.type || "evidence"}-${index}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">{evidence.type || "evidence"}</p>
                     <p className="font-medium mb-1">{evidence.title || "Untitled evidence"}</p>
-                    <p className="text-xs text-text-tertiary">{evidence.ref || "No ref"}</p>
+                    <p className="text-xs text-text-tertiary">{evidence.ref || t("shared.noRef")}</p>
                   </div>
                 );
               })}
             </div>
           ) : (
             <EmptyText>
-              Evidence links will appear here as plans, issues, pull requests, and commits get attached to snapshots.
+              {t("state.evidenceSummaryHint")}
             </EmptyText>
           )}
         </Panel>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr] mb-8">
-        <Panel title="Snapshot history" headerAction={`${snapshotHistory.length} saved`}>
+        <Panel title={t("state.snapshotHistory")} headerAction={t("state.savedCount", {count: snapshotHistory.length})}>
           {snapshotHistory.length > 0 ? (
             <div className="space-y-3">
               {snapshotHistory.map((historyItem, index) => {
@@ -477,12 +485,12 @@ export default async function ProjectStatePage({
                         {new Date(historyItem.generated_at).toLocaleString()}
                       </p>
                       <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-elevated text-text-secondary border border-border-subtle">
-                        {historyMeta.mode === "project_state_analysis" ? "github+plan" : "baseline"}
+                        {historyMeta.mode === "project_state_analysis" ? t("state.githubPlan") : t("state.baseline")}
                       </span>
                     </div>
                     <div className="grid sm:grid-cols-3 gap-3 text-sm text-text-secondary">
                       <p>
-                        Progress:{" "}
+                        {t("shared.progress")}:{" "}
                         <span className="text-text-primary font-medium">
                           {historyItem.progress_percent}%
                         </span>
@@ -494,7 +502,7 @@ export default async function ProjectStatePage({
                         ) : null}
                       </p>
                       <p>
-                        Drift:{" "}
+                        {t("shared.drift")}:{" "}
                         <span className="text-text-primary font-medium">
                           {historyItem.drift_count}
                         </span>
@@ -506,7 +514,7 @@ export default async function ProjectStatePage({
                         ) : null}
                       </p>
                       <p>
-                        Phase:{" "}
+                        {t("shared.phase")}:{" "}
                         <span className="text-text-primary font-medium">
                           {historyItem.current_phase}
                         </span>
@@ -518,38 +526,38 @@ export default async function ProjectStatePage({
             </div>
           ) : (
             <EmptyText>
-              Snapshot history appears after refresh runs start accumulating.
+              {t("state.snapshotHistoryHint")}
             </EmptyText>
           )}
         </Panel>
 
-        <Panel title="Change since last snapshot">
+        <Panel title={t("state.changeSinceLastSnapshot")}>
           {snapshot && previousSnapshot ? (
             <div className="space-y-4 text-sm text-text-secondary">
               <ChangeLine
-                label="Progress delta"
+                label={t("state.progressDelta")}
                 value={`${snapshot.progress_percent - previousSnapshot.progress_percent >= 0 ? "+" : ""}${snapshot.progress_percent - previousSnapshot.progress_percent}pt`}
                 positive={snapshot.progress_percent >= previousSnapshot.progress_percent}
               />
               <ChangeLine
-                label="Drift delta"
+                label={t("state.driftDelta")}
                 value={`${snapshot.drift_count - previousSnapshot.drift_count >= 0 ? "+" : ""}${snapshot.drift_count - previousSnapshot.drift_count}`}
                 positive={snapshot.drift_count <= previousSnapshot.drift_count}
               />
               <ChangeLine
-                label="Risk delta"
+                label={t("state.riskDelta")}
                 value={`${snapshot.risk_count - previousSnapshot.risk_count >= 0 ? "+" : ""}${snapshot.risk_count - previousSnapshot.risk_count}`}
                 positive={snapshot.risk_count <= previousSnapshot.risk_count}
               />
               <ChangeLine
-                label="Blocker delta"
+                label={t("state.blockerDelta")}
                 value={`${snapshot.blocker_count - previousSnapshot.blocker_count >= 0 ? "+" : ""}${snapshot.blocker_count - previousSnapshot.blocker_count}`}
                 positive={snapshot.blocker_count <= previousSnapshot.blocker_count}
               />
             </div>
           ) : (
             <EmptyText>
-              You need at least two saved snapshots before this board can show meaningful change over time.
+              {t("state.changeSinceLastSnapshotHint")}
             </EmptyText>
           )}
         </Panel>
@@ -557,8 +565,8 @@ export default async function ProjectStatePage({
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr] mb-8">
         <Panel
-          title="Progress against plan"
-          headerAction={plan ? `Plan: ${plan.title}` : "No current plan"}
+          title={t("state.progressAgainstPlan")}
+          headerAction={plan ? t("state.planTitle", {title: plan.title}) : t("state.noCurrentPlan")}
         >
           {planItems.length > 0 ? (
             <div className="space-y-3">
@@ -577,11 +585,11 @@ export default async function ProjectStatePage({
                     <div className="flex items-center justify-between gap-3 mb-2">
                       <p className="font-medium">{progressItem.label || "Untitled item"}</p>
                       <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-elevated text-text-secondary border border-border-subtle">
-                        {progressItem.status || "unknown"}
+                        {progressItem.status || t("shared.unknown")}
                       </span>
                     </div>
                     {progressItem.evidence ? (
-                      <p className="text-sm text-text-secondary mb-1">Evidence: {progressItem.evidence}</p>
+                      <p className="text-sm text-text-secondary mb-1">{t("shared.evidence")}: {progressItem.evidence}</p>
                     ) : null}
                     {progressItem.notes ? (
                       <p className="text-sm text-text-tertiary">{progressItem.notes}</p>
@@ -592,33 +600,33 @@ export default async function ProjectStatePage({
             </div>
           ) : (
             <EmptyText>
-              Progress items will appear here after the refresh pipeline starts translating the plan into state.
+              {t("state.progressAgainstPlanHint")}
             </EmptyText>
           )}
         </Panel>
 
-        <Panel title="Open blockers and risks">
+        <Panel title={t("state.openBlockersAndRisks")}>
           {snapshot ? (
             <div className="space-y-4 text-sm text-text-secondary">
               <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">Blocked</p>
-                <p>{snapshot.blocker_count > 0 ? `${snapshot.blocker_count} active blocker(s)` : "No blockers in the latest snapshot"}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">{t("shared.blocked")}</p>
+                <p>{snapshot.blocker_count > 0 ? t("state.activeBlockers", {count: snapshot.blocker_count}) : t("state.noBlockers")}</p>
               </div>
               <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">Risks</p>
-                <p>{snapshot.risk_count > 0 ? `${snapshot.risk_count} risk item(s) require review` : "No risks surfaced in the latest snapshot"}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">{t("shared.risks")}</p>
+                <p>{snapshot.risk_count > 0 ? t("state.riskItems", {count: snapshot.risk_count}) : t("state.noRisks")}</p>
               </div>
             </div>
           ) : (
             <EmptyText>
-              Risks and blockers are empty until the first state snapshot exists.
+              {t("state.risksEmptyHint")}
             </EmptyText>
           )}
         </Panel>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
-        <Panel title="Recent drift" headerAction={<Link href={`/projects/${currentProject.id}/drift`} className="text-accent hover:text-accent-hover transition-colors">View all</Link>}>
+        <Panel title={t("state.recentDrift")} headerAction={<Link href={`/projects/${currentProject.id}/drift`} className="text-accent hover:text-accent-hover transition-colors">{t("shared.viewAll")}</Link>}>
           {driftItems.length > 0 ? (
             <div className="space-y-3">
               {driftItems.slice(0, 3).map((item, index) => {
@@ -633,8 +641,9 @@ export default async function ProjectStatePage({
                     <p className="font-medium mb-3">{driftItem.title || "Untitled drift"}</p>
                     <div className="space-y-2 text-sm text-text-secondary">
                       <p><span className="text-text-primary font-medium">Original:</span> {driftItem.original || "—"}</p>
-                      <p><span className="text-text-primary font-medium">Now:</span> {driftItem.current || "—"}</p>
-                      <p><span className="text-text-primary font-medium">Why:</span> {driftItem.why || "—"}</p>
+                      <p><span className="text-text-primary font-medium">{t("shared.original")}:</span> {driftItem.original || "—"}</p>
+                      <p><span className="text-text-primary font-medium">{t("shared.now")}:</span> {driftItem.current || "—"}</p>
+                      <p><span className="text-text-primary font-medium">{t("shared.why")}:</span> {driftItem.why || "—"}</p>
                     </div>
                   </div>
                 );
@@ -642,14 +651,14 @@ export default async function ProjectStatePage({
             </div>
           ) : (
             <EmptyText>
-              No drift items yet. Once the product thesis starts moving, this is where changed decisions will show up.
+              {t("state.noDriftItems")}
             </EmptyText>
           )}
         </Panel>
 
-        <Panel title="Evidence entry">
+        <Panel title={t("state.evidenceEntry")}>
           <EmptyText>
-            Use the panels above to inspect exactly which plans, issues, pull requests, and commits informed the latest snapshot.
+            {t("state.evidenceEntryHint")}
           </EmptyText>
         </Panel>
       </section>
@@ -752,10 +761,14 @@ function ChecklistRow({
   label,
   detail,
   ready,
+  readyLabel,
+  pendingLabel,
 }: {
   label: string;
   detail: string;
   ready: boolean;
+  readyLabel: string;
+  pendingLabel: string;
 }) {
   return (
     <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30 flex items-start justify-between gap-4">
@@ -770,7 +783,7 @@ function ChecklistRow({
             : "bg-elevated text-text-secondary border border-border-subtle"
         }`}
       >
-        {ready ? "ready" : "check"}
+        {ready ? readyLabel : pendingLabel}
       </span>
     </div>
   );
