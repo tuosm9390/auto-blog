@@ -35,6 +35,7 @@ export default async function ProjectsPage({
   const blockedProjects = projectsWithState.filter((item) => (item.snapshot?.blocker_count ?? 0) > 0).length;
   const highDriftProjects = projectsWithState.filter((item) => (item.snapshot?.drift_count ?? 0) >= 3).length;
   const needsReviewProjects = projectsWithState.filter((item) => !item.snapshot).length;
+  const hasProjects = projectsWithState.length > 0;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
@@ -64,6 +65,52 @@ export default async function ProjectsPage({
         <SummaryCard label="High drift" value={String(highDriftProjects)} meta="Projects with 3+ drift items" />
         <SummaryCard label="Needs review" value={String(needsReviewProjects)} meta="Projects without a snapshot" />
       </section>
+
+      {setupState.ready ? (
+        <section className="grid gap-4 xl:grid-cols-[1.1fr_1fr] mb-8">
+          <section className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <h2 className="text-lg font-semibold">First-run checklist</h2>
+              <span className="text-xs text-text-tertiary">Use this once</span>
+            </div>
+            <div className="space-y-3">
+              <ChecklistRow
+                label="Create one project"
+                detail={hasProjects ? "At least one project exists" : "Start with a single real project"}
+                ready={hasProjects}
+              />
+              <ChecklistRow
+                label="Attach a current plan"
+                detail={hasProjects ? "Add or refine the PRD from the project edit page" : "You will add this when creating the project"}
+                ready={projectsWithState.some((item) => Boolean(item.project.current_thesis || item.project.description))}
+              />
+              <ChecklistRow
+                label="Connect a GitHub repo"
+                detail={hasProjects ? "Repo owner/name can be edited later too" : "You can do this during project creation"}
+                ready={projectsWithState.some((item) => Boolean(item.project.github_repo_owner && item.project.github_repo_name))}
+              />
+              <ChecklistRow
+                label="Run the first refresh"
+                detail={needsReviewProjects > 0 ? "Projects without snapshots still need the first run" : "At least one snapshot already exists"}
+                ready={projectsWithState.some((item) => Boolean(item.snapshot))}
+              />
+            </div>
+          </section>
+
+          <section className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <h2 className="text-lg font-semibold">What to verify next</h2>
+              <span className="text-xs text-text-tertiary">After the first refresh</span>
+            </div>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`fallbackReason` should be empty if GitHub activity was included.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`PRD preview` should reflect the current plan instead of generic text.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`Commit coverage`, `PR evidence`, and `Issue evidence` should all feel believable.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`Watch next` should give concrete follow-up, not generic filler.</span></li>
+            </ul>
+          </section>
+        </section>
+      ) : null}
 
       {!setupState.ready ? (
         <section className="mb-8 border border-yellow-500/30 rounded-2xl p-5 bg-yellow-500/10">
@@ -129,6 +176,34 @@ export default async function ProjectsPage({
           ))}
         </section>
       )}
+    </div>
+  );
+}
+
+function ChecklistRow({
+  label,
+  detail,
+  ready,
+}: {
+  label: string;
+  detail: string;
+  ready: boolean;
+}) {
+  return (
+    <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30 flex items-start justify-between gap-4">
+      <div>
+        <p className="font-medium mb-1">{label}</p>
+        <p className="text-sm text-text-secondary">{detail}</p>
+      </div>
+      <span
+        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+          ready
+            ? "bg-success/10 text-success border border-success/30"
+            : "bg-elevated text-text-secondary border border-border-subtle"
+        }`}
+      >
+        {ready ? "done" : "next"}
+      </span>
     </div>
   );
 }

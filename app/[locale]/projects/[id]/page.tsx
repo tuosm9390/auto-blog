@@ -22,6 +22,7 @@ export default async function ProjectStatePage({
     redirect({ href: "/login", locale });
   }
   const safeUserId = userId as string;
+  const hasAccessToken = Boolean((session?.user as { accessToken?: string } | undefined)?.accessToken);
 
   const [project, plan, snapshot, runs, snapshots] = await Promise.all([
     getProjectById(id),
@@ -114,6 +115,7 @@ export default async function ProjectStatePage({
         : "Latest snapshot was created without GitHub activity",
     },
   ];
+  const hasSnapshot = Boolean(snapshot);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
@@ -169,6 +171,43 @@ export default async function ProjectStatePage({
         <MetricCard label="Plan drift" value={snapshot ? String(snapshot.drift_count) : "—"} meta="Changed decisions detected" />
         <MetricCard label="Blocked / Risks" value={snapshot ? `${snapshot.blocker_count} / ${snapshot.risk_count}` : "—"} meta="Open blockers and risks" />
       </section>
+
+      {!hasSnapshot ? (
+        <section className="grid gap-4 xl:grid-cols-[1.05fr_1fr] mb-8">
+          <Panel title="Before first refresh">
+            <div className="space-y-3">
+              <ChecklistRow
+                label="Plan attached"
+                detail={plan ? `Current plan: ${plan.title}` : "Add a PRD or rough markdown plan from Edit project"}
+                ready={Boolean(plan?.content_markdown?.trim())}
+              />
+              <ChecklistRow
+                label="Repo connected"
+                detail={
+                  currentProject.github_repo_owner && currentProject.github_repo_name
+                    ? `${currentProject.github_repo_owner}/${currentProject.github_repo_name}`
+                    : "Connect the GitHub repository from Edit project"
+                }
+                ready={Boolean(currentProject.github_repo_owner && currentProject.github_repo_name)}
+              />
+              <ChecklistRow
+                label="Auth token available"
+                detail="If the refresh falls back to baseline, check the latest run and GitHub auth state."
+                ready={hasAccessToken}
+              />
+            </div>
+          </Panel>
+
+          <Panel title="What a good first result looks like">
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`Current snapshot` mentions actual work instead of generic setup text.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`Commit coverage` shows multiple refs and touched files.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`PR evidence` or `Issue evidence` shows linked context when available.</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>`Watch next` gives concrete next actions you would actually take.</span></li>
+            </ul>
+          </Panel>
+        </section>
+      ) : null}
 
       <section className="grid gap-4 xl:grid-cols-[1.4fr_1fr] mb-8">
         <Panel title="Current snapshot">
@@ -705,6 +744,34 @@ function MiniInfoCard({
     <div className="border border-border-subtle rounded-xl px-3 py-3 bg-canvas/30">
       <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-tertiary mb-1">{label}</p>
       <p className="text-sm font-semibold break-words">{value}</p>
+    </div>
+  );
+}
+
+function ChecklistRow({
+  label,
+  detail,
+  ready,
+}: {
+  label: string;
+  detail: string;
+  ready: boolean;
+}) {
+  return (
+    <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30 flex items-start justify-between gap-4">
+      <div>
+        <p className="font-medium mb-1">{label}</p>
+        <p className="text-sm text-text-secondary">{detail}</p>
+      </div>
+      <span
+        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+          ready
+            ? "bg-success/10 text-success border border-success/30"
+            : "bg-elevated text-text-secondary border border-border-subtle"
+        }`}
+      >
+        {ready ? "ready" : "check"}
+      </span>
     </div>
   );
 }
