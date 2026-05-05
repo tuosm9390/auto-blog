@@ -490,6 +490,27 @@
           "secondRefresh": "After a bit more work, run a second refresh and check whether the deltas still make sense."
         }
       },
+      "secondRefresh": {
+        "title": "Second refresh validation",
+        "ready": "comparison ready",
+        "waiting": "waiting for next snapshot",
+        "empty": "Do a bit more work, then run `Refresh state` again. From the second snapshot onward, this board can validate deltas and drift sensitivity.",
+        "howToUse": "What to check on refresh #2",
+        "progress": "Did progress move?",
+        "progressReady": "Progress changed by {value}pt.",
+        "progressMissing": "If progress stayed flat, check whether the new work actually made it into the snapshot.",
+        "drift": "Does drift change naturally?",
+        "driftStable": "Drift stayed flat. If the direction did not really change, this is reasonable.",
+        "driftChanged": "Drift changed by {value}. Check whether that matches actual product-direction changes.",
+        "risks": "Are risk/blocker changes explainable?",
+        "risksDetail": "Blocker delta {blocker}, risk delta {risk}",
+        "hints": {
+          "workMore": "Do a bit more work before triggering the second refresh.",
+          "checkDelta": "Compare `Change since last snapshot` with what actually changed in the project.",
+          "checkDrift": "If tiny implementation changes create large drift jumps, the detector is too sensitive.",
+          "runs": "If something looks off, inspect the latest snapshot source and raw output from `View runs`."
+        }
+      },
       "githubActivityMissing": "Latest snapshot was created without GitHub activity",
       "snapshotModeGithubPlan": "GitHub + plan analysis",
       "snapshotModeBaseline": "Plan-only baseline",

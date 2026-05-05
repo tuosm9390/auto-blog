@@ -143,6 +143,49 @@ export default async function ProjectStatePage({
     },
   ];
   const reviewReadyCount = reviewChecks.filter((item) => item.ready).length;
+  const hasComparisonData = Boolean(snapshot && previousSnapshot);
+  const currentSnapshotForCompare = hasComparisonData ? snapshot : null;
+  const previousSnapshotForCompare = hasComparisonData ? previousSnapshot : null;
+  const progressDelta = hasComparisonData
+    ? currentSnapshotForCompare!.progress_percent - previousSnapshotForCompare!.progress_percent
+    : null;
+  const driftDelta = hasComparisonData
+    ? currentSnapshotForCompare!.drift_count - previousSnapshotForCompare!.drift_count
+    : null;
+  const blockerDelta = hasComparisonData
+    ? currentSnapshotForCompare!.blocker_count - previousSnapshotForCompare!.blocker_count
+    : null;
+  const riskDelta = hasComparisonData
+    ? currentSnapshotForCompare!.risk_count - previousSnapshotForCompare!.risk_count
+    : null;
+  const secondRefreshChecks = hasComparisonData
+            ? [
+        {
+          label: t("state.secondRefresh.progress"),
+          ready: progressDelta !== 0,
+          detail:
+            progressDelta !== 0
+              ? t("state.secondRefresh.progressReady", { value: progressDelta ?? 0 })
+              : t("state.secondRefresh.progressMissing"),
+        },
+        {
+          label: t("state.secondRefresh.drift"),
+          ready: driftDelta !== null,
+          detail:
+            driftDelta === 0
+              ? t("state.secondRefresh.driftStable")
+              : t("state.secondRefresh.driftChanged", { value: driftDelta ?? 0 }),
+        },
+        {
+          label: t("state.secondRefresh.risks"),
+          ready: blockerDelta !== null && riskDelta !== null,
+          detail: t("state.secondRefresh.risksDetail", {
+            blocker: blockerDelta ?? 0,
+            risk: riskDelta ?? 0,
+          }),
+        },
+      ]
+    : [];
   const readinessChecks = [
     {
       label: t("state.checks.planAttached"),
@@ -262,6 +305,47 @@ export default async function ProjectStatePage({
               <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.review.hints.watchNext")}</span></li>
               <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.review.hints.evidence")}</span></li>
               <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.review.hints.secondRefresh")}</span></li>
+            </ul>
+          </Panel>
+        </section>
+      ) : null}
+
+      {snapshot ? (
+        <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr] mb-8">
+          <Panel
+            title={t("state.secondRefresh.title")}
+            headerAction={
+              hasComparisonData
+                ? t("state.secondRefresh.ready")
+                : t("state.secondRefresh.waiting")
+            }
+          >
+            {hasComparisonData ? (
+              <div className="space-y-3">
+                {secondRefreshChecks.map((item) => (
+                  <ChecklistRow
+                    key={item.label}
+                    label={item.label}
+                    detail={item.detail}
+                    ready={item.ready}
+                    readyLabel={t("shared.done")}
+                    pendingLabel={t("shared.check")}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyText>
+                {t("state.secondRefresh.empty")}
+              </EmptyText>
+            )}
+          </Panel>
+
+          <Panel title={t("state.secondRefresh.howToUse")}>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.secondRefresh.hints.workMore")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.secondRefresh.hints.checkDelta")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.secondRefresh.hints.checkDrift")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.secondRefresh.hints.runs")}</span></li>
             </ul>
           </Panel>
         </section>

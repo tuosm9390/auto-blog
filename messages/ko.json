@@ -490,6 +490,27 @@
           "secondRefresh": "조금 더 작업한 뒤 두 번째 새로고침을 돌려 비교 변화가 자연스러운지 확인합니다."
         }
       },
+      "secondRefresh": {
+        "title": "2차 새로고침 검증",
+        "ready": "비교 가능",
+        "waiting": "다음 스냅샷 대기",
+        "empty": "조금 더 작업한 뒤 한 번 더 `상태 새로고침`을 실행하세요. 두 번째 스냅샷부터는 변화량과 드리프트 민감도를 함께 볼 수 있습니다.",
+        "howToUse": "2차 검증에서 볼 것",
+        "progress": "진행률 변화가 있는가",
+        "progressReady": "진행률이 {value}pt 변했습니다.",
+        "progressMissing": "진행률이 그대로라면 실제 작업이 반영됐는지 다시 볼 필요가 있습니다.",
+        "drift": "드리프트 변화가 자연스러운가",
+        "driftStable": "드리프트 수는 유지됐습니다. 큰 방향 변화가 없었다면 자연스러운 결과입니다.",
+        "driftChanged": "드리프트 수가 {value}만큼 변했습니다. 제품 방향 변화와 맞는지 확인하세요.",
+        "risks": "리스크/블로커 변화가 설명되는가",
+        "risksDetail": "블로커 변화 {blocker}, 리스크 변화 {risk}",
+        "hints": {
+          "workMore": "작업을 조금 더 진행한 뒤 두 번째 새로고침을 돌립니다.",
+          "checkDelta": "`지난 스냅샷 대비 변화`와 숫자 변화가 실제 작업량과 맞는지 봅니다.",
+          "checkDrift": "작은 구현 수정만 했는데 드리프트가 크게 늘면 너무 민감한 것입니다.",
+          "runs": "이상하면 `실행 이력 보기`에서 최신 snapshot source와 raw output을 같이 봅니다."
+        }
+      },
       "githubActivityMissing": "최신 스냅샷이 GitHub 활동 없이 생성되었습니다",
       "snapshotModeGithubPlan": "GitHub + 계획 분석",
       "snapshotModeBaseline": "계획 기반 기본 상태",
