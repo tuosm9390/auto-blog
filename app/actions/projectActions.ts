@@ -74,17 +74,33 @@ export async function refreshProjectStateAction(locale: string, projectId: strin
     redirect({ href: "/projects", locale });
   }
   const accessToken = (session?.user as { accessToken?: string } | undefined)?.accessToken;
-  await refreshProjectState({
-    projectId,
-    triggeredBy: safeUserId,
-    accessToken,
-    sourceWindowDays: 7,
-  });
+  try {
+    await refreshProjectState({
+      projectId,
+      triggeredBy: safeUserId,
+      accessToken,
+      sourceWindowDays: 7,
+    });
 
-  revalidatePath(`/${locale}/projects`);
-  revalidatePath(`/${locale}/projects/${projectId}`);
-  revalidatePath(`/${locale}/projects/${projectId}/drift`);
-  redirect({ href: `/projects/${projectId}`, locale });
+    revalidatePath(`/${locale}/projects`);
+    revalidatePath(`/${locale}/projects/${projectId}`);
+    revalidatePath(`/${locale}/projects/${projectId}/drift`);
+    revalidatePath(`/${locale}/projects/${projectId}/runs`);
+    redirect({ href: `/projects/${projectId}`, locale });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "상태 새로고침 중 오류가 발생했습니다.";
+
+    console.error("refreshProjectStateAction error:", message);
+
+    revalidatePath(`/${locale}/projects/${projectId}`);
+    revalidatePath(`/${locale}/projects/${projectId}/runs`);
+
+    redirect({
+      href: `/projects/${projectId}?refresh=failed&message=${encodeURIComponent(message)}`,
+      locale,
+    });
+  }
 }
 
 export async function updateProjectAction(locale: string, projectId: string, formData: FormData) {

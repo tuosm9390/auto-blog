@@ -12,10 +12,13 @@ import {
 
 export default async function ProjectStatePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams?: Promise<{ refresh?: string; message?: string }>;
 }) {
   const { locale, id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const session = await auth();
   const userId = session?.user?.id;
 
@@ -46,6 +49,8 @@ export default async function ProjectStatePage({
   const latestRun = runs[0] ?? null;
   const snapshotHistory = snapshots;
   const previousSnapshot = snapshotHistory[1] ?? null;
+  const refreshFailed = resolvedSearchParams?.refresh === "failed";
+  const actionErrorMessage = resolvedSearchParams?.message ?? null;
   const rawMeta = (snapshot?.raw_output_json ?? {}) as {
     mode?: string;
     generatedFromPlan?: boolean;
@@ -121,6 +126,20 @@ export default async function ProjectStatePage({
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
+      {refreshFailed ? (
+        <section className="mb-6 border border-error/30 bg-error/10 rounded-2xl p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-error mb-2">
+            {t("state.refreshFailedTag")}
+          </p>
+          <p className="text-sm text-text-secondary leading-7">
+            {latestRun?.error_message || actionErrorMessage || t("state.refreshFailedBody")}
+          </p>
+          <p className="text-xs text-text-tertiary mt-3">
+            {t("state.refreshFailedHint")}
+          </p>
+        </section>
+      ) : null}
+
       <section className="mb-8 flex flex-col xl:flex-row xl:items-end justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent mb-2">{t("state.tag")}</p>
