@@ -18,6 +18,26 @@ function getGeminiClient() {
   return new GoogleGenAI({ apiKey });
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getProjectMemoryModelName() {
+  return process.env.GEMINI_PROJECT_MEMORY_MODEL || "gemini-2.5-flash";
+}
+
+function isTemporaryGeminiOverload(error: unknown) {
+  const err = error as { status?: number; message?: string };
+  const message = err.message || "";
+
+  return (
+    err.status === 503 ||
+    message.includes('"code":503') ||
+    message.includes("UNAVAILABLE") ||
+    message.includes("high demand")
+  );
+}
+
 export interface ProjectStateAnalysisResult {
   summary: string;
   progressPercent: number;
@@ -230,17 +250,40 @@ export async function analyzeProjectState(
     ],
   };
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: schema,
-    },
-  });
+  const generateWithRetry = async (retryCount = 0): Promise<ProjectStateAnalysisResult> => {
+    try {
+      const response = await ai.models.generateContent({
+        model: getProjectMemoryModelName(),
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: schema,
+        },
+      });
 
-  const rawText = (response.text ?? "").trim();
-  const parsed = JSON.parse(rawText) as ProjectStateAnalysisResult;
+      const rawText = (response.text ?? "").trim();
+      return JSON.parse(rawText) as ProjectStateAnalysisResult;
+    } catch (error) {
+      if (retryCount < 2 && isTemporaryGeminiOverload(error)) {
+        const delay = Math.pow(2, retryCount) * 2000;
+        console.warn(
+          `Project state analysis temporarily unavailable. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/3)`
+        );
+        await sleep(delay);
+        return generateWithRetry(retryCount + 1);
+      }
+
+      if (isTemporaryGeminiOverload(error)) {
+        throw new Error(
+          "Gemini 모델이 현재 과부하 상태입니다. 잠시 후 다시 시도해 주세요."
+        );
+      }
+
+      throw error;
+    }
+  };
+
+  const parsed = await generateWithRetry();
 
   const commitEvidence: EvidenceItem[] = commitDiffs.slice(0, 5).map((diff) => ({
     type: "commit",
