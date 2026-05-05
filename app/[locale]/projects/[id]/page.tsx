@@ -100,6 +100,49 @@ export default async function ProjectStatePage({
   const touchedFileCount = rawMeta.commitCoverage?.touchedFileCount ?? 0;
   const pullRequests = rawMeta.pullRequests ?? [];
   const issues = rawMeta.issues ?? [];
+  const summaryText = snapshot?.summary?.trim() ?? "";
+  const watchNextItems = snapshot?.watch_next ?? [];
+  const hasConcreteSummary =
+    summaryText.length >= 80 &&
+    !summaryText.toLowerCase().includes("initial state board created") &&
+    !summaryText.toLowerCase().includes("based on the current thesis");
+  const hasConcreteWatchNext =
+    watchNextItems.length >= 2 &&
+    watchNextItems.some((item) => item.length >= 28);
+  const hasEvidenceCoverage =
+    commitRefs.length > 0 || pullRequests.length > 0 || issues.length > 0;
+  const hasPlanCoverage = planItems.length >= 2;
+  const reviewChecks = [
+    {
+      label: t("state.review.summary"),
+      ready: hasConcreteSummary,
+      detail: hasConcreteSummary
+        ? t("state.review.summaryReady")
+        : t("state.review.summaryMissing"),
+    },
+    {
+      label: t("state.review.watchNext"),
+      ready: hasConcreteWatchNext,
+      detail: hasConcreteWatchNext
+        ? t("state.review.watchNextReady")
+        : t("state.review.watchNextMissing"),
+    },
+    {
+      label: t("state.review.evidence"),
+      ready: hasEvidenceCoverage,
+      detail: hasEvidenceCoverage
+        ? t("state.review.evidenceReady")
+        : t("state.review.evidenceMissing"),
+    },
+    {
+      label: t("state.review.planCoverage"),
+      ready: hasPlanCoverage,
+      detail: hasPlanCoverage
+        ? t("state.review.planCoverageReady")
+        : t("state.review.planCoverageMissing"),
+    },
+  ];
+  const reviewReadyCount = reviewChecks.filter((item) => item.ready).length;
   const readinessChecks = [
     {
       label: t("state.checks.planAttached"),
@@ -192,6 +235,37 @@ export default async function ProjectStatePage({
         <MetricCard label={t("state.metrics.planDrift")} value={snapshot ? String(snapshot.drift_count) : "—"} meta={t("state.metrics.planDriftMeta")} />
         <MetricCard label={t("state.metrics.blockedRisks")} value={snapshot ? `${snapshot.blocker_count} / ${snapshot.risk_count}` : "—"} meta={t("state.metrics.blockedRisksMeta")} />
       </section>
+
+      {snapshot ? (
+        <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr] mb-8">
+          <Panel
+            title={t("state.review.title")}
+            headerAction={t("state.review.score", { count: reviewReadyCount })}
+          >
+            <div className="space-y-3">
+              {reviewChecks.map((item) => (
+                <ChecklistRow
+                  key={item.label}
+                  label={item.label}
+                  detail={item.detail}
+                  ready={item.ready}
+                  readyLabel={t("shared.ready")}
+                  pendingLabel={t("shared.check")}
+                />
+              ))}
+            </div>
+          </Panel>
+
+          <Panel title={t("state.review.howToUse")}>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.review.hints.summary")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.review.hints.watchNext")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.review.hints.evidence")}</span></li>
+              <li className="flex gap-2"><span className="text-accent">•</span><span>{t("state.review.hints.secondRefresh")}</span></li>
+            </ul>
+          </Panel>
+        </section>
+      ) : null}
 
       {!hasSnapshot ? (
         <section className="grid gap-4 xl:grid-cols-[1.05fr_1fr] mb-8">
