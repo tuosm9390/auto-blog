@@ -1,5 +1,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { CommitDiff, DriftItem, EvidenceItem, PlanProgressItem, Project, ProjectPlan } from "./types";
+import {
+  CommitDiff,
+  DriftItem,
+  EvidenceItem,
+  IssueContext,
+  PlanProgressItem,
+  Project,
+  ProjectPlan,
+  PullRequestContext,
+} from "./types";
 
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -25,7 +34,9 @@ export interface ProjectStateAnalysisResult {
 function buildProjectStatePrompt(
   project: Project,
   plan: ProjectPlan | null,
-  commitDiffs: CommitDiff[]
+  commitDiffs: CommitDiff[],
+  pullRequests: PullRequestContext[],
+  issues: IssueContext[]
 ): string {
   const planBlock = plan?.content_markdown?.trim()
     ? plan.content_markdown
@@ -54,6 +65,44 @@ ${files || "- no relevant files"}`;
           .join("\n\n")
       : "최근 분석할 GitHub 활동이 없습니다.";
 
+  const prBlock =
+    pullRequests.length > 0
+      ? pullRequests
+          .map((pull) => {
+            const trimmedBody = (pull.body || "")
+              .replace(/\s+/g, " ")
+              .trim()
+              .slice(0, 400);
+
+            return `## PR #${pull.number}
+Title: ${pull.title}
+State: ${pull.state}
+Merged: ${pull.merged ? "yes" : "no"}
+Author: ${pull.author}
+Merged at: ${pull.merged_at || "not merged"}
+Body: ${trimmedBody || "no body"}`;
+          })
+          .join("\n\n")
+      : "연결된 Pull Request 맥락이 없습니다.";
+
+  const issueBlock =
+    issues.length > 0
+      ? issues
+          .map((issue) => {
+            const trimmedBody = (issue.body || "")
+              .replace(/\s+/g, " ")
+              .trim()
+              .slice(0, 280);
+
+            return `## Issue #${issue.number}
+Title: ${issue.title}
+State: ${issue.state}
+Author: ${issue.author}
+Body: ${trimmedBody || "no body"}`;
+          })
+          .join("\n\n")
+      : "연결된 Issue 맥락이 없습니다.";
+
   return `당신은 AI-native solo builder의 프로젝트 상태를 점검하는 운영 리뷰어입니다.
 
 목표는 "글을 쓰는 것"이 아니라, 프로젝트 상태를 구조화된 JSON으로 보고하는 것입니다.
@@ -72,6 +121,12 @@ ${planBlock}
 [RECENT ENGINEERING ACTIVITY]
 ${commitBlock}
 
+[RECENT PR CONTEXT]
+${prBlock}
+
+[RECENT ISSUE CONTEXT]
+${issueBlock}
+
 출력 목표:
 1. 현재 프로젝트 상태를 2~4문장으로 요약
 2. 진행률을 0~100 사이 정수로 추정
@@ -85,6 +140,7 @@ ${commitBlock}
 - 정보가 부족하면 확신하는 척하지 말고 보수적으로 추정
 - drift는 단순 구현 세부가 아니라 제품/범위/실행 방향 변화만 잡기
 - evidence는 최근 commit 메시지와 PRD 존재 여부를 바탕으로 짧게 연결
+- PR title/body와 issue title/body가 있으면 결정의 이유와 범위 판단에 우선 활용
 - 모든 텍스트는 영어로 작성
 
 JSON shape:
@@ -115,10 +171,12 @@ JSON shape:
 export async function analyzeProjectState(
   project: Project,
   plan: ProjectPlan | null,
-  commitDiffs: CommitDiff[]
+  commitDiffs: CommitDiff[],
+  pullRequests: PullRequestContext[],
+  issues: IssueContext[]
 ): Promise<ProjectStateAnalysisResult> {
   const ai = getGeminiClient();
-  const prompt = buildProjectStatePrompt(project, plan, commitDiffs);
+  const prompt = buildProjectStatePrompt(project, plan, commitDiffs, pullRequests, issues);
 
   const schema = {
     type: Type.OBJECT,
@@ -202,6 +260,20 @@ export async function analyzeProjectState(
       ]
     : [];
 
+  const prEvidence: EvidenceItem[] = pullRequests.slice(0, 3).map((pull) => ({
+    type: "pull_request",
+    title: pull.title,
+    ref: `#${pull.number}`,
+    url: pull.url,
+  }));
+
+  const issueEvidence: EvidenceItem[] = issues.slice(0, 3).map((issue) => ({
+    type: "issue",
+    title: issue.title,
+    ref: `#${issue.number}`,
+    url: issue.url,
+  }));
+
   return {
     summary: parsed.summary,
     progressPercent: Math.max(0, Math.min(100, parsed.progressPercent)),
@@ -212,6 +284,6 @@ export async function analyzeProjectState(
     watchNext: parsed.watchNext.slice(0, 4),
     planProgress: parsed.planProgress.slice(0, 6),
     drift: parsed.drift.slice(0, 3),
-    evidence: [...planEvidence, ...commitEvidence],
+    evidence: [...planEvidence, ...issueEvidence, ...prEvidence, ...commitEvidence],
   };
 }

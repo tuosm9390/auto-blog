@@ -1,5 +1,5 @@
 import { requireAuth, requireProjectOwnership, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
-import { getLatestStateSnapshot } from "@/lib/projects";
+import { getStateSnapshotsByProject } from "@/lib/projects";
 
 interface RouteProps {
   params: Promise<{ id: string }>;
@@ -16,7 +16,17 @@ export async function GET(request: Request, { params }: RouteProps) {
 
     const { id } = await params;
     const project = await requireProjectOwnership(id, userId);
-    const latestSnapshot = await getLatestStateSnapshot(id);
+    const snapshots = await getStateSnapshotsByProject(id, 2);
+    const latestSnapshot = snapshots[0] ?? null;
+    const previousSnapshot = snapshots[1] ?? null;
+    const latestDrift = latestSnapshot?.drift_json ?? [];
+    const previousDrift = previousSnapshot?.drift_json ?? [];
+    const latestTitles = new Set(
+      latestDrift.map((item) => ((item as { title?: string }).title || "").trim()).filter(Boolean)
+    );
+    const previousTitles = new Set(
+      previousDrift.map((item) => ((item as { title?: string }).title || "").trim()).filter(Boolean)
+    );
 
     return apiSuccess({
       project: {
@@ -25,9 +35,18 @@ export async function GET(request: Request, { params }: RouteProps) {
         originalThesis: project.original_thesis,
         currentThesis: project.current_thesis,
       },
-      drift: latestSnapshot?.drift_json ?? [],
+      drift: latestDrift,
+      newDrift: latestDrift.filter((item) => {
+        const title = ((item as { title?: string }).title || "").trim();
+        return title && !previousTitles.has(title);
+      }),
+      resolvedDrift: previousDrift.filter((item) => {
+        const title = ((item as { title?: string }).title || "").trim();
+        return title && !latestTitles.has(title);
+      }),
       generatedAt: latestSnapshot?.generated_at ?? null,
       driftCount: latestSnapshot?.drift_count ?? 0,
+      previousGeneratedAt: previousSnapshot?.generated_at ?? null,
     });
   } catch (error: unknown) {
     if (isAuthError(error)) return apiError(error.message, error.message === "권한이 없습니다." ? 403 : 401);

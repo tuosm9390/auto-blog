@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect, Link } from "@/i18n/routing";
-import { getLatestStateSnapshot, getProjectById } from "@/lib/projects";
+import { getProjectById, getStateSnapshotsByProject } from "@/lib/projects";
 
 export default async function ProjectDriftPage({
   params,
@@ -16,9 +16,9 @@ export default async function ProjectDriftPage({
   }
   const safeUserId = userId as string;
 
-  const [project, snapshot] = await Promise.all([
+  const [project, snapshots] = await Promise.all([
     getProjectById(id),
-    getLatestStateSnapshot(id),
+    getStateSnapshotsByProject(id, 2),
   ]);
 
   if (!project || project.owner_id !== safeUserId) {
@@ -26,8 +26,20 @@ export default async function ProjectDriftPage({
   }
 
   const currentProject = project as NonNullable<typeof project>;
-
-  const driftItems = snapshot?.drift_json ?? [];
+  const latestSnapshot = snapshots[0] ?? null;
+  const previousSnapshot = snapshots[1] ?? null;
+  const driftItems = latestSnapshot?.drift_json ?? [];
+  const latestTitles = new Set(
+    driftItems.map((item) => ((item as { title?: string }).title || "").trim()).filter(Boolean)
+  );
+  const previousDriftItems = previousSnapshot?.drift_json ?? [];
+  const previousTitles = new Set(
+    previousDriftItems
+      .map((item) => ((item as { title?: string }).title || "").trim())
+      .filter(Boolean)
+  );
+  const newDriftCount = Array.from(latestTitles).filter((title) => !previousTitles.has(title)).length;
+  const resolvedDriftCount = Array.from(previousTitles).filter((title) => !latestTitles.has(title)).length;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 animate-fade-in-up">
@@ -50,13 +62,14 @@ export default async function ProjectDriftPage({
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-        <MetricCard label="Major shifts" value={snapshot ? String(snapshot.drift_count) : "0"} meta="Latest detected drift items" />
+        <MetricCard label="Major shifts" value={latestSnapshot ? String(latestSnapshot.drift_count) : "0"} meta="Latest detected drift items" />
+        <MetricCard label="New since last" value={String(newDriftCount)} meta="Freshly surfaced changes" />
+        <MetricCard label="Resolved" value={String(resolvedDriftCount)} meta="Items that disappeared from drift" />
         <MetricCard label="Current thesis" value={currentProject.current_thesis || "Unset"} meta="Where the project is now" />
-        <MetricCard label="Original thesis" value={currentProject.original_thesis || "Unset"} meta="Where the project started" />
-        <MetricCard label="Current phase" value={snapshot?.current_phase || "No snapshot"} meta="Latest state context" />
+        <MetricCard label="Current phase" value={latestSnapshot?.current_phase || "No snapshot"} meta="Latest state context" />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
+      <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr] mb-8">
         <div className="space-y-4">
           <div className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
             <div className="flex items-center justify-between gap-4 mb-4">
@@ -123,6 +136,72 @@ export default async function ProjectDriftPage({
               This page should answer that question over time by making product-level changes visible, not just generating more text.
             </p>
           </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-2">
+        <div className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h2 className="text-lg font-semibold">New drift since last refresh</h2>
+            <span className="text-xs text-text-tertiary">Snapshot compare</span>
+          </div>
+          {newDriftCount > 0 ? (
+            <div className="space-y-3">
+              {driftItems
+                .filter((item) => {
+                  const title = ((item as { title?: string }).title || "").trim();
+                  return title && !previousTitles.has(title);
+                })
+                .map((item, index) => {
+                  const driftItem = item as {
+                    title?: string;
+                    why?: string;
+                  };
+                  return (
+                    <div key={`${driftItem.title || "new-drift"}-${index}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
+                      <p className="font-medium mb-1">{driftItem.title || "Untitled drift"}</p>
+                      <p className="text-sm text-text-secondary">{driftItem.why || "No reason recorded"}</p>
+                    </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <p className="text-sm text-text-secondary leading-7">
+              No newly surfaced drift compared with the previous snapshot.
+            </p>
+          )}
+        </div>
+
+        <div className="border border-border-subtle rounded-2xl p-6 bg-surface/30">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h2 className="text-lg font-semibold">Resolved drift since last refresh</h2>
+            <span className="text-xs text-text-tertiary">Snapshot compare</span>
+          </div>
+          {resolvedDriftCount > 0 ? (
+            <div className="space-y-3">
+              {previousDriftItems
+                .filter((item) => {
+                  const title = ((item as { title?: string }).title || "").trim();
+                  return title && !latestTitles.has(title);
+                })
+                .map((item, index) => {
+                  const driftItem = item as {
+                    title?: string;
+                    why?: string;
+                  };
+                  return (
+                    <div key={`${driftItem.title || "resolved-drift"}-${index}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
+                      <p className="font-medium mb-1">{driftItem.title || "Untitled drift"}</p>
+                      <p className="text-sm text-text-secondary">{driftItem.why || "No reason recorded"}</p>
+                    </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <p className="text-sm text-text-secondary leading-7">
+              No drift items disappeared compared with the previous snapshot.
+            </p>
+          )}
         </div>
       </section>
     </div>

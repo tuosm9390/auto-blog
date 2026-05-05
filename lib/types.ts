@@ -24,6 +24,28 @@ export interface CommitDiff {
   };
 }
 
+export interface PullRequestContext {
+  id: number;
+  number: number;
+  title: string;
+  body: string | null;
+  state: string;
+  merged: boolean;
+  url: string;
+  author: string;
+  merged_at?: string | null;
+}
+
+export interface IssueContext {
+  id: number;
+  number: number;
+  title: string;
+  body: string | null;
+  state: string;
+  url: string;
+  author: string;
+}
+
 export type PostingMode = "auto" | "manual";
 export type PostStatus = "draft" | "published";
 export type AutoSchedule = "daily" | "weekly";

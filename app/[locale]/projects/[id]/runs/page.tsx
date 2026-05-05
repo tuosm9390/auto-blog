@@ -187,6 +187,37 @@ function SnapshotSourceSummary({
     typeof rawOutput.commitCount === "number" ? rawOutput.commitCount : 0;
   const fallbackReason =
     typeof rawOutput.fallbackReason === "string" ? rawOutput.fallbackReason : null;
+  const planSummary =
+    typeof rawOutput.planSummary === "object" && rawOutput.planSummary
+      ? (rawOutput.planSummary as { previewLines?: string[]; objective?: string | null })
+      : null;
+  const commitCoverage =
+    typeof rawOutput.commitCoverage === "object" && rawOutput.commitCoverage
+      ? (rawOutput.commitCoverage as {
+          analyzedCommitRefs?: string[];
+          touchedFileCount?: number;
+          touchedFilesSample?: string[];
+        })
+      : null;
+  const pullRequests = Array.isArray(rawOutput.pullRequests)
+    ? (rawOutput.pullRequests as Array<{
+        number?: number;
+        title?: string;
+        state?: string;
+        merged?: boolean;
+      }>)
+    : [];
+  const pullRequestCount =
+    typeof rawOutput.pullRequestCount === "number" ? rawOutput.pullRequestCount : pullRequests.length;
+  const issues = Array.isArray(rawOutput.issues)
+    ? (rawOutput.issues as Array<{
+        number?: number;
+        title?: string;
+        state?: string;
+      }>)
+    : [];
+  const issueCount =
+    typeof rawOutput.issueCount === "number" ? rawOutput.issueCount : issues.length;
 
   return (
     <div className="space-y-2 text-sm text-text-secondary">
@@ -211,6 +242,48 @@ function SnapshotSourceSummary({
       {fallbackReason ? (
         <p>
           Fallback reason: <span className="text-text-primary">{fallbackReason}</span>
+        </p>
+      ) : null}
+      {planSummary?.objective ? (
+        <p>
+          PRD objective: <span className="text-text-primary">{planSummary.objective}</span>
+        </p>
+      ) : null}
+      {commitCoverage?.analyzedCommitRefs?.length ? (
+        <p>
+          Commit refs:{" "}
+          <span className="text-text-primary">{commitCoverage.analyzedCommitRefs.join(", ")}</span>
+        </p>
+      ) : null}
+      {typeof commitCoverage?.touchedFileCount === "number" ? (
+        <p>
+          Touched files: <span className="text-text-primary">{commitCoverage.touchedFileCount}</span>
+        </p>
+      ) : null}
+      {pullRequestCount > 0 ? (
+        <p>
+          Linked PRs: <span className="text-text-primary">{pullRequestCount}</span>
+        </p>
+      ) : null}
+      {pullRequests.length > 0 ? (
+        <p>
+          PR refs:{" "}
+          <span className="text-text-primary">
+            {pullRequests.slice(0, 3).map((pull) => `#${pull.number} ${pull.title || ""}`.trim()).join(", ")}
+          </span>
+        </p>
+      ) : null}
+      {issueCount > 0 ? (
+        <p>
+          Linked issues: <span className="text-text-primary">{issueCount}</span>
+        </p>
+      ) : null}
+      {issues.length > 0 ? (
+        <p>
+          Issue refs:{" "}
+          <span className="text-text-primary">
+            {issues.slice(0, 3).map((issue) => `#${issue.number} ${issue.title || ""}`.trim()).join(", ")}
+          </span>
         </p>
       ) : null}
     </div>

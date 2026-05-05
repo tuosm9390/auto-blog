@@ -1,5 +1,5 @@
 import { Octokit } from "octokit";
-import { CommitInfo, CommitDiff, FileDiff } from "./types";
+import { CommitInfo, CommitDiff, FileDiff, IssueContext, PullRequestContext } from "./types";
 
 // 변경사항 분석에서 제외할 파일 패턴
 // - 자동 생성 파일, 민감 정보, 바이너리 등 AI 분석에 불필요한 파일 제외
@@ -200,4 +200,67 @@ export async function getUserRepos(token: string) {
     url: repo.html_url,
     updated_at: repo.updated_at,
   }));
+}
+
+export async function getPullRequestsForCommit(
+  owner: string,
+  repo: string,
+  commitSha: string,
+  token?: string
+): Promise<PullRequestContext[]> {
+  const octokit = getOctokit(token);
+
+  const { data } = await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+    owner,
+    repo,
+    commit_sha: commitSha,
+  });
+
+  return data.map((pull) => ({
+    id: pull.id,
+    number: pull.number,
+    title: pull.title,
+    body: pull.body,
+    state: pull.state,
+    merged: Boolean(pull.merged_at),
+    url: pull.html_url,
+    author: pull.user?.login || "unknown",
+    merged_at: pull.merged_at,
+  }));
+}
+
+export async function getIssuesByNumbers(
+  owner: string,
+  repo: string,
+  issueNumbers: number[],
+  token?: string
+): Promise<IssueContext[]> {
+  const octokit = getOctokit(token);
+  const uniqueNumbers = Array.from(new Set(issueNumbers)).slice(0, 8);
+
+  const issues = await Promise.all(
+    uniqueNumbers.map(async (issueNumber) => {
+      const { data } = await octokit.rest.issues.get({
+        owner,
+        repo,
+        issue_number: issueNumber,
+      });
+
+      if ("pull_request" in data) {
+        return null;
+      }
+
+      return {
+        id: data.id,
+        number: data.number,
+        title: data.title,
+        body: data.body ?? null,
+        state: data.state,
+        url: data.html_url,
+        author: data.user?.login || "unknown",
+      } satisfies IssueContext;
+    })
+  );
+
+  return issues.filter((issue): issue is IssueContext => issue !== null);
 }

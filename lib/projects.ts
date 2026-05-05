@@ -439,6 +439,28 @@ export const getLatestStateSnapshot = cache(async function getLatestStateSnapsho
   return data as StateSnapshot;
 });
 
+export async function getStateSnapshotsByProject(
+  projectId: string,
+  limit: number = 10
+): Promise<StateSnapshot[]> {
+  const { data, error } = await supabase
+    .from("state_snapshots")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("generated_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) {
+    console.error("getStateSnapshotsByProject error:", error?.message);
+    if (isMissingProjectMemoryTableError(error)) {
+      console.error(PROJECT_MEMORY_SETUP_MESSAGE);
+    }
+    return [];
+  }
+
+  return data as StateSnapshot[];
+}
+
 export async function getAnalysisRunsByProject(projectId: string): Promise<AnalysisRun[]> {
   const { data, error } = await supabase
     .from("analysis_runs")

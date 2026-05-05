@@ -1,4 +1,4 @@
-import { getCommitDiff, getRecentCommits } from "./github";
+import { getCommitDiff, getIssuesByNumbers, getPullRequestsForCommit, getRecentCommits } from "./github";
 import { analyzeProjectState } from "./project-memory-ai";
 import {
   createAnalysisRun,
@@ -7,7 +7,73 @@ import {
   getProjectById,
   updateAnalysisRunStatus,
 } from "./projects";
-import type { CommitDiff, StateSnapshot } from "./types";
+import type { CommitDiff, IssueContext, PullRequestContext, StateSnapshot } from "./types";
+
+function buildPlanSummary(markdown: string | null | undefined) {
+  const lines = (markdown ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const previewLines = lines
+    .filter((line) => line.startsWith("#") || line.startsWith("-") || line.startsWith("*"))
+    .slice(0, 5)
+    .map((line) => line.replace(/^#+\s*/, ""));
+
+  const objective =
+    lines.find((line) => !line.startsWith("#") && !line.startsWith("-") && !line.startsWith("*")) ?? null;
+
+  return {
+    previewLines,
+    objective,
+  };
+}
+
+function buildCommitCoverage(commitDiffs: CommitDiff[]) {
+  const uniqueFiles = new Set<string>();
+
+  commitDiffs.forEach((diff) => {
+    diff.files.forEach((file) => uniqueFiles.add(file.filename));
+  });
+
+  return {
+    analyzedCommitRefs: commitDiffs.map((diff) => diff.commit.sha.slice(0, 7)),
+    analyzedCommitMessages: commitDiffs.map((diff) => diff.commit.message),
+    touchedFileCount: uniqueFiles.size,
+    touchedFilesSample: Array.from(uniqueFiles).slice(0, 8),
+  };
+}
+
+function dedupePullRequests(pullRequests: PullRequestContext[]) {
+  const seen = new Set<number>();
+  return pullRequests.filter((pull) => {
+    if (seen.has(pull.id)) {
+      return false;
+    }
+    seen.add(pull.id);
+    return true;
+  });
+}
+
+function extractIssueNumbers(text: string | null | undefined): number[] {
+  if (!text) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      Array.from(text.matchAll(/#(\d{1,6})/g)).map((match) => Number(match[1])).filter(Number.isFinite)
+    )
+  );
+}
+
+function buildIssueCoverage(issues: IssueContext[]) {
+  return {
+    linkedIssueNumbers: issues.map((issue) => issue.number),
+    linkedIssueTitles: issues.map((issue) => issue.title),
+    openIssueCount: issues.filter((issue) => issue.state === "open").length,
+  };
+}
 
 export async function refreshProjectState(params: {
   projectId: string;
@@ -28,6 +94,7 @@ export async function refreshProjectState(params: {
   const hasPlan = Boolean(plan?.content_markdown?.trim());
   const hasRepoConfigured =
     Boolean(currentProject.github_repo_owner) && Boolean(currentProject.github_repo_name);
+  const planSummary = buildPlanSummary(plan?.content_markdown);
 
   const run = await createAnalysisRun({
     projectId: params.projectId,
@@ -40,6 +107,8 @@ export async function refreshProjectState(params: {
 
   try {
     let commitDiffs: CommitDiff[] = [];
+    let pullRequests: PullRequestContext[] = [];
+    let issues: IssueContext[] = [];
     const hasRepoConnection =
       hasRepoConfigured &&
       Boolean(accessToken);
@@ -64,10 +133,44 @@ export async function refreshProjectState(params: {
           )
         )
       );
+
+      const pullRequestGroups = await Promise.all(
+        commits.slice(0, 5).map((commit) =>
+          getPullRequestsForCommit(
+            currentProject.github_repo_owner as string,
+            currentProject.github_repo_name as string,
+            commit.sha,
+            accessToken
+          ).catch(() => [])
+        )
+      );
+      pullRequests = dedupePullRequests(pullRequestGroups.flat()).slice(0, 5);
+
+      const issueNumbers = Array.from(
+        new Set([
+          ...commits.flatMap((commit) => extractIssueNumbers(commit.message)),
+          ...pullRequests.flatMap((pull) => [
+            ...extractIssueNumbers(pull.title),
+            ...extractIssueNumbers(pull.body),
+          ]),
+        ])
+      ).slice(0, 8);
+
+      if (issueNumbers.length > 0) {
+        issues = await getIssuesByNumbers(
+          currentProject.github_repo_owner as string,
+          currentProject.github_repo_name as string,
+          issueNumbers,
+          accessToken
+        ).catch(() => []);
+      }
     }
 
+    const commitCoverage = buildCommitCoverage(commitDiffs);
+    const issueCoverage = buildIssueCoverage(issues);
+
     const analysis = hasRepoConnection
-      ? await analyzeProjectState(currentProject, plan, commitDiffs)
+      ? await analyzeProjectState(currentProject, plan, commitDiffs, pullRequests, issues)
       : {
           summary:
             "Initial state board created. GitHub activity is not connected yet, so this snapshot is based on the current thesis and attached plan only.",
@@ -151,6 +254,27 @@ export async function refreshProjectState(params: {
         repoConfigured: hasRepoConfigured,
         tokenAvailable: Boolean(accessToken),
         commitCount: commitDiffs.length,
+        pullRequestCount: pullRequests.length,
+        pullRequests: pullRequests.map((pull) => ({
+          number: pull.number,
+          title: pull.title,
+          state: pull.state,
+          merged: pull.merged,
+          author: pull.author,
+          url: pull.url,
+        })),
+        issueCount: issues.length,
+        issues: issues.map((issue) => ({
+          number: issue.number,
+          title: issue.title,
+          state: issue.state,
+          author: issue.author,
+          url: issue.url,
+        })),
+        commitCoverage,
+        issueCoverage,
+        planSummary,
+        planTitle: plan?.title ?? null,
         sourceWindowDays,
         fallbackReason: hasRepoConnection
           ? null

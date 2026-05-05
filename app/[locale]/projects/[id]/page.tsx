@@ -6,6 +6,7 @@ import {
   getCurrentProjectPlan,
   getLatestStateSnapshot,
   getProjectById,
+  getStateSnapshotsByProject,
 } from "@/lib/projects";
 
 export default async function ProjectStatePage({
@@ -22,11 +23,12 @@ export default async function ProjectStatePage({
   }
   const safeUserId = userId as string;
 
-  const [project, plan, snapshot, runs] = await Promise.all([
+  const [project, plan, snapshot, runs, snapshots] = await Promise.all([
     getProjectById(id),
     getCurrentProjectPlan(id),
     getLatestStateSnapshot(id),
     getAnalysisRunsByProject(id),
+    getStateSnapshotsByProject(id, 6),
   ]);
 
   if (!project || project.owner_id !== safeUserId) {
@@ -39,6 +41,8 @@ export default async function ProjectStatePage({
   const planItems = snapshot?.plan_progress_json ?? [];
   const driftItems = snapshot?.drift_json ?? [];
   const latestRun = runs[0] ?? null;
+  const snapshotHistory = snapshots;
+  const previousSnapshot = snapshotHistory[1] ?? null;
   const rawMeta = (snapshot?.raw_output_json ?? {}) as {
     mode?: string;
     generatedFromPlan?: boolean;
@@ -47,7 +51,47 @@ export default async function ProjectStatePage({
     tokenAvailable?: boolean;
     commitCount?: number;
     fallbackReason?: string | null;
+    planTitle?: string | null;
+    planSummary?: {
+      previewLines?: string[];
+      objective?: string | null;
+    };
+    commitCoverage?: {
+      analyzedCommitRefs?: string[];
+      analyzedCommitMessages?: string[];
+      touchedFileCount?: number;
+      touchedFilesSample?: string[];
+    };
+    pullRequestCount?: number;
+    pullRequests?: Array<{
+      number?: number;
+      title?: string;
+      state?: string;
+      merged?: boolean;
+      author?: string;
+      url?: string;
+    }>;
+    issueCount?: number;
+    issues?: Array<{
+      number?: number;
+      title?: string;
+      state?: string;
+      author?: string;
+      url?: string;
+    }>;
+    issueCoverage?: {
+      linkedIssueNumbers?: number[];
+      linkedIssueTitles?: string[];
+      openIssueCount?: number;
+    };
   };
+  const planPreviewLines = rawMeta.planSummary?.previewLines ?? [];
+  const planObjective = rawMeta.planSummary?.objective ?? null;
+  const commitRefs = rawMeta.commitCoverage?.analyzedCommitRefs ?? [];
+  const touchedFilesSample = rawMeta.commitCoverage?.touchedFilesSample ?? [];
+  const touchedFileCount = rawMeta.commitCoverage?.touchedFileCount ?? 0;
+  const pullRequests = rawMeta.pullRequests ?? [];
+  const issues = rawMeta.issues ?? [];
   const readinessChecks = [
     {
       label: "Plan attached",
@@ -218,6 +262,260 @@ export default async function ProjectStatePage({
         </Panel>
       </section>
 
+      <section className="grid gap-4 xl:grid-cols-[1.1fr_1fr] mb-8">
+        <Panel title="PRD preview" headerAction={rawMeta.planTitle || plan?.title || "No plan title"}>
+          {planPreviewLines.length > 0 || planObjective ? (
+            <div className="space-y-4 text-sm text-text-secondary">
+              {planObjective ? (
+                <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">
+                    Objective
+                  </p>
+                  <p>{planObjective}</p>
+                </div>
+              ) : null}
+              {planPreviewLines.length > 0 ? (
+                <div className="space-y-2">
+                  {planPreviewLines.map((line) => (
+                    <div key={line} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
+                      <p>{line}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <EmptyText>
+              Attach a PRD or working plan to give the state board stronger product context.
+            </EmptyText>
+          )}
+        </Panel>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1fr_1fr] mb-8">
+        <Panel title="Commit coverage">
+          {rawMeta.generatedFromGithub ? (
+            <div className="space-y-4 text-sm text-text-secondary">
+              <div className="grid grid-cols-2 gap-3">
+                <MiniInfoCard label="Commits analyzed" value={String(rawMeta.commitCount ?? 0)} />
+                <MiniInfoCard label="Touched files" value={String(touchedFileCount)} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">
+                  Commit refs
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {commitRefs.map((ref) => (
+                    <span key={ref} className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-elevated text-text-secondary border border-border-subtle">
+                      {ref}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">
+                  File sample
+                </p>
+                <div className="space-y-2">
+                  {touchedFilesSample.map((file) => (
+                    <div key={file} className="border border-border-subtle rounded-xl p-3 bg-canvas/30 text-xs break-all">
+                      {file}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <EmptyText>
+              GitHub-backed commit coverage appears after a refresh run with repo connection and token access.
+            </EmptyText>
+          )}
+        </Panel>
+
+        <Panel title="PR evidence">
+          {pullRequests.length > 0 ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <MiniInfoCard label="PRs linked" value={String(rawMeta.pullRequestCount ?? pullRequests.length)} />
+                <MiniInfoCard label="Merged" value={String(pullRequests.filter((pull) => pull.merged).length)} />
+              </div>
+              {pullRequests.slice(0, 3).map((pull) => (
+                <div key={`${pull.number}-${pull.title}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <p className="font-medium">{pull.title || "Untitled PR"}</p>
+                    <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-elevated text-text-secondary border border-border-subtle">
+                      #{pull.number}
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-secondary">
+                    {pull.author || "unknown"} · {pull.merged ? "merged" : pull.state || "open"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyText>
+              PR-backed reasoning appears when recent commits can be associated with pull requests.
+            </EmptyText>
+          )}
+        </Panel>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1fr_1fr] mb-8">
+        <Panel title="Issue evidence">
+          {issues.length > 0 ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <MiniInfoCard label="Issues linked" value={String(rawMeta.issueCount ?? issues.length)} />
+                <MiniInfoCard label="Open issues" value={String(rawMeta.issueCoverage?.openIssueCount ?? 0)} />
+              </div>
+              {issues.slice(0, 3).map((issue) => (
+                <div key={`${issue.number}-${issue.title}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <p className="font-medium">{issue.title || "Untitled issue"}</p>
+                    <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-elevated text-text-secondary border border-border-subtle">
+                      #{issue.number}
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-secondary">
+                    {issue.author || "unknown"} · {issue.state || "unknown"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyText>
+              Issue-backed reasoning appears when commit or PR text references GitHub issues.
+            </EmptyText>
+          )}
+        </Panel>
+
+        <Panel title="Evidence summary">
+          {snapshot?.evidence_json?.length ? (
+            <div className="space-y-3">
+              {snapshot.evidence_json.slice(0, 6).map((item, index) => {
+                const evidence = item as { type?: string; title?: string; ref?: string | null };
+                return (
+                  <div key={`${evidence.type || "evidence"}-${index}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">{evidence.type || "evidence"}</p>
+                    <p className="font-medium mb-1">{evidence.title || "Untitled evidence"}</p>
+                    <p className="text-xs text-text-tertiary">{evidence.ref || "No ref"}</p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyText>
+              Evidence links will appear here as plans, issues, pull requests, and commits get attached to snapshots.
+            </EmptyText>
+          )}
+        </Panel>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr] mb-8">
+        <Panel title="Snapshot history" headerAction={`${snapshotHistory.length} saved`}>
+          {snapshotHistory.length > 0 ? (
+            <div className="space-y-3">
+              {snapshotHistory.map((historyItem, index) => {
+                const previous = snapshotHistory[index + 1] ?? null;
+                const progressDelta = previous
+                  ? historyItem.progress_percent - previous.progress_percent
+                  : null;
+                const driftDelta = previous
+                  ? historyItem.drift_count - previous.drift_count
+                  : null;
+                const historyMeta = (historyItem.raw_output_json ?? {}) as {
+                  mode?: string;
+                };
+
+                return (
+                  <div
+                    key={historyItem.id}
+                    className="border border-border-subtle rounded-xl p-4 bg-canvas/30"
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                      <p className="font-medium">
+                        {new Date(historyItem.generated_at).toLocaleString()}
+                      </p>
+                      <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-elevated text-text-secondary border border-border-subtle">
+                        {historyMeta.mode === "project_state_analysis" ? "github+plan" : "baseline"}
+                      </span>
+                    </div>
+                    <div className="grid sm:grid-cols-3 gap-3 text-sm text-text-secondary">
+                      <p>
+                        Progress:{" "}
+                        <span className="text-text-primary font-medium">
+                          {historyItem.progress_percent}%
+                        </span>
+                        {progressDelta !== null ? (
+                          <span className={progressDelta >= 0 ? "text-success ml-2" : "text-error ml-2"}>
+                            {progressDelta >= 0 ? "+" : ""}
+                            {progressDelta}pt
+                          </span>
+                        ) : null}
+                      </p>
+                      <p>
+                        Drift:{" "}
+                        <span className="text-text-primary font-medium">
+                          {historyItem.drift_count}
+                        </span>
+                        {driftDelta !== null ? (
+                          <span className={driftDelta <= 0 ? "text-success ml-2" : "text-error ml-2"}>
+                            {driftDelta >= 0 ? "+" : ""}
+                            {driftDelta}
+                          </span>
+                        ) : null}
+                      </p>
+                      <p>
+                        Phase:{" "}
+                        <span className="text-text-primary font-medium">
+                          {historyItem.current_phase}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyText>
+              Snapshot history appears after refresh runs start accumulating.
+            </EmptyText>
+          )}
+        </Panel>
+
+        <Panel title="Change since last snapshot">
+          {snapshot && previousSnapshot ? (
+            <div className="space-y-4 text-sm text-text-secondary">
+              <ChangeLine
+                label="Progress delta"
+                value={`${snapshot.progress_percent - previousSnapshot.progress_percent >= 0 ? "+" : ""}${snapshot.progress_percent - previousSnapshot.progress_percent}pt`}
+                positive={snapshot.progress_percent >= previousSnapshot.progress_percent}
+              />
+              <ChangeLine
+                label="Drift delta"
+                value={`${snapshot.drift_count - previousSnapshot.drift_count >= 0 ? "+" : ""}${snapshot.drift_count - previousSnapshot.drift_count}`}
+                positive={snapshot.drift_count <= previousSnapshot.drift_count}
+              />
+              <ChangeLine
+                label="Risk delta"
+                value={`${snapshot.risk_count - previousSnapshot.risk_count >= 0 ? "+" : ""}${snapshot.risk_count - previousSnapshot.risk_count}`}
+                positive={snapshot.risk_count <= previousSnapshot.risk_count}
+              />
+              <ChangeLine
+                label="Blocker delta"
+                value={`${snapshot.blocker_count - previousSnapshot.blocker_count >= 0 ? "+" : ""}${snapshot.blocker_count - previousSnapshot.blocker_count}`}
+                positive={snapshot.blocker_count <= previousSnapshot.blocker_count}
+              />
+            </div>
+          ) : (
+            <EmptyText>
+              You need at least two saved snapshots before this board can show meaningful change over time.
+            </EmptyText>
+          )}
+        </Panel>
+      </section>
+
       <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr] mb-8">
         <Panel
           title="Progress against plan"
@@ -311,24 +609,9 @@ export default async function ProjectStatePage({
         </Panel>
 
         <Panel title="Evidence entry">
-          {snapshot?.evidence_json?.length ? (
-            <div className="space-y-3">
-              {snapshot.evidence_json.slice(0, 4).map((item, index) => {
-                const evidence = item as { type?: string; title?: string; ref?: string | null };
-                return (
-                  <div key={`${evidence.type || "evidence"}-${index}`} className="border border-border-subtle rounded-xl p-4 bg-canvas/30">
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary mb-2">{evidence.type || "evidence"}</p>
-                    <p className="font-medium mb-1">{evidence.title || "Untitled evidence"}</p>
-                    <p className="text-xs text-text-tertiary">{evidence.ref || "No ref"}</p>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyText>
-              Evidence links will appear here as commits, plans, and AI notes get attached to snapshots.
-            </EmptyText>
-          )}
+          <EmptyText>
+            Use the panels above to inspect exactly which plans, issues, pull requests, and commits informed the latest snapshot.
+          </EmptyText>
         </Panel>
       </section>
     </div>
@@ -391,5 +674,37 @@ function RunStatusPill({ status }: { status: string }) {
     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${toneClass}`}>
       {status}
     </span>
+  );
+}
+
+function ChangeLine({
+  label,
+  value,
+  positive,
+}: {
+  label: string;
+  value: string;
+  positive: boolean;
+}) {
+  return (
+    <div className="border border-border-subtle rounded-xl p-4 bg-canvas/30 flex items-center justify-between gap-3">
+      <p>{label}</p>
+      <p className={positive ? "text-success font-medium" : "text-error font-medium"}>{value}</p>
+    </div>
+  );
+}
+
+function MiniInfoCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="border border-border-subtle rounded-xl px-3 py-3 bg-canvas/30">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-tertiary mb-1">{label}</p>
+      <p className="text-sm font-semibold break-words">{value}</p>
+    </div>
   );
 }
