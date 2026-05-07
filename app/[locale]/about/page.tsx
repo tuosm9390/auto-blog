@@ -96,6 +96,20 @@ export default async function LandingPage({
               </p>
             </div>
 
+            {/* 이름의 의미 */}
+            <div className="border border-border-subtle rounded-3xl p-8 md:p-10 bg-elevated/40">
+              <h2 className="text-2xl md:text-3xl font-display font-bold mb-6 flex items-center gap-3">
+                {t("nameTitle")}
+              </h2>
+              <p className="text-text-secondary leading-relaxed">
+                {t.rich("nameContent", {
+                  important: (chunks) => (
+                    <strong className="text-text-primary">{chunks}</strong>
+                  ),
+                })}
+              </p>
+            </div>
+
             {/* 특징 및 차별점 */}
             <div className="bg-surface border border-border-subtle rounded-3xl p-8 md:p-12 shadow-sm">
               <h2 className="text-2xl md:text-3xl font-display font-bold mb-8">

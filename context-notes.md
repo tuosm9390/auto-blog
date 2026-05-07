@@ -13,3 +13,8 @@
 - Decision: The public product message should lead with AI-native project memory, not AI blog generation.
 - Scope: Apply the safe first pass from `doc/service-positioning-refresh-design.md`: update landing, how-it-works, navigation labels, and metadata. Do not delete legacy post-generation routes in this pass.
 - Risk control: Remove generated-post samples from the landing page because they reinforce the old product promise. Keep direct routes for `/generate`, `/jobs`, and public posts intact.
+
+## 2026-05-07 Brand Meaning
+
+- Decision: Explain Synapso as a product name derived from the feeling of a synapse, connecting scattered project signals and preserving them as usable project memory.
+- Scope: Add this as copy on About and reinforce it in How it works. Do not change branding assets or product naming.
