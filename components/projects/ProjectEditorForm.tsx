@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/routing";
 import { Project, ProjectPlan } from "@/lib/types";
 import { getTranslations } from "next-intl/server";
+import { GitHubRepoPicker } from "./GitHubRepoPicker";
 
 interface ProjectEditorFormProps {
   mode: "create" | "edit";
@@ -105,20 +106,18 @@ export default async function ProjectEditorForm({
 
         <section className="border border-border-subtle rounded-2xl p-6 space-y-4 bg-surface/30">
           <h2 className="text-lg font-semibold">{t("editor.sections.repo")}</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field
-              label={t("editor.fields.githubOwner")}
-              name="githubRepoOwner"
-              placeholder="tuosm9390"
-              defaultValue={project?.github_repo_owner ?? ""}
-            />
-            <Field
-              label={t("editor.fields.githubRepo")}
-              name="githubRepoName"
-              placeholder="auto-blog"
-              defaultValue={project?.github_repo_name ?? ""}
-            />
-          </div>
+          <GitHubRepoPicker
+            ownerLabel={t("editor.fields.githubOwner")}
+            repoLabel={t("editor.fields.githubRepo")}
+            selectLabel={t("editor.repoPicker.select")}
+            loadingLabel={t("editor.repoPicker.loading")}
+            emptyLabel={t("editor.repoPicker.empty")}
+            errorLabel={t("editor.repoPicker.error")}
+            manualLabel={t("editor.repoPicker.manual")}
+            selectedLabel={t("editor.repoPicker.selected")}
+            initialOwner={project?.github_repo_owner}
+            initialRepo={project?.github_repo_name}
+          />
         </section>
 
         <section className="border border-border-subtle rounded-2xl p-6 space-y-4 bg-surface/30">

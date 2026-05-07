@@ -116,6 +116,9 @@ export interface Repo {
   name: string;
   full_name: string;
   private: boolean;
+  description?: string | null;
+  url?: string;
+  updated_at?: string | null;
 }
 
 export interface SubscriptionInfo {

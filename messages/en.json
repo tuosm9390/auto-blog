@@ -378,6 +378,14 @@
         "planTitle": "Current Plan",
         "planBody": "Paste the current PRD or working plan here. Even a rough markdown draft is enough for Sprint 1."
       },
+      "repoPicker": {
+        "select": "Select GitHub repository",
+        "loading": "Loading repositories...",
+        "empty": "No repositories available",
+        "error": "Failed to load repository list.",
+        "manual": "Switch to manual owner/repo input",
+        "selected": "Selected repository"
+      },
       "planHelp": "Empty is allowed. You can keep the project first and refine the plan later."
     },
     "index": {
