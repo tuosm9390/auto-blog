@@ -1,8 +1,25 @@
 import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
-import { reviewsKo, reviewsEn } from "../data/reviews";
-import { getRecentPublishedPosts } from "@/lib/posts";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+
+  return {
+    title: isEn
+      ? "AI-native project memory | Synapso.dev"
+      : "AI-native 프로젝트 메모리 | Synapso.dev",
+    description: isEn
+      ? "Track project progress, blockers, risks, and drift from your PRD and GitHub activity."
+      : "PRD와 GitHub 활동을 연결해 프로젝트 진행률, 막힘, 리스크, 드리프트를 추적합니다.",
+  };
+}
 
 export default async function LandingPage({
   params,
@@ -11,14 +28,11 @@ export default async function LandingPage({
 }) {
   const session = await auth();
   const t = await getTranslations("About");
-  const { locale } = await params;
+  await params;
 
   // CTA 텍스트 및 링크 결정
   const ctaText = !session ? t("ctaFree") : t("ctaManage");
-  const ctaHref = !session ? "/login" : "/generate";
-
-  const reviews = locale === "ko" ? reviewsKo : reviewsEn;
-  const samplePosts = await getRecentPublishedPosts(3);
+  const ctaHref = !session ? "/login" : "/projects/new";
 
   return (
     <div className="max-w-6xl mx-auto px-4 animate-fade-in-up">
@@ -30,9 +44,7 @@ export default async function LandingPage({
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight leading-tight mb-6 whitespace-pre-line">
           {t("heroTitle1")}
           <br />
-          {t("heroTitle2Prefix")}{" "}
-          <span className="text-text-secondary">AI</span>
-          {t("heroTitle2Suffix")}
+          <span className="text-text-secondary">{t("heroTitle2")}</span>
         </h1>
         <p className="max-w-2xl text-text-secondary text-lg md:text-xl mb-10 leading-relaxed font-body whitespace-pre-line">
           {t("heroDesc")}
@@ -51,24 +63,6 @@ export default async function LandingPage({
             {t("ctaHow")}
           </Link>
         </div>
-
-        {samplePosts.length > 0 && (
-          <div className="mt-8 border border-accent/20 bg-accent/5 rounded-xl px-6 py-4 max-w-lg w-full text-left">
-            <p className="text-xs text-accent font-semibold uppercase tracking-wider mb-3">
-              ✦ {t("samplePostsLabel")}
-            </p>
-            {samplePosts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/@${post.author}/${post.slug}`}
-                className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary py-1.5 transition-colors"
-              >
-                <span className="text-accent text-xs">→</span>
-                {post.title}
-              </Link>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* [NEW] Project Introduction Section (비로그인 전용) */}
@@ -167,65 +161,37 @@ export default async function LandingPage({
         </div>
       </section>
 
-      {/* Reviews */}
+      {/* Proof */}
       <section className="py-24 border-t border-border-subtle overflow-hidden">
         <div className="text-center mb-16 px-4">
           <span className="inline-block px-3 py-1 border border-border-subtle rounded-full text-xs tracking-widest text-text-tertiary uppercase mb-4">
-            {t("testimonialsTag")}
+            {t("proofTag")}
           </span>
           <h2 className="text-2xl md:text-3xl font-display font-semibold mb-4">
-            {t("testimonialsTitle")}
+            {t("proofTitle")}
           </h2>
           <p className="text-text-secondary max-w-xl mx-auto">
-            {t("testimonialsDesc")}
+            {t("proofDesc")}
           </p>
         </div>
 
-        <div className="relative space-y-6 pause-on-hover">
-          <div className="flex select-none gap-6 animate-marquee whitespace-nowrap">
-            {[...reviews, ...reviews].map((review, idx) => (
-              <div
-                key={idx}
-                className="w-[400px] flex-shrink-0 border border-border-subtle rounded-2xl p-6 bg-surface/50 hover:bg-surface hover:border-border-strong transition-all duration-300"
-              >
-                <p className="text-text-primary text-sm leading-relaxed mb-4 whitespace-normal line-clamp-3">
-                  &quot;{review.quote}&quot;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-elevated border border-border-subtle flex items-center justify-center">
-                    <span className="text-text-tertiary text-xs">✦</span>
-                  </div>
-                  <span className="text-xs font-semibold text-text-tertiary">
-                    {review.role}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex select-none gap-6 animate-marquee-reverse whitespace-nowrap">
-            {[...reviews, ...reviews].map((review, idx) => (
-              <div
-                key={idx + 100}
-                className="w-[400px] flex-shrink-0 border border-border-subtle rounded-2xl p-6 bg-surface/50 hover:bg-surface hover:border-border-strong transition-all duration-300"
-              >
-                <p className="text-text-primary text-sm leading-relaxed mb-4 whitespace-normal line-clamp-3">
-                  &quot;{review.quote}&quot;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-elevated border border-border-subtle flex items-center justify-center">
-                    <span className="text-text-tertiary text-xs">✦</span>
-                  </div>
-                  <span className="text-xs font-semibold text-text-tertiary">
-                    {review.role}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-canvas to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-canvas to-transparent z-10" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="border border-border-subtle rounded-2xl p-6 bg-surface/50 hover:bg-surface hover:border-border-strong transition-all duration-300"
+            >
+              <p className="text-xs text-accent font-mono mb-3">
+                0{i}
+              </p>
+              <h3 className="text-lg font-semibold mb-3">
+                {t(`proof${i}Title` as any)}
+              </h3>
+              <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
+                {t(`proof${i}Desc` as any)}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 

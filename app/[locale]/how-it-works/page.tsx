@@ -2,15 +2,14 @@ import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { SECTION_HEADINGS } from "@/lib/constants/sections";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const isEn = (await params).locale === 'en';
   return {
     title: isEn ? "How it works | Synapso.dev" : "사용 방법 | Synapso.dev",
     description: isEn 
-      ? "Learn how Synapso.dev turns your GitHub commits into professional tech blog posts."
-      : "GitHub 커밋을 AI가 분석하여 기술 블로그 포스트를 자동 생성하는 과정을 안내합니다.",
+      ? "Learn how Synapso.dev turns your PRD and GitHub activity into a project state board."
+      : "PRD와 GitHub 활동을 프로젝트 상태판으로 바꾸는 과정을 안내합니다.",
   };
 }
 
@@ -21,35 +20,35 @@ export default async function HowItWorksPage() {
   const steps = [
     {
       num: "01",
-      icon: "🔗",
+      icon: "📌",
       title: t("step1Title"),
       desc: t("step1Desc"),
       extra: null as string | null,
     },
     {
       num: "02",
-      icon: "✍️",
+      icon: "🧭",
       title: t("step2Title"),
       desc: t("step2Desc"),
-      extra: "userContextPreview" as string | null,
+      extra: "planPreview" as string | null,
     },
     {
       num: "03",
-      icon: "🔬",
+      icon: "🔗",
       title: t("step3Title"),
       desc: t("step3Desc"),
       extra: null as string | null,
     },
     {
       num: "04",
-      icon: "📄",
+      icon: "🔄",
       title: t("step4Title"),
       desc: t("step4Desc"),
-      extra: "outputSectionsPreview" as string | null,
+      extra: "statePreview" as string | null,
     },
     {
       num: "05",
-      icon: "🚀",
+      icon: "🧠",
       title: t("step5Title"),
       desc: t("step5Desc"),
       extra: null as string | null,
@@ -78,24 +77,24 @@ export default async function HowItWorksPage() {
               <h3 className="text-lg font-semibold mb-1">{step.title}</h3>
               <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">{step.desc}</p>
 
-              {step.extra === "userContextPreview" && (
+              {step.extra === "planPreview" && (
                 <div className="mt-3 border-l-2 border-accent bg-accent/5 rounded-r-lg px-3 py-2">
-                  <p className="text-xs text-accent font-bold mb-1">✦ userContext</p>
+                  <p className="text-xs text-accent font-bold mb-1">✦ PRD / Plan</p>
                   <div className="mt-1 bg-surface border border-border-subtle rounded px-3 py-1.5 text-xs text-text-tertiary pointer-events-none cursor-not-allowed">
-                    {t("step2ContextPlaceholder")}
+                    {t("step2PlanPlaceholder")}
                   </div>
                 </div>
               )}
 
-              {step.extra === "outputSectionsPreview" && (
+              {step.extra === "statePreview" && (
                 <div className="mt-3 bg-elevated border border-border-subtle rounded-xl p-4">
                   <p className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-3">
                     {t("outputPreviewLabel")}
                   </p>
-                  {SECTION_HEADINGS.map((s, idx) => (
+                  {[1, 2, 3, 4].map((idx) => (
                     <div key={idx} className="flex items-center gap-3 py-1.5 border-b border-border-subtle last:border-0">
-                      <span className="text-accent text-xs font-bold w-5">§{idx + 1}</span>
-                      <span className="text-sm font-medium">{s.tabLabel}</span>
+                      <span className="text-accent text-xs font-bold w-5">§{idx}</span>
+                      <span className="text-sm font-medium">{t(`output${idx}` as any)}</span>
                     </div>
                   ))}
                 </div>
@@ -106,7 +105,7 @@ export default async function HowItWorksPage() {
       </div>
 
       <div className="text-center mt-16">
-        <Link href={session ? "/" : "/login"} className="inline-block px-10 py-4 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors text-lg">
+        <Link href={session ? "/projects" : "/login"} className="inline-block px-10 py-4 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors text-lg">
           {session ? t("ctaManage") : t("ctaStart")}
         </Link>
       </div>

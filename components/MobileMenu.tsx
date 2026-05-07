@@ -126,7 +126,7 @@ export default function MobileMenu({
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-accent hover:bg-elevated transition-colors font-medium"
                 >
-                  Projects
+                  {t("projects")}
                 </Link>
                 <Link
                   href="/generate"

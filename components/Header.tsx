@@ -54,7 +54,7 @@ export default async function Header() {
                 href="/projects"
                 className="text-sm text-accent hover:text-accent-hover transition-colors font-medium"
               >
-                Projects
+                {t("projects")}
               </Link>
               <Link
                 href="/generate"

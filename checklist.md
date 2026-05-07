@@ -1,6 +1,7 @@
 # Checklist
 
-- [x] Pass the current locale into project state refresh.
-- [x] Instruct the AI prompt to write all user-facing analysis fields in the requested language.
-- [x] Localize non-GitHub baseline snapshot fallback text.
+- [x] Refresh landing page copy for project memory positioning.
+- [x] Refresh how-it-works copy and flow for project state boards.
+- [x] Update header and mobile menu labels around Projects as the primary product.
+- [x] Remove public landing exposure of generated blog sample posts and legacy testimonials.
 - [x] Verify with typecheck and build.
