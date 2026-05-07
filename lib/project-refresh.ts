@@ -9,6 +9,147 @@ import {
 } from "./projects";
 import type { CommitDiff, IssueContext, PullRequestContext, StateSnapshot } from "./types";
 
+type ProjectRefreshLocale = "ko" | "en";
+
+function normalizeLocale(locale: string | undefined): ProjectRefreshLocale {
+  return locale === "ko" ? "ko" : "en";
+}
+
+function buildBaselineAnalysis(
+  projectId: string,
+  projectName: string,
+  plan: Awaited<ReturnType<typeof getCurrentProjectPlan>>,
+  locale: ProjectRefreshLocale
+) {
+  if (locale === "ko") {
+    return {
+      summary:
+        "초기 상태 보드가 생성되었습니다. 아직 GitHub 활동이 연결되지 않아 이 스냅샷은 현재 가설과 연결된 계획을 기준으로 구성되었습니다.",
+      progressPercent: plan ? 12 : 4,
+      currentPhase: plan ? "기준선 설정" : "프로젝트 설정",
+      blockerCount: plan ? 0 : 1,
+      riskCount: 2,
+      driftCount: 0,
+      watchNext: plan
+        ? [
+            "다음 새로고침에서 GitHub 활동을 연결하기",
+            "현재 계획을 진행 상태 항목으로 변환하기",
+            "실제 프로젝트 변경으로 드리프트 감지를 검증하기",
+          ]
+        : [
+            "현재 PRD 또는 계획을 추가하기",
+            "다음 새로고침에서 GitHub 활동을 연결하기",
+            "하나의 실제 프로젝트로 상태 보드의 유용성을 검증하기",
+          ],
+      planProgress: plan
+        ? [
+            {
+              label: "계획 연결",
+              status: "done",
+              evidence: "현재 계획 문서가 존재합니다.",
+              notes: "이 문서를 진행 상태 추적의 기준선으로 사용합니다.",
+            },
+            {
+              label: "GitHub 활동 소스",
+              status: "at_risk",
+              evidence: "레포지토리 연결이 없거나 토큰을 사용할 수 없습니다.",
+              notes: "활동 데이터가 연결되기 전까지 상태 품질은 제한적입니다.",
+            },
+          ]
+        : [
+            {
+              label: "계획 연결",
+              status: "at_risk",
+              evidence: "현재 계획 문서가 없습니다.",
+              notes: "계획이 없으면 PRD 기준 추적이 약해집니다.",
+            },
+          ],
+      drift: [],
+      evidence: [
+        {
+          type: "project",
+          title: projectName,
+          ref: projectId,
+          url: null,
+        },
+        ...(plan
+          ? [
+              {
+                type: "prd_snippet",
+                title: plan.title,
+                ref: plan.id,
+                url: null,
+              },
+            ]
+          : []),
+      ],
+    };
+  }
+
+  return {
+    summary:
+      "Initial state board created. GitHub activity is not connected yet, so this snapshot is based on the current thesis and attached plan only.",
+    progressPercent: plan ? 12 : 4,
+    currentPhase: plan ? "Baseline setup" : "Project setup",
+    blockerCount: plan ? 0 : 1,
+    riskCount: 2,
+    driftCount: 0,
+    watchNext: plan
+      ? [
+          "Connect GitHub activity to future refresh runs",
+          "Translate the current plan into progress states",
+          "Validate drift detection with real project changes",
+        ]
+      : [
+          "Attach a current PRD or plan",
+          "Connect GitHub activity to future refresh runs",
+          "Validate state board usefulness with one real project",
+        ],
+    planProgress: plan
+      ? [
+          {
+            label: "Plan attached",
+            status: "done",
+            evidence: "Current plan document exists",
+            notes: "Use this as the baseline for progress tracking",
+          },
+          {
+            label: "GitHub activity source",
+            status: "at_risk",
+            evidence: "Repo connection missing or token unavailable",
+            notes: "State quality stays shallow until activity is connected",
+          },
+        ]
+      : [
+          {
+            label: "Plan attached",
+            status: "at_risk",
+            evidence: "No current plan document",
+            notes: "PRD-aware tracking is weak without a plan",
+          },
+        ],
+    drift: [],
+    evidence: [
+      {
+        type: "project",
+        title: projectName,
+        ref: projectId,
+        url: null,
+      },
+      ...(plan
+        ? [
+            {
+              type: "prd_snippet",
+              title: plan.title,
+              ref: plan.id,
+              url: null,
+            },
+          ]
+        : []),
+    ],
+  };
+}
+
 function buildPlanSummary(markdown: string | null | undefined) {
   const lines = (markdown ?? "")
     .split("\n")
@@ -79,6 +220,7 @@ export async function refreshProjectState(params: {
   projectId: string;
   triggeredBy: string;
   accessToken?: string;
+  locale?: string;
   sourceWindowDays?: number;
 }): Promise<{ snapshot: StateSnapshot; runId: string }> {
   const project = await getProjectById(params.projectId);
@@ -90,6 +232,7 @@ export async function refreshProjectState(params: {
   const plan = await getCurrentProjectPlan(params.projectId);
   const now = new Date().toISOString();
   const sourceWindowDays = params.sourceWindowDays ?? 7;
+  const locale = normalizeLocale(params.locale);
   const accessToken = params.accessToken;
   const hasPlan = Boolean(plan?.content_markdown?.trim());
   const hasRepoConfigured =
@@ -170,69 +313,8 @@ export async function refreshProjectState(params: {
     const issueCoverage = buildIssueCoverage(issues);
 
     const analysis = hasRepoConnection
-      ? await analyzeProjectState(currentProject, plan, commitDiffs, pullRequests, issues)
-      : {
-          summary:
-            "Initial state board created. GitHub activity is not connected yet, so this snapshot is based on the current thesis and attached plan only.",
-          progressPercent: plan ? 12 : 4,
-          currentPhase: plan ? "Baseline setup" : "Project setup",
-          blockerCount: plan ? 0 : 1,
-          riskCount: 2,
-          driftCount: 0,
-          watchNext: plan
-            ? [
-                "Connect GitHub activity to future refresh runs",
-                "Translate the current plan into progress states",
-                "Validate drift detection with real project changes",
-              ]
-            : [
-                "Attach a current PRD or plan",
-                "Connect GitHub activity to future refresh runs",
-                "Validate state board usefulness with one real project",
-              ],
-          planProgress: plan
-            ? [
-                {
-                  label: "Plan attached",
-                  status: "done",
-                  evidence: "Current plan document exists",
-                  notes: "Use this as the baseline for progress tracking",
-                },
-                {
-                  label: "GitHub activity source",
-                  status: "at_risk",
-                  evidence: "Repo connection missing or token unavailable",
-                  notes: "State quality stays shallow until activity is connected",
-                },
-              ]
-            : [
-                {
-                  label: "Plan attached",
-                  status: "at_risk",
-                  evidence: "No current plan document",
-                  notes: "PRD-aware tracking is weak without a plan",
-                },
-              ],
-          drift: [],
-          evidence: [
-            {
-              type: "project",
-              title: currentProject.name,
-              ref: currentProject.id,
-              url: null,
-            },
-            ...(plan
-              ? [
-                  {
-                    type: "prd_snippet",
-                    title: plan.title,
-                    ref: plan.id,
-                    url: null,
-                  },
-                ]
-              : []),
-          ],
-        };
+      ? await analyzeProjectState(currentProject, plan, commitDiffs, pullRequests, issues, locale)
+      : buildBaselineAnalysis(currentProject.id, currentProject.name, plan, locale);
 
     const snapshot = await createStateSnapshot({
       projectId: params.projectId,
@@ -276,6 +358,7 @@ export async function refreshProjectState(params: {
         planSummary,
         planTitle: plan?.title ?? null,
         sourceWindowDays,
+        locale,
         fallbackReason: hasRepoConnection
           ? null
           : !hasPlan

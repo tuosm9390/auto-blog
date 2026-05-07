@@ -80,6 +80,7 @@ export async function refreshProjectStateAction(locale: string, projectId: strin
       projectId,
       triggeredBy: safeUserId,
       accessToken,
+      locale,
       sourceWindowDays: 7,
     });
 

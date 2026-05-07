@@ -51,12 +51,33 @@ export interface ProjectStateAnalysisResult {
   evidence: EvidenceItem[];
 }
 
+type ProjectStateLocale = "ko" | "en";
+
+function getOutputLanguageInstruction(locale: ProjectStateLocale) {
+  if (locale === "ko") {
+    return [
+      "출력 언어: 한국어.",
+      "summary, currentPhase, watchNext, planProgress.label, planProgress.evidence, planProgress.notes, drift.title, drift.original, drift.current, drift.why는 모두 자연스러운 한국어로 작성하세요.",
+      "status 값(done, in_progress, at_risk, blocked)과 drift_type 값(strategic, scope, execution)은 스키마 값을 그대로 유지하세요.",
+      "커밋 SHA, 파일명, PR/Issue 번호, 고유명사는 번역하지 마세요.",
+    ].join("\n");
+  }
+
+  return [
+    "Output language: English.",
+    "Write summary, currentPhase, watchNext, planProgress fields, and drift fields in natural English.",
+    "Keep status values and drift_type values exactly as schema enum-style values.",
+    "Do not translate commit SHAs, file names, PR/Issue numbers, or proper nouns.",
+  ].join("\n");
+}
+
 function buildProjectStatePrompt(
   project: Project,
   plan: ProjectPlan | null,
   commitDiffs: CommitDiff[],
   pullRequests: PullRequestContext[],
-  issues: IssueContext[]
+  issues: IssueContext[],
+  locale: ProjectStateLocale
 ): string {
   const planBlock = plan?.content_markdown?.trim()
     ? plan.content_markdown
@@ -123,10 +144,15 @@ Body: ${trimmedBody || "no body"}`;
           .join("\n\n")
       : "연결된 Issue 맥락이 없습니다.";
 
+  const outputLanguageInstruction = getOutputLanguageInstruction(locale);
+
   return `당신은 AI-native solo builder의 프로젝트 상태를 점검하는 운영 리뷰어입니다.
 
 목표는 "글을 쓰는 것"이 아니라, 프로젝트 상태를 구조화된 JSON으로 보고하는 것입니다.
 말투는 간결하고 사실 중심이어야 합니다. 과장 금지. 마케팅 금지.
+
+[OUTPUT LANGUAGE]
+${outputLanguageInstruction}
 
 [PROJECT]
 Name: ${project.name}
@@ -161,7 +187,6 @@ ${issueBlock}
 - drift는 단순 구현 세부가 아니라 제품/범위/실행 방향 변화만 잡기
 - evidence는 최근 commit 메시지와 PRD 존재 여부를 바탕으로 짧게 연결
 - PR title/body와 issue title/body가 있으면 결정의 이유와 범위 판단에 우선 활용
-- 모든 텍스트는 영어로 작성
 
 JSON shape:
 {
@@ -193,10 +218,11 @@ export async function analyzeProjectState(
   plan: ProjectPlan | null,
   commitDiffs: CommitDiff[],
   pullRequests: PullRequestContext[],
-  issues: IssueContext[]
+  issues: IssueContext[],
+  locale: ProjectStateLocale = "en"
 ): Promise<ProjectStateAnalysisResult> {
   const ai = getGeminiClient();
-  const prompt = buildProjectStatePrompt(project, plan, commitDiffs, pullRequests, issues);
+  const prompt = buildProjectStatePrompt(project, plan, commitDiffs, pullRequests, issues, locale);
 
   const schema = {
     type: Type.OBJECT,

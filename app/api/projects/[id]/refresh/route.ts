@@ -4,6 +4,7 @@ import { refreshProjectState } from "@/lib/project-refresh";
 import { z } from "zod";
 
 const refreshSchema = z.object({
+  locale: z.enum(["ko", "en"]).optional().default("en"),
   sourceWindowDays: z.number().int().min(1).max(30).optional().default(7),
 });
 
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
       projectId: id,
       triggeredBy: userId,
       accessToken,
+      locale: parsed.data.locale,
       sourceWindowDays: parsed.data.sourceWindowDays,
     });
 
