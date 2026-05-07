@@ -2,10 +2,12 @@ import { auth } from "@/auth";
 import { redirect, Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import {
+  getAnalysisRunsByProject,
   getLatestStateSnapshot,
   getProjectMemorySetupState,
   getProjectsByOwner,
 } from "@/lib/projects";
+import type { AnalysisRun, StateSnapshot } from "@/lib/types";
 
 export default async function ProjectsPage({
   params,
@@ -27,10 +29,17 @@ export default async function ProjectsPage({
     getProjectsByOwner(safeUserId),
   ]);
   const projectsWithState = await Promise.all(
-    projects.map(async (project) => ({
-      project,
-      snapshot: await getLatestStateSnapshot(project.id),
-    }))
+    projects.map(async (project) => {
+      const [snapshot, runs] = await Promise.all([
+        getLatestStateSnapshot(project.id),
+        getAnalysisRunsByProject(project.id),
+      ]);
+      return {
+        project,
+        snapshot,
+        latestRun: runs[0] ?? null,
+      };
+    })
   );
 
   const activeProjects = projectsWithState.filter((item) => item.project.status === "active").length;
@@ -152,7 +161,18 @@ export default async function ProjectsPage({
         </section>
       ) : (
         <section className="space-y-4">
-          {projectsWithState.map(({ project, snapshot }) => (
+          {projectsWithState.map(({ project, snapshot, latestRun }) => {
+            const rawMeta = getSnapshotMeta(snapshot);
+            const reviewReadyCount = getSnapshotReviewReadyCount(snapshot);
+            const queueState = getProjectQueueState(snapshot, latestRun, reviewReadyCount);
+            const lastRefreshDate = snapshot?.generated_at ?? latestRun?.created_at ?? null;
+            const snapshotMode = rawMeta.generatedFromGithub
+              ? t("index.snapshotMode.github")
+              : snapshot
+                ? t("index.snapshotMode.baseline")
+                : t("shared.noSnapshot");
+
+            return (
             <Link
               key={project.id}
               href={`/projects/${project.id}`}
@@ -163,6 +183,7 @@ export default async function ProjectsPage({
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <h2 className="text-xl font-semibold">{project.name}</h2>
                     <StatusPill label={t(`shared.status.${project.status}`)} tone="neutral" />
+                    <StatusPill label={t(`index.queue.${queueState}`)} tone={getQueueTone(queueState)} />
                     {snapshot?.drift_count ? <StatusPill label={t("index.labels.driftCount", {count: snapshot.drift_count})} tone="accent" /> : null}
                     {snapshot?.blocker_count ? <StatusPill label={t("index.labels.blockedCount", {count: snapshot.blocker_count})} tone="danger" /> : null}
                   </div>
@@ -171,19 +192,21 @@ export default async function ProjectsPage({
                   </p>
                   <div className="text-xs text-text-tertiary flex flex-wrap gap-x-4 gap-y-2">
                     <span>{t("shared.repo")}: {project.github_repo_owner && project.github_repo_name ? `${project.github_repo_owner}/${project.github_repo_name}` : t("shared.notConnected")}</span>
-                    <span>{t("shared.updated")}: {new Date(project.updated_at).toLocaleDateString()}</span>
+                    <span>{t("index.lastRefresh")}: {lastRefreshDate ? new Date(lastRefreshDate).toLocaleString() : t("shared.none")}</span>
+                    <span>{t("index.snapshotStatus")}: {snapshotMode}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3 lg:w-[420px]">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3 lg:w-[520px]">
                   <MetricTile label={t("shared.progress")} value={snapshot ? `${snapshot.progress_percent}%` : "—"} />
-                  <MetricTile label={t("shared.phase")} value={snapshot?.current_phase || t("shared.noSnapshot")} />
-                  <MetricTile label={t("shared.risks")} value={snapshot ? String(snapshot.risk_count) : "—"} />
+                  <MetricTile label={t("index.validation")} value={snapshot ? t("state.review.score", { count: reviewReadyCount }) : "—"} />
+                  <MetricTile label={t("index.latestRun")} value={latestRun ? t(`index.runStatus.${latestRun.status}`) : t("shared.none")} />
                   <MetricTile label={t("shared.watchNext")} value={snapshot?.watch_next?.[0] || t("shared.refreshState")} />
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </section>
       )}
     </div>
@@ -234,9 +257,9 @@ function SummaryCard({ label, value, meta }: { label: string; value: string; met
 
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-border-subtle rounded-xl px-3 py-3 bg-canvas/30">
+    <div className="border border-border-subtle rounded-xl px-3 py-3 bg-canvas/30 min-h-[76px]">
       <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-tertiary mb-1">{label}</p>
-      <p className="text-sm font-semibold">{value}</p>
+      <p className="text-sm font-semibold line-clamp-2 break-words">{value}</p>
     </div>
   );
 }
@@ -246,11 +269,13 @@ function StatusPill({
   tone,
 }: {
   label: string;
-  tone: "neutral" | "accent" | "danger";
+  tone: "neutral" | "accent" | "danger" | "success";
 }) {
   const toneClass =
     tone === "accent"
       ? "bg-accent/10 text-accent border border-accent/30"
+      : tone === "success"
+        ? "bg-success/10 text-success border border-success/30"
       : tone === "danger"
         ? "bg-error/10 text-error border border-error/30"
         : "bg-elevated text-text-secondary border border-border-subtle";
@@ -260,4 +285,84 @@ function StatusPill({
       {label}
     </span>
   );
+}
+
+function getSnapshotMeta(snapshot: StateSnapshot | null) {
+  const rawMeta = (snapshot?.raw_output_json ?? {}) as {
+    generatedFromGithub?: boolean;
+    commitCoverage?: {
+      analyzedCommitRefs?: string[];
+    };
+    pullRequests?: unknown[];
+    issues?: unknown[];
+  };
+
+  return {
+    generatedFromGithub: Boolean(rawMeta.generatedFromGithub),
+    commitRefs: rawMeta.commitCoverage?.analyzedCommitRefs ?? [],
+    pullRequests: Array.isArray(rawMeta.pullRequests) ? rawMeta.pullRequests : [],
+    issues: Array.isArray(rawMeta.issues) ? rawMeta.issues : [],
+  };
+}
+
+function getSnapshotReviewReadyCount(snapshot: StateSnapshot | null) {
+  if (!snapshot) {
+    return 0;
+  }
+
+  const rawMeta = getSnapshotMeta(snapshot);
+  const summaryText = snapshot.summary.trim();
+  const hasConcreteSummary =
+    summaryText.length >= 80 &&
+    !summaryText.toLowerCase().includes("initial state board created") &&
+    !summaryText.toLowerCase().includes("based on the current thesis");
+  const hasConcreteWatchNext =
+    snapshot.watch_next.length >= 2 &&
+    snapshot.watch_next.some((item) => item.length >= 28);
+  const hasEvidenceCoverage =
+    rawMeta.commitRefs.length > 0 || rawMeta.pullRequests.length > 0 || rawMeta.issues.length > 0;
+  const hasPlanCoverage = snapshot.plan_progress_json.length >= 2;
+
+  return [
+    hasConcreteSummary,
+    hasConcreteWatchNext,
+    hasEvidenceCoverage,
+    hasPlanCoverage,
+  ].filter(Boolean).length;
+}
+
+function getProjectQueueState(
+  snapshot: StateSnapshot | null,
+  latestRun: AnalysisRun | null,
+  reviewReadyCount: number
+) {
+  if (!snapshot) {
+    return "needsRefresh";
+  }
+  if (latestRun?.status === "failed") {
+    return "refreshFailed";
+  }
+  if (snapshot.blocker_count > 0) {
+    return "blocked";
+  }
+  if (snapshot.drift_count >= 3) {
+    return "reviewDrift";
+  }
+  if (reviewReadyCount < 4) {
+    return "qualityCheck";
+  }
+  return "onTrack";
+}
+
+function getQueueTone(queueState: string): "neutral" | "accent" | "danger" | "success" {
+  if (queueState === "onTrack") {
+    return "success";
+  }
+  if (queueState === "blocked" || queueState === "refreshFailed") {
+    return "danger";
+  }
+  if (queueState === "reviewDrift" || queueState === "qualityCheck") {
+    return "accent";
+  }
+  return "neutral";
 }

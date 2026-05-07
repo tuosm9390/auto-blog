@@ -301,6 +301,7 @@
       "viewRuns": "실행 이력 보기",
       "reviewDrift": "드리프트 검토",
       "refreshState": "상태 새로고침",
+      "refreshingState": "상태 분석 중...",
       "backToState": "상태판으로 돌아가기",
       "viewAll": "전체 보기",
       "ready": "준비됨",
@@ -402,6 +403,28 @@
         "prdPreview": "`PRD 미리보기`가 일반적인 문장이 아니라 현재 계획을 제대로 반영해야 합니다.",
         "evidence": "`커밋 커버리지`, `PR 근거`, `이슈 근거`가 모두 실제 작업 맥락과 맞아야 합니다.",
         "watchNext": "`Watch next`는 뻔한 문장 대신 실제로 다음에 할 일을 제시해야 합니다."
+      },
+      "lastRefresh": "마지막 새로고침",
+      "snapshotStatus": "스냅샷 상태",
+      "validation": "검증",
+      "latestRun": "최근 실행",
+      "snapshotMode": {
+        "github": "GitHub 활동 포함",
+        "baseline": "기본 상태"
+      },
+      "queue": {
+        "needsRefresh": "새로고침 필요",
+        "refreshFailed": "새로고침 실패",
+        "blocked": "막힘 있음",
+        "reviewDrift": "드리프트 검토",
+        "qualityCheck": "품질 확인",
+        "onTrack": "정상"
+      },
+      "runStatus": {
+        "pending": "대기 중",
+        "processing": "분석 중",
+        "completed": "완료",
+        "failed": "실패"
       },
       "checklist": {
         "createProject": "프로젝트 하나 만들기",

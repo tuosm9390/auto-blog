@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect, Link } from "@/i18n/routing";
 import { refreshProjectStateAction } from "@/app/actions/projectActions";
+import { RefreshStateButton } from "@/components/projects/RefreshStateButton";
 import { getTranslations } from "next-intl/server";
 import {
   getAnalysisRunsByProject,
@@ -262,12 +263,10 @@ export default async function ProjectStatePage({
             {t("shared.reviewDrift")}
           </Link>
           <form action={refreshAction}>
-            <button
-              type="submit"
-              className="w-full px-5 py-3 bg-accent text-black font-semibold rounded-lg hover:bg-accent-hover transition-colors"
-            >
-              {t("shared.refreshState")}
-            </button>
+            <RefreshStateButton
+              idleLabel={t("shared.refreshState")}
+              pendingLabel={t("shared.refreshingState")}
+            />
           </form>
         </div>
       </section>

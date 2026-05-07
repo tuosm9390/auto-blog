@@ -301,6 +301,7 @@
       "viewRuns": "View runs",
       "reviewDrift": "Review drift",
       "refreshState": "Refresh state",
+      "refreshingState": "Analyzing state...",
       "backToState": "Back to state",
       "viewAll": "View all",
       "ready": "ready",
@@ -402,6 +403,28 @@
         "prdPreview": "`PRD preview` should reflect the current plan instead of generic text.",
         "evidence": "`Commit coverage`, `PR evidence`, and `Issue evidence` should all feel believable.",
         "watchNext": "`Watch next` should give concrete follow-up, not generic filler."
+      },
+      "lastRefresh": "Last refresh",
+      "snapshotStatus": "Snapshot status",
+      "validation": "Validation",
+      "latestRun": "Latest run",
+      "snapshotMode": {
+        "github": "GitHub activity included",
+        "baseline": "Baseline"
+      },
+      "queue": {
+        "needsRefresh": "Needs refresh",
+        "refreshFailed": "Refresh failed",
+        "blocked": "Blocked",
+        "reviewDrift": "Review drift",
+        "qualityCheck": "Quality check",
+        "onTrack": "On track"
+      },
+      "runStatus": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "failed": "Failed"
       },
       "checklist": {
         "createProject": "Create one project",
