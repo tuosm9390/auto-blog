@@ -1,20 +1,7 @@
 # Context Notes
 
-## 2026-05-07
+## 2026-05-07 PRD Template Guidance
 
-- Decision: Project state analysis output should follow the active app locale, because snapshot summaries, plan progress, watch-next, and drift are persisted and then shown directly in localized pages.
-- Scope: Keep the change surgical by passing `locale` through the refresh pipeline and adding language instructions to the existing Gemini prompt. Do not redesign the snapshot schema.
-- Compatibility: API refresh callers that do not provide locale should continue to default to English unless an explicit locale is supplied.
-- Implementation: Server action refreshes pass the active route locale. API refresh accepts an optional `locale` body field and defaults to English for backward compatibility.
-- Implementation: Baseline snapshots are localized separately because they do not go through the Gemini prompt.
-
-## 2026-05-07 Service Positioning Refresh
-
-- Decision: The public product message should lead with AI-native project memory, not AI blog generation.
-- Scope: Apply the safe first pass from `doc/service-positioning-refresh-design.md`: update landing, how-it-works, navigation labels, and metadata. Do not delete legacy post-generation routes in this pass.
-- Risk control: Remove generated-post samples from the landing page because they reinforce the old product promise. Keep direct routes for `/generate`, `/jobs`, and public posts intact.
-
-## 2026-05-07 Brand Meaning
-
-- Decision: Explain Synapso as a product name derived from the feeling of a synapse, connecting scattered project signals and preserving them as usable project memory.
-- Scope: Add this as copy on About and reinforce it in How it works. Do not change branding assets or product naming.
+- Decision: Add PRD guidance inside the project create/edit form because that is where users attach the current plan that powers snapshots, progress, and drift.
+- Decision: Do not auto-fill the textarea with template content. Placeholder template text can accidentally be saved as real PRD content if the user submits without editing, so the template should be visible as guidance instead.
+- Scope: Keep the first version as localized copy and UI guidance only. Do not add database fields, new routes, or AI generation for PRDs.

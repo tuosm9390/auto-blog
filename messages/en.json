@@ -403,7 +403,22 @@
         "manual": "Switch to manual owner/repo input",
         "selected": "Selected repository"
       },
-      "planHelp": "Empty is allowed. You can keep the project first and refine the plan later."
+      "planHelp": "Empty is allowed. You can keep the project first and refine the plan later.",
+      "prdTemplate": {
+        "title": "Use this structure to write the current plan",
+        "description": "Synapso uses this document to judge progress, blockers, risks, and drift. It does not need to be a polished PRD, but the objective and acceptance criteria should be concrete.",
+        "checklistTitle": "Start by filling these",
+        "templateTitle": "Markdown template",
+        "copyHint": "Move only the useful parts into the input",
+        "checklist": {
+          "objective": "The problem this project solves and the v1 goal",
+          "users": "Who will use it and in what situation",
+          "scope": "What is in scope and out of scope for this pass",
+          "acceptance": "How you will know the work is done",
+          "risks": "Open decisions, risks, and blockers"
+        },
+        "markdown": "# PRD\n\n## 1. Background\n- Why this project is needed.\n- What problem exists today.\n\n## 2. Objective\n- The main goal for v1.\n- What should change for the user if this succeeds.\n\n## 3. Target Users\n- Primary users.\n- The situation where they would use this feature.\n\n## 4. Core Scenario\n1. Where does the user start.\n2. What input or choice does the user make.\n3. What result should the user see.\n\n## 5. Scope\n### In scope\n- Features that must be included in this version.\n\n### Out of scope\n- Work that will not be handled in this version.\n\n## 6. Acceptance Criteria\n- [ ] The user action that must succeed.\n- [ ] The result the system must save or display.\n- [ ] The change that should appear on the Synapso state board after refresh.\n\n## 7. Risks and Open Questions\n- Decisions that are not settled yet.\n- Technical uncertainty.\n- Assumptions that need user validation.\n\n## 8. Current Progress\n- Completed work.\n- Work in progress.\n- Next work to do."
+      }
     },
     "index": {
       "tag": "Projects",

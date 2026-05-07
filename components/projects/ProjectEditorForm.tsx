@@ -138,6 +138,21 @@ export default async function ProjectEditorForm({
           <p className="text-xs text-text-tertiary">
             {t("editor.planHelp")}
           </p>
+          <PrdTemplateGuide
+            title={t("editor.prdTemplate.title")}
+            description={t("editor.prdTemplate.description")}
+            checklistTitle={t("editor.prdTemplate.checklistTitle")}
+            templateTitle={t("editor.prdTemplate.templateTitle")}
+            copyHint={t("editor.prdTemplate.copyHint")}
+            checklist={[
+              t("editor.prdTemplate.checklist.objective"),
+              t("editor.prdTemplate.checklist.users"),
+              t("editor.prdTemplate.checklist.scope"),
+              t("editor.prdTemplate.checklist.acceptance"),
+              t("editor.prdTemplate.checklist.risks"),
+            ]}
+            template={t("editor.prdTemplate.markdown")}
+          />
         </section>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-end">
@@ -156,6 +171,60 @@ export default async function ProjectEditorForm({
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function PrdTemplateGuide({
+  title,
+  description,
+  checklistTitle,
+  templateTitle,
+  copyHint,
+  checklist,
+  template,
+}: {
+  title: string;
+  description: string;
+  checklistTitle: string;
+  templateTitle: string;
+  copyHint: string;
+  checklist: string[];
+  template: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-accent/25 bg-accent/5 p-5 space-y-4">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent mb-2">
+          PRD Template
+        </p>
+        <h3 className="text-base font-semibold text-text-primary">{title}</h3>
+        <p className="mt-2 text-sm leading-6 text-text-secondary">{description}</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-xl border border-border-subtle bg-surface/60 p-4">
+          <p className="text-sm font-semibold text-text-primary mb-3">{checklistTitle}</p>
+          <ul className="space-y-2 text-sm text-text-secondary">
+            {checklist.map((item) => (
+              <li key={item} className="flex gap-2">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="rounded-xl border border-border-subtle bg-background/80 p-4">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <p className="text-sm font-semibold text-text-primary">{templateTitle}</p>
+            <p className="text-xs text-text-tertiary">{copyHint}</p>
+          </div>
+          <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-black/30 p-4 text-xs leading-5 text-text-secondary">
+            {template}
+          </pre>
+        </div>
+      </div>
     </div>
   );
 }

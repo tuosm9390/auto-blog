@@ -1,6 +1,7 @@
 # Checklist
 
-- [x] Add Synapso naming rationale to the About page.
-- [x] Reflect the synapse/project-memory metaphor in How it works copy.
-- [x] Update Korean and English localized messages.
-- [x] Verify with JSON parse, typecheck, and build.
+- [x] Inspect project editor and localization structure.
+- [x] Add a PRD markdown template guide to the project form.
+- [x] Add Korean and English localized template copy.
+- [x] Verify JSON, typecheck, and build.
+- [ ] Commit the logical change.
