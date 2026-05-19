@@ -1,6 +1,5 @@
 ﻿import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { getPostById } from "@/lib/posts";
 import { getProjectById } from "@/lib/projects";
 
 export class AuthError extends Error {
@@ -58,29 +57,6 @@ export async function parseJsonBody<T>(req: Request): Promise<T> {
   } catch {
     throw new Error("Invalid JSON body");
   }
-}
-
-export async function requirePostOwnership(postId: string, username: string) {
-  const post = await getPostById(postId);
-  if (!post) {
-    throw new Error("Post not found");
-  }
-  if (post.author !== username) {
-    throw new AuthError("권한이 없습니다.");
-  }
-  return post;
-}
-
-export async function requireJobOwnership(jobId: string, username: string) {
-  const { getJobById } = await import("./jobs");
-  const job = await getJobById(jobId);
-  if (!job) {
-    throw new Error("Job not found");
-  }
-  if (job.github_username !== username) {
-    throw new AuthError("권한이 없습니다.");
-  }
-  return job;
 }
 
 export async function requireProjectOwnership(projectId: string, userId: string) {

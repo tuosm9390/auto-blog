@@ -6,6 +6,8 @@
 
 단순한 변경사항 나열을 넘어, 커밋 Diff 패턴과 파일 구조 변화를 바탕으로 "요구사항 → 기획 → 개발"이라는 개발자의 의사결정 흐름을 역추론(**Reverse Spec Recovery**)하여 완성도 높은 마크다운 문서를 자동 생성·발행합니다.
 
+추가로, **Project Memory** 기능을 통해 GitHub 커밋·PR·이슈 활동을 PRD 기준으로 AI가 분석하여 프로젝트 진행 상태, 드리프트, 리스크를 구조화된 대시보드로 추적합니다.
+
 > **"코딩만 하세요. 기술 블로그는 AI가 완성합니다."**
 
 ---
@@ -27,6 +29,7 @@ repo scope           80,000자 제한          5분 타임아웃          Expone
 - NextAuth v5로 GitHub OAuth 인증. `repo` scope 요청으로 퍼블릭·프라이빗 저장소 모두 접근
 - **GitHub Numeric ID를 안정적 사용자 식별자로 고정**: NextAuth 기본 동작(매 로그인마다 randomUUID 생성)을 오버라이드하여 `account.providerAccountId`를 `token.sub`으로 명시 설정. 로그인할 때마다 user.id가 달라지는 버그를 원천 차단
 - Octokit으로 커밋 Diff 추출 시 `EXCLUDED_FILE_PATTERNS`로 lock 파일, 바이너리, 빌드 아티팩트, `.env` 계열을 자동 필터링하여 AI 컨텍스트 윈도우 낭비 방지
+- PR 연결 커밋과 이슈 번호 추출도 지원하여 Project Memory 분석에 맥락 데이터를 제공
 
 ### 2단계: 비동기 작업 큐 (`lib/jobs.ts`)
 
@@ -36,7 +39,7 @@ repo scope           80,000자 제한          5분 타임아웃          Expone
 
 ### 3단계: AI 심층 분석 (`lib/ai.ts`)
 
-- Gemini API의 `responseMimeType: "application/json"` + `responseSchema`(JSON Schema)로 **Structured Output** 강제. 자유 텍스트 파싱의 불안정성 완전 제거
+- `@google/genai` SDK(신규)를 사용하여 Gemini API 호출. `responseMimeType: "application/json"` + `responseSchema`로 **Structured Output** 강제
 - **5개 섹션 완결성 정규식 검증**: 응답에 `커밋 개발내역 / 작업 순서 / 핵심 기능 / 개발 스토리 / 핵심 교훈` 5개 섹션이 모두 포함되지 않으면 즉시 재시도
 - **Exponential Backoff 재시도**: Rate Limit(429) 또는 섹션 누락 시 `2^n * 2000ms` 딜레이로 최대 3회 재시도
 - **Reverse Spec Recovery 프롬프팅**: 단순 코드 설명 금지. 커밋(구현)으로부터 요구사항·기획·개발 의사결정을 역추론하도록 시스템 프롬프트 설계
@@ -48,6 +51,26 @@ repo scope           80,000자 제한          5분 타임아웃          Expone
 - 동일 Slug 충돌 방지: DB에서 기존 Slug를 조회 후 `-1`, `-2` 카운터 부여 (최대 100회 보호)
 - **Soft Delete 패턴**: 삭제 요청 시 실제 레코드 삭제 대신 `deletedAt` 타임스탬프 설정. 휴먼 에러 시 복구 가능
 - React `cache()` 적용으로 동일 요청 내 DB 중복 조회 방지 (`getPostById`, `getPostByUsernameAndSlug`)
+
+### 5단계: Project Memory — AI 기반 프로젝트 상태 추적
+
+Project Memory는 GitHub 활동(커밋, PR, 이슈)과 PRD(제품 요구사항 문서)를 Gemini AI가 교차 분석하여 프로젝트의 현재 상태를 구조화된 스냅샷으로 보고하는 기능입니다.
+
+```
+GitHub 커밋/PR/이슈 수집 → PRD 교차 분석 → Gemini 상태 분석 → StateSnapshot 저장 → 대시보드 표시
+```
+
+- `lib/project-refresh.ts`가 전체 파이프라인을 조율합니다
+- `lib/project-memory-ai.ts`가 Gemini Structured Output으로 상태 JSON을 생성합니다
+- `lib/projects.ts`가 `projects`, `project_plans`, `analysis_runs`, `state_snapshots` 테이블 CRUD를 담당합니다
+- 분석 결과에는 진행률(%), 현재 단계, blocker/risk/drift 수, watchNext 항목, PRD 기준 planProgress, drift 목록이 포함됩니다
+- GitHub 연결이 없으면 baseline 스냅샷을 자동 생성하고, 연결 시 실제 활동 기반 분석으로 전환됩니다
+- PR title/body와 issue 맥락을 우선 활용하여 의사결정 추론의 정확도를 높입니다
+- 한국어/영어 다국어 출력을 지원합니다
+
+### 6단계: GitHub Releases 기반 Changelog
+
+`lib/changelog.ts`가 GitHub Releases API에서 릴리스 노트를 가져와 새 기능, 버그 수정, 보안, 리팩토링으로 분류합니다. `unstable_cache`로 1시간 캐시하여 API 호출을 최소화합니다.
 
 ---
 
@@ -62,6 +85,8 @@ synapso.dev/
 │   │   ├── jobs/               # 작업 현황 대시보드
 │   │   ├── settings/           # 자동 포스팅·결제 설정
 │   │   ├── pricing/            # 구독 플랜 안내
+│   │   ├── projects/           # Project Memory 대시보드 및 상세
+│   │   ├── changelog/          # GitHub Releases 기반 업데이트 노트
 │   │   ├── demo/               # 로그인 없이 체험 가능한 데모
 │   │   └── admin/              # 관리자 전용 포털
 │   ├── actions/                # React Server Actions
@@ -83,12 +108,16 @@ synapso.dev/
 │   ├── jobs.ts                 # Job 상태 머신 및 백그라운드 워커
 │   ├── posts.ts                # 포스트 CRUD, Slug 생성, Soft Delete
 │   ├── profiles.ts             # 사용자 프로필 관리, Profile ID 마이그레이션
+│   ├── projects.ts             # Project Memory CRUD (projects, plans, snapshots, runs)
+│   ├── project-memory-ai.ts    # Gemini 기반 프로젝트 상태 분석 프롬프트 및 호출
+│   ├── project-refresh.ts      # 프로젝트 상태 새로고침 파이프라인 조율
 │   ├── subscription.ts         # 티어별 제한 상수(TIER_LIMITS), 사용량 Lazy Reset
 │   ├── portone-billing.ts      # PortOne SDK 결제키 저장·청구·취소·웹훅 처리
 │   ├── settings.ts             # 자동 포스팅 설정, processed_commits 중복 방지
 │   ├── email.ts                # Resend 기반 트랜잭션 이메일 발송
 │   ├── billing.ts              # Stripe 기반 레거시 결제 (글로벌)
 │   ├── changelog.ts            # GitHub Releases 기반 업데이트 노트
+│   ├── types.ts                # 공유 타입 (Post, Project, StateSnapshot 등)
 │   └── supabase-admin.ts       # Service Role Key 기반 관리자 클라이언트
 └── components/
     ├── GenerateForm.tsx         # 커밋 선택 및 AI 생성 폼
@@ -218,6 +247,10 @@ auto_mode 유저 조회 → 사용량·티어 확인 → weekly 스케줄 체크
 | `user_settings`     | 자동 포스팅 모드, 대상 저장소, 스케줄 설정            |
 | `processed_commits` | 자동 포스팅 처리된 커밋 SHA (중복 방지)               |
 | `payment_events`    | 결제 이벤트 멱등성 기록                               |
+| `projects`          | Project Memory 프로젝트 (이름, thesis, GitHub 연결)   |
+| `project_plans`     | PRD/계획 문서 (버전 관리, is_current 플래그)          |
+| `analysis_runs`     | 분석 실행 기록 (pending → completed/failed)           |
+| `state_snapshots`   | AI 분석 결과 스냅샷 (진행률, drift, planProgress)     |
 
 ---
 
@@ -228,7 +261,7 @@ auto_mode 유저 조회 → 사용량·티어 확인 → weekly 스케줄 체크
 | **Framework**     | Next.js 16.1.6 (App Router), React 19.2.3                             |
 | **Auth**          | NextAuth v5.0.0-beta.30 (GitHub OAuth, JWT 전략)                      |
 | **Database**      | Supabase (PostgreSQL, RLS, Service Role Admin)                        |
-| **AI / LLM**      | `@google/generative-ai` — Gemini 2.5 Flash Lite / Flash / Pro         |
+| **AI / LLM**      | `@google/genai` — Gemini 2.5 Flash Lite / Flash / Pro                 |
 | **결제 (국내)**   | PortOne Server SDK (`@portone/server-sdk`, 빌링키 정기결제)           |
 | **결제 (글로벌)** | Stripe (레거시 보존)                                                  |
 | **Styling**       | Tailwind CSS v4.2.0, CSS Variables, 다크 테마                         |
@@ -265,3 +298,11 @@ Vercel Serverless의 10~60초 Request Timeout 한계를 극복하기 위해, 무
 ### 5. 안정적인 사용자 식별자 설계
 
 NextAuth v5 기본 동작의 불안정한 UUID 생성 문제를 해결하기 위해 GitHub Numeric ID를 `token.sub`으로 고정하고, 기존 UUID 기반 프로필의 `id` 컬럼을 `migrateProfileId` 함수로 1회성 자동 마이그레이션합니다.
+
+### 6. Project Memory — PRD 기준 프로젝트 상태 추적
+
+GitHub 커밋·PR·이슈 활동을 PRD와 교차 분석하여 프로젝트의 진행률, 현재 단계, blocker/risk/drift를 구조화된 JSON으로 보고합니다. Gemini Structured Output으로 환각을 억제하고, baseline bootstrap과 실제 활동 분석을 자동 전환합니다. 스냅샷 히스토리를 통해 프로젝트 상태 변화를 시계열로 추적할 수 있습니다.
+
+### 7. GitHub Releases 기반 Changelog
+
+GitHub Releases API에서 릴리스 노트를 가져와 새 기능·버그 수정·보안·리팩토링으로 자동 분류합니다. `unstable_cache`로 1시간 캐시하여 API 호출을 최소화하고, Footer에서 업데이트 노트 페이지로 연결합니다.

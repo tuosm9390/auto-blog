@@ -25,11 +25,27 @@
 
 - **[인증/API 관리 시]** (app/api/auth/**, middleware.ts): doc/rules/client/auth.md
 - **[포스트/AI 작업 관리 시]** (lib/posts.ts, lib/jobs.ts, app/api/posts/**): doc/rules/client/posts-jobs.md
-- **[결제/구독 관리 시]** (app/api/checkout/**, lib/stripe.ts): doc/rules/client/billing.md
+- **[결제/구독 관리 시]** (app/api/portone/**, lib/portone-billing.ts, app/api/cron/billing/**): doc/rules/client/billing.md
+
+## ⚡ 필수 커맨드 (Quick Reference)
+
+```bash
+npm run dev      # 개발 서버 (기본 포트 3000)
+npm run build    # 프로덕션 빌드
+npm run lint     # ESLint 검사
+npx vitest       # 단위/통합 테스트 (tests/integration/)
+```
+
+## ⚠️ Known Gotchas (빌드 오류 방지)
+
+- **`cookies()` 반드시 await**: `const cookieStore = await cookies()` — Next.js 15+에서 동기 호출 시 오류
+- **`jose` 미설치**: JWT 직접 서명 시 `jose` 사용 금지. `crypto.createHmac` (Node.js 내장) 사용
+- **Octokit `type: "public"` 오류**: `listForUser`에 `type` 필드 전달 금지 — TypeScript 오류 발생
+- **Stripe 레거시**: `lib/stripe.ts` 및 관련 파일은 410 스텁. 신규 결제 코드는 `lib/portone-billing.ts` 사용
 
 ## ✅ 검증 (Validation)
 
-코드 수정 후 반드시 doc/rules/shared/tech-stack.md의 필수 명령어를 통해 빌드 성공 및 린트 준수 여부를 확인하십시오.
+코드 수정 후 반드시 위 필수 커맨드로 빌드 성공 및 린트 준수 여부를 확인하십시오.
 
 ## 📝 Git 커밋 메시지 형식 (Commit Convention)
 

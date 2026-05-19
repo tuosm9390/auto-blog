@@ -129,20 +129,6 @@ export default function MobileMenu({
                   {t("projects")}
                 </Link>
                 <Link
-                  href="/generate"
-                  onClick={close}
-                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors font-medium"
-                >
-                  {t("generate")}
-                </Link>
-                <Link
-                  href="/jobs"
-                  onClick={close}
-                  className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"
-                >
-                  {t("jobs")}
-                </Link>
-                <Link
                   href="/settings"
                   onClick={close}
                   className="px-4 py-2.5 text-sm text-text-secondary hover:bg-elevated hover:text-text-primary transition-colors"

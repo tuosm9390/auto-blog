@@ -9,9 +9,6 @@ import { useTranslations } from "next-intl";
 import { Repo, UserSettingsData, SubscriptionInfo } from "@/lib/types";
 
 import { BillingSection } from "@/components/settings/BillingSection";
-import { PostingModeSection } from "@/components/settings/PostingModeSection";
-import { ScheduleSection } from "@/components/settings/ScheduleSection";
-import { RepoSelector } from "@/components/settings/RepoSelector";
 
 function SettingsContent() {
   const { data: session, status } = useSession();
@@ -175,28 +172,6 @@ function SettingsContent() {
               pricingT={pricingT}
               commonT={commonT}
             />
-          )}
-
-          <PostingModeSection
-            mode={settings.posting_mode}
-            onToggle={toggleMode}
-            t={t}
-          />
-
-          {settings.posting_mode === "auto" && (
-            <>
-              <ScheduleSection
-                schedule={settings.auto_schedule}
-                onChange={(val) => setSettings({ ...settings, auto_schedule: val })}
-                t={t}
-              />
-              <RepoSelector
-                repos={repos}
-                selectedRepos={settings.auto_repos || []}
-                onToggle={toggleRepo}
-                t={t}
-              />
-            </>
           )}
 
           <div className="flex justify-end">

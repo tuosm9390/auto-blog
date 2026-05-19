@@ -47,24 +47,8 @@ export interface IssueContext {
 }
 
 export type PostingMode = "auto" | "manual";
-export type PostStatus = "draft" | "published";
 export type AutoSchedule = "daily" | "weekly";
 export type SubscriptionTier = "free" | "pro" | "business";
-
-export interface Post {
-  id: string;
-  slug: string;
-  title: string;
-  date: string;
-  summary: string;
-  content: string;
-  repo: string;
-  commits: string[];
-  tags: string[];
-  status: PostStatus;
-  author: string;
-  is_public: boolean;
-}
 
 export interface UserSettings {
   id: string;
@@ -83,33 +67,6 @@ export interface GenerateRequest {
   until?: string;
   commitShas?: string[];
   userContext?: string;
-}
-
-export interface GenerateResult {
-  title: string;
-  content: string;
-  summary: string;
-  tags: string[];
-  commits: string[];
-  repo: string;
-  userContext?: string;
-  id?: string;
-  slug?: string;
-  author?: string;
-}
-export type JobStatus = "pending" | "processing" | "completed" | "failed";
-
-export interface AIJob {
-  id: string;
-  github_username: string;
-  repo: string;
-  commit_shas: string[];
-  status: JobStatus;
-  result?: GenerateResult;
-  error?: string;
-  created_at: string;
-  updated_at: string;
-  is_public: boolean;
 }
 
 export interface Repo {
@@ -137,7 +94,16 @@ export interface UserSettingsData {
   auto_schedule: AutoSchedule;
 }
 
-export interface DemoPost extends Omit<Post, 'author' | 'repo'> {
+export interface DemoPost {
+  id: string;
+  slug: string;
+  title: string;
+  date: string;
+  summary: string;
+  content: string;
+  commits: string[];
+  tags: string[];
+  is_public: boolean;
   author: "";
   repo: "";
 }
