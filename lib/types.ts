@@ -46,19 +46,7 @@ export interface IssueContext {
   author: string;
 }
 
-export type PostingMode = "auto" | "manual";
-export type AutoSchedule = "daily" | "weekly";
 export type SubscriptionTier = "free" | "pro" | "business";
-
-export interface UserSettings {
-  id: string;
-  github_username: string;
-  posting_mode: PostingMode;
-  auto_repos: string[];
-  auto_schedule: AutoSchedule;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface GenerateRequest {
   owner: string;
@@ -85,27 +73,6 @@ export interface SubscriptionInfo {
   remaining: number;
   resetDate: string | null;
   billingCycle?: 'monthly' | 'yearly' | null;
-}
-
-export interface UserSettingsData {
-  github_username: string;
-  posting_mode: PostingMode;
-  auto_repos: string[];
-  auto_schedule: AutoSchedule;
-}
-
-export interface DemoPost {
-  id: string;
-  slug: string;
-  title: string;
-  date: string;
-  summary: string;
-  content: string;
-  commits: string[];
-  tags: string[];
-  is_public: boolean;
-  author: "";
-  repo: "";
 }
 
 export type ProjectStatus = "active" | "paused" | "archived";
@@ -196,18 +163,3 @@ export interface AnalysisRun {
   created_at: string;
 }
 
-import { z } from "zod";
-
-export const DemoPostSchema = z.object({
-  id: z.string().uuid(),
-  slug: z.string(),
-  title: z.string(),
-  date: z.string(),
-  summary: z.string(),
-  content: z.string(),
-  tags: z.array(z.string()),
-  author: z.literal(""),
-  repo: z.literal(""),
-  status: z.literal("published"),
-  is_public: z.boolean().default(true),
-});

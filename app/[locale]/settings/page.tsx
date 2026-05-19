@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { toast } from "sonner";
 import { LoginRequired } from "@/components/ui/LoginRequired";
 import { useTranslations } from "next-intl";
-import { Repo, UserSettingsData, SubscriptionInfo } from "@/lib/types";
+import { Repo, SubscriptionInfo } from "@/lib/types";
 
 import { BillingSection } from "@/components/settings/BillingSection";
 
@@ -16,7 +16,7 @@ function SettingsContent() {
   const pricingT = useTranslations("Pricing");
   const commonT = useTranslations("Common");
 
-  const [settings, setSettings] = useState<UserSettingsData | null>(null);
+  const [settings, setSettings] = useState<{ github_username: string; posting_mode: string; auto_repos: string[]; auto_schedule: string } | null>(null);
   const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

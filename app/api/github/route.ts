@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import { getRecentCommits } from "@/lib/github";
-import { getProcessedCommitShas } from "@/lib/settings";
 import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
@@ -18,9 +17,8 @@ export async function GET(request: NextRequest) {
     }
 
     const commits = await getRecentCommits(owner, repo, since, until, 30, accessToken);
-    const processedShas = await getProcessedCommitShas(username, `${owner}/${repo}`);
 
-    return apiSuccess({ commits, processedShas });
+    return apiSuccess({ commits });
   } catch (error: unknown) {
     console.error("Github API error:", error);
     if (isAuthError(error)) return apiError(error.message, 401);
