@@ -15,7 +15,7 @@
 
 프로젝트 전반의 지식이 필요할 때 로드하십시오.
 
-- doc/rules/shared/tech-stack.md: Next.js 15, Tailwind v4, Gemini SDK, Stripe 등 기술 명세.
+- doc/rules/shared/tech-stack.md: Next.js 16, Tailwind v4, Gemini SDK, PortOne 등 기술 명세.
 - doc/rules/shared/architecture.md: 디렉토리 구조 및 데이터베이스 스키마(v0.6.0 기준).
 - doc/rules/shared/conventions.md: 명명 규칙(PascalCase 등), 에러 핸들링 및 문서화 표준.
 
@@ -24,7 +24,7 @@
 작업 중인 파일 경로에 따라 필요한 추가 컨텍스트를 로드하십시오.
 
 - **[인증/API 관리 시]** (app/api/auth/**, middleware.ts): doc/rules/client/auth.md
-- **[포스트/AI 작업 관리 시]** (lib/posts.ts, lib/jobs.ts, app/api/posts/**): doc/rules/client/posts-jobs.md
+- **[프로젝트 분석 관리 시]** (lib/projects.ts, lib/project-refresh.ts, app/api/projects/**): doc/rules/client/posts-jobs.md
 - **[결제/구독 관리 시]** (app/api/portone/**, lib/portone-billing.ts, app/api/cron/billing/**): doc/rules/client/billing.md
 
 ## ⚡ 필수 커맨드 (Quick Reference)
@@ -33,7 +33,7 @@
 npm run dev      # 개발 서버 (기본 포트 3000)
 npm run build    # 프로덕션 빌드
 npm run lint     # ESLint 검사
-npx vitest       # 단위/통합 테스트 (tests/integration/)
+npx vitest       # 단위/통합 테스트
 ```
 
 ## ⚠️ Known Gotchas (빌드 오류 방지)
