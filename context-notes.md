@@ -1,5 +1,12 @@
 # Context Notes
 
+## 2026-05-26 GitHub OAuth redirect_uri 오류 수정
+
+- Observation: The app uses NextAuth v5 with the default GitHub provider in `auth.ts`, so the GitHub OAuth callback path is `/api/auth/callback/github`.
+- Constraint: Existing uncommitted changes in `DESCRIPTION.md` appear unrelated and should not be touched.
+- Observation: Vercel has `AUTH_URL=https://synapso.dev` and the provider endpoint reports `callbackUrl=https://synapso.dev/api/auth/callback/github`.
+- Decision: Add `AUTH_REDIRECT_PROXY_URL=https://synapso.dev/api/auth` in Vercel production/development and local `.env.local` so non-canonical hosts use the canonical GitHub callback instead of generating an unregistered `redirect_uri`.
+
 ## 2026-05-26 Individual Evidence Documents and Management Page Premise
 
 - Decision: Split the Evidence Pack into individual docs under `doc/designs/evidence-pack/` so each document can evolve independently and later map cleanly to a project document type.

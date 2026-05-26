@@ -1,5 +1,13 @@
 # Checklist
 
+## 2026-05-26 GitHub OAuth redirect_uri 오류 수정
+
+- [x] 인증 구현과 로그인 액션 확인.
+- [x] OAuth 공개 URL 환경변수와 callback 경로 확인.
+- [x] redirect_uri 불일치 원인 수정.
+- [x] 관련 검증 실행.
+- [x] 변경 사항 커밋.
+
 ## 2026-05-26 개별 Evidence 문서와 문서 관리 페이지 전제
 
 - [x] 현재 프로젝트 상세/runs/drift/edit 페이지 구조 확인.
