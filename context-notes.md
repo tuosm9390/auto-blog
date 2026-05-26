@@ -1,5 +1,11 @@
 # Context Notes
 
+## 2026-05-26 Evidence Pack Templates
+
+- Decision: Create a repo markdown template pack instead of changing UI, DB, or API in this pass. The current product stores one current plan in `project_plans`, so implementation should first stabilize the agent-readable document standard.
+- Decision: Use 8 templates rather than all 11 document categories. The pack covers PRD, roadmap, backlog, sprint plan, decision/ADR, RFC, risk/issue/dependency, and release/ops learning.
+- Decision: Every template includes state signals and agent reading notes so the document can feed `progress`, `blocker`, `risk`, `drift`, `watchNext`, and `evidence` judgments.
+
 ## 2026-05-26 Project Management Document Premise
 
 - Decision: Treat project documents as evidence for project-state judgment, not as a generic document repository. This matches the current Project Memory pipeline better than rebuilding Confluence/Notion.

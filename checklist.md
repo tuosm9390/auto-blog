@@ -1,5 +1,13 @@
 # Checklist
 
+## 2026-05-26 Evidence Pack 템플릿 작성
+
+- [x] 기존 Project Memory 저장 모델과 PRD 템플릿 구조 확인.
+- [x] Evidence Pack 산출 범위 확정.
+- [x] 프로젝트 상태 판단용 문서 초안 8종 작성.
+- [x] 변경 파일 검토.
+- [x] 커밋 생성.
+
 ## 2026-05-26 프로젝트 관리 문서 전제 정리
 
 - [x] 현재 Project Memory 제품 방향과 기존 문서 구조 확인.
