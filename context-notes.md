@@ -1,5 +1,11 @@
 # Context Notes
 
+## 2026-05-26 Individual Evidence Documents and Management Page Premise
+
+- Decision: Split the Evidence Pack into individual docs under `doc/designs/evidence-pack/` so each document can evolve independently and later map cleanly to a project document type.
+- Decision: Keep the product page premise separate from the templates. The templates describe what users write; the page premise describes how Synapso should let users manage, inspect, and connect those documents.
+- Decision: The first product page should show document readiness and evidence coverage before becoming a full document editor. This avoids rebuilding Notion/Confluence and keeps the product centered on state judgment.
+
 ## 2026-05-26 Evidence Pack Templates
 
 - Decision: Create a repo markdown template pack instead of changing UI, DB, or API in this pass. The current product stores one current plan in `project_plans`, so implementation should first stabilize the agent-readable document standard.
