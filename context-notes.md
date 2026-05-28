@@ -1,5 +1,12 @@
 # Context Notes
 
+## 2026-05-28 Evidence Draft Display Fix Implementation
+
+- Decision: Move the documents page view model builder into `lib/project-document-view-models.ts` so missing-template behavior can be unit-tested outside the Next page.
+- Decision: Missing documents show their template body as an unsaved draft and use `draft` readiness, while stored documents and existing PRD plans still use persisted content.
+- Decision: Add `key={selectedDocument.type}` to the editor so uncontrolled `defaultValue` fields remount on tab changes.
+- Verification: `npx vitest run tests/project-document-templates.test.ts tests/project-document-view-models.test.ts`, `npm run build`, and `npm run lint` pass.
+
 ## 2026-05-28 Evidence Draft Display Fix Plan
 
 - Observation: `ProjectDocumentEditor` uses uncontrolled `defaultValue` fields, so React can preserve the previous input DOM when only the selected `type` query parameter changes.

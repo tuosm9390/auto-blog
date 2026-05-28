@@ -1,5 +1,15 @@
 # Checklist
 
+## 2026-05-28 Evidence Draft Display Fix Implementation
+
+- [x] 현재 문서 page/editor/view model 구조 재확인.
+- [x] 문서 view model builder를 테스트 가능한 lib로 분리.
+- [x] 저장 전 template 초안 표시와 draft readiness 적용.
+- [x] 탭 전환 시 editor remount 보장.
+- [x] 관련 단위 테스트 추가.
+- [x] build와 lint 검증.
+- [x] 변경 사항 커밋.
+
 ## 2026-05-28 Evidence Draft Display Fix Plan
 
 - [x] 현재 문서 관리 페이지와 editor 렌더링 구조 확인.

@@ -7,17 +7,14 @@ import {
   refreshProjectStateAction,
   saveProjectDocumentAction,
 } from "@/app/actions/projectActions";
-import DocumentCoverageGrid, { DocumentCoverageItem } from "@/components/projects/DocumentCoverageGrid";
+import DocumentCoverageGrid from "@/components/projects/DocumentCoverageGrid";
 import ProjectDocumentEditor from "@/components/projects/ProjectDocumentEditor";
 import { RefreshStateButton } from "@/components/projects/RefreshStateButton";
 import { Link, redirect } from "@/i18n/routing";
 import {
-  buildDocumentSummary,
-  getProjectDocumentTemplate,
-  getProjectDocumentTypeMeta,
   normalizeProjectDocumentType,
-  PROJECT_DOCUMENT_TYPES,
 } from "@/lib/project-document-templates";
+import { buildProjectDocumentViewModels } from "@/lib/project-document-view-models";
 import {
   getProjectDocuments,
   getProjectDocumentsSetupState,
@@ -27,15 +24,8 @@ import {
   getLatestStateSnapshot,
   getProjectById,
 } from "@/lib/projects";
-import type { ProjectDocument, ProjectDocumentReadiness } from "@/lib/types";
+import type { ProjectDocumentReadiness } from "@/lib/types";
 import { getTranslations } from "next-intl/server";
-
-interface DocumentViewModel extends DocumentCoverageItem {
-  id: string | null;
-  title: string;
-  contentMarkdown: string;
-  isPrd: boolean;
-}
 
 export default async function ProjectDocumentsPage({
   params,
@@ -69,7 +59,7 @@ export default async function ProjectDocumentsPage({
   const currentProject = project!;
 
   const selectedType = normalizeProjectDocumentType(resolvedSearchParams?.type) ?? "prd";
-  const viewModels = buildDocumentViewModels({
+  const viewModels = buildProjectDocumentViewModels({
     locale,
     plan,
     documents,
@@ -160,6 +150,7 @@ export default async function ProjectDocumentsPage({
       </section>
 
       <ProjectDocumentEditor
+        key={selectedDocument.type}
         documentType={selectedDocument.type}
         documentId={selectedDocument.id}
         title={selectedDocument.title}
@@ -187,7 +178,7 @@ export default async function ProjectDocumentsPage({
           prdAlwaysApplied: t("documents.editor.prdAlwaysApplied"),
           analysisSignals: t("documents.editor.analysisSignals"),
           readiness: readinessLabels,
-          emptyHint: t("documents.editor.emptyHint"),
+          emptyHint: selectedDocument.id ? t("documents.editor.emptyHint") : t("documents.editor.unsavedDraftHint"),
         }}
       />
 
@@ -201,65 +192,6 @@ export default async function ProjectDocumentsPage({
       </section>
     </div>
   );
-}
-
-function buildDocumentViewModels({
-  locale,
-  plan,
-  documents,
-}: {
-  locale: string;
-  plan: Awaited<ReturnType<typeof getCurrentProjectPlan>>;
-  documents: ProjectDocument[];
-}): DocumentViewModel[] {
-  const documentsByType = new Map(documents.map((document) => [document.document_type, document]));
-
-  return PROJECT_DOCUMENT_TYPES.map((type) => {
-    const meta = getProjectDocumentTypeMeta(type);
-    const template = getProjectDocumentTemplate(type, locale);
-
-    if (type === "prd") {
-      const summary = buildDocumentSummary({
-        id: plan?.id ?? "current-plan",
-        documentType: "prd",
-        title: plan?.title ?? template.title,
-        contentMarkdown: plan?.content_markdown ?? "",
-        isApplied: Boolean(plan?.content_markdown?.trim()),
-        updatedAt: plan?.updated_at ?? null,
-      });
-      return {
-        ...meta,
-        id: plan?.id ?? null,
-        title: summary.title,
-        contentMarkdown: plan?.content_markdown ?? "",
-        readiness: summary.readiness,
-        isApplied: summary.isApplied,
-        updatedAt: summary.updatedAt,
-        isPrd: true,
-      };
-    }
-
-    const document = documentsByType.get(type);
-    const summary = buildDocumentSummary({
-      id: document?.id ?? type,
-      documentType: type,
-      title: document?.title ?? template.title,
-      contentMarkdown: document?.content_markdown ?? "",
-      isApplied: Boolean(document?.is_applied),
-      updatedAt: document?.updated_at ?? null,
-    });
-
-    return {
-      ...meta,
-      id: document?.id ?? null,
-      title: summary.title,
-      contentMarkdown: document?.content_markdown ?? "",
-      readiness: summary.readiness,
-      isApplied: summary.isApplied,
-      updatedAt: summary.updatedAt,
-      isPrd: false,
-    };
-  });
 }
 
 function Metric({ label, value }: { label: string; value: string }) {

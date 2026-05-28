@@ -659,7 +659,8 @@
         "appliedState": "Analysis state",
         "prdAlwaysApplied": "The PRD is managed as the current plan source and is included in analysis whenever it has content.",
         "analysisSignals": "State signals affected",
-        "emptyHint": "Create a draft from the template or write markdown directly."
+        "emptyHint": "Create a draft from the template or write markdown directly.",
+        "unsavedDraftHint": "This draft is not saved yet. Edit it, then save the document."
       }
     },
     "drift": {
