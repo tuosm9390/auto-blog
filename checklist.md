@@ -1,5 +1,14 @@
 # Checklist
 
+## 2026-05-28 Project Documents Implementation Plan
+
+- [x] 기존 Project Documents 설계 문서와 실제 코드 경계 확인.
+- [x] DB, 타입, 서버 액션, UI, 분석 파이프라인 구현 단위 분해.
+- [x] 구현 순서와 검증 기준 정의.
+- [x] 구현 계획서 작성.
+- [x] 변경 파일 검토.
+- [x] 커밋 생성.
+
 ## 2026-05-28 Project Documents Feature Design
 
 - [x] 현재 Project Memory 저장 모델과 프로젝트 상세 UI 확인.

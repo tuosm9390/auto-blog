@@ -1,5 +1,12 @@
 # Context Notes
 
+## 2026-05-28 Project Documents Implementation Plan
+
+- Observation: `scripts/add-project-memory-core.sql` is the current project-memory schema source, so document storage should be added there or through a companion migration that follows the same RLS style.
+- Observation: `refreshProjectState` currently loads only project, current plan, GitHub commits, PRs, and issues before calling `analyzeProjectState`.
+- Decision: Implement in thin vertical slices: storage/types first, then CRUD actions, then page UI, then analysis integration. This keeps each step verifiable.
+- Decision: The first editor should reuse markdown textarea patterns instead of introducing a block editor or external document sync.
+
 ## 2026-05-28 Project Documents Feature Design
 
 - Assumption: Treat the feature as a real Synapso.dev SaaS product enhancement, not a demo-only editor.
