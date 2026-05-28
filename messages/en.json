@@ -653,6 +653,8 @@
         "body": "Document body",
         "save": "Save document",
         "createFromTemplate": "Create from template",
+        "generateDraft": "Draft with AI",
+        "generatingDraft": "Drafting...",
         "apply": "Apply to analysis",
         "exclude": "Exclude from analysis",
         "supersede": "Mark superseded",

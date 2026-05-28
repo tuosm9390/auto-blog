@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import {
   applyProjectDocumentAction,
   createProjectDocumentFromTemplateAction,
+  generateProjectDocumentDraftAction,
   markProjectDocumentSupersededAction,
   refreshProjectStateAction,
   saveProjectDocumentAction,
@@ -70,6 +71,7 @@ export default async function ProjectDocumentsPage({
   const staleCount = viewModels.filter((item) => item.readiness === "stale").length;
   const refreshAction = refreshProjectStateAction.bind(null, locale, id);
   const createAction = createProjectDocumentFromTemplateAction.bind(null, locale, id);
+  const generateDraftAction = generateProjectDocumentDraftAction.bind(null, locale, id);
   const saveAction = saveProjectDocumentAction.bind(null, locale, id);
   const applyAction = selectedDocument.id
     ? applyProjectDocumentAction.bind(null, locale, id, selectedDocument.id, selectedDocument.type, true)
@@ -163,6 +165,7 @@ export default async function ProjectDocumentsPage({
         signals={selectedDocument.signals}
         saveAction={saveAction}
         createFromTemplateAction={createAction}
+        generateDraftAction={generateDraftAction}
         applyAction={applyAction}
         excludeAction={excludeAction}
         supersedeAction={supersedeAction}
@@ -171,6 +174,8 @@ export default async function ProjectDocumentsPage({
           body: t("documents.editor.body"),
           save: t("documents.editor.save"),
           createFromTemplate: t("documents.editor.createFromTemplate"),
+          generateDraft: t("documents.editor.generateDraft"),
+          generatingDraft: t("documents.editor.generatingDraft"),
           apply: t("documents.editor.apply"),
           exclude: t("documents.editor.exclude"),
           supersede: t("documents.editor.supersede"),

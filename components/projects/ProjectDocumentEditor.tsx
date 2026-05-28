@@ -1,5 +1,6 @@
 // 프로젝트 Evidence 문서의 마크다운 편집 폼을 렌더링한다.
 import type { ProjectDocumentReadiness, ProjectDocumentType } from "@/lib/types";
+import ProjectDocumentGenerateButton from "./ProjectDocumentGenerateButton";
 
 interface ProjectDocumentEditorProps {
   documentType: ProjectDocumentType;
@@ -14,6 +15,7 @@ interface ProjectDocumentEditorProps {
   signals: string[];
   saveAction: (formData: FormData) => void | Promise<void>;
   createFromTemplateAction: (formData: FormData) => void | Promise<void>;
+  generateDraftAction: (formData: FormData) => void | Promise<void>;
   applyAction?: () => void | Promise<void>;
   excludeAction?: () => void | Promise<void>;
   supersedeAction?: () => void | Promise<void>;
@@ -22,6 +24,8 @@ interface ProjectDocumentEditorProps {
     body: string;
     save: string;
     createFromTemplate: string;
+    generateDraft: string;
+    generatingDraft: string;
     apply: string;
     exclude: string;
     supersede: string;
@@ -46,6 +50,7 @@ export default function ProjectDocumentEditor({
   signals,
   saveAction,
   createFromTemplateAction,
+  generateDraftAction,
   applyAction,
   excludeAction,
   supersedeAction,
@@ -72,6 +77,13 @@ export default function ProjectDocumentEditor({
             >
               {labels.createFromTemplate}
             </button>
+          </form>
+          <form action={generateDraftAction}>
+            <input type="hidden" name="documentType" value={documentType} />
+            <ProjectDocumentGenerateButton
+              idleLabel={labels.generateDraft}
+              pendingLabel={labels.generatingDraft}
+            />
           </form>
           {!isPrd && documentId && (applyAction || excludeAction) ? (
             <>

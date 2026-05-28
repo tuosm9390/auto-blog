@@ -1,5 +1,14 @@
 # Context Notes
 
+## 2026-05-28 Evidence AI Draft Generation
+
+- Observation: `Apply to analysis` only marks saved non-PRD documents as included in future refresh runs; it does not create usable document content.
+- Observation: The product needs a pre-analysis authoring step where an agent fills each Evidence document from project metadata, current PRD, existing documents, and the latest state snapshot.
+- Decision: Add AI draft generation as a server action that writes the selected document body into the existing PRD or `project_documents` storage, without automatically applying non-PRD documents to analysis.
+- Decision: Keep generated content in editable Markdown so users can review and adjust before applying it as evidence.
+- Decision: The prompt uses project metadata, current PRD, related Evidence document summaries, latest state snapshot, existing document content, and the selected template structure.
+- Verification: `npx vitest run tests/project-document-draft-ai.test.ts tests/project-document-templates.test.ts tests/project-document-view-models.test.ts`, `npm run build`, and `npm run lint` pass.
+
 ## 2026-05-28 Evidence Agent Prompt Addition
 
 - Observation: Evidence templates already include `Agent Reading Notes`, but those notes tell the system how to interpret a document rather than giving the user a reusable prompt for agent collaboration.

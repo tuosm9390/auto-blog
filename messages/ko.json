@@ -653,6 +653,8 @@
         "body": "문서 내용",
         "save": "문서 저장",
         "createFromTemplate": "템플릿으로 생성",
+        "generateDraft": "AI 초안 작성",
+        "generatingDraft": "초안 작성 중...",
         "apply": "분석에 적용",
         "exclude": "분석에서 제외",
         "supersede": "대체됨으로 표시",

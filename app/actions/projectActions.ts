@@ -2,9 +2,12 @@
 
 import { auth } from "@/auth";
 import { refreshProjectState } from "@/lib/project-refresh";
+import { generateProjectDocumentDraft } from "@/lib/project-document-draft-ai";
 import {
+  getProjectDocuments,
   markProjectDocumentSuperseded,
   setProjectDocumentApplied,
+  summarizeStoredProjectDocuments,
   updateProjectDocument,
   upsertProjectDocument,
 } from "@/lib/project-documents";
@@ -18,10 +21,11 @@ import {
   createProject,
   getProjectById,
   getCurrentProjectPlan,
+  getLatestStateSnapshot,
   updateProject,
   upsertCurrentProjectPlan,
 } from "@/lib/projects";
-import { ProjectStatus } from "@/lib/types";
+import type { Project, ProjectStatus } from "@/lib/types";
 import { redirect } from "@/i18n/routing";
 import { unstable_rethrow } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -191,7 +195,7 @@ export async function updateProjectAction(locale: string, projectId: string, for
   redirect({ href: `/projects/${projectId}`, locale });
 }
 
-async function requireOwnedProject(locale: string, projectId: string) {
+async function requireOwnedProject(locale: string, projectId: string): Promise<Project> {
   const session = await auth();
   const userId = session?.user?.id;
   if (!userId) {
@@ -202,6 +206,7 @@ async function requireOwnedProject(locale: string, projectId: string) {
   const project = await getProjectById(projectId);
   if (!project || project.owner_id !== safeUserId) {
     redirect({ href: "/projects", locale });
+    throw new Error("프로젝트를 찾을 수 없습니다.");
   }
 
   return project;
@@ -290,6 +295,57 @@ export async function saveProjectDocumentAction(
         analysisSignals: meta.signals,
       });
     }
+  }
+
+  revalidateProjectDocumentPaths(locale, projectId);
+  redirect({ href: `/projects/${projectId}/documents?type=${documentType}`, locale });
+}
+
+export async function generateProjectDocumentDraftAction(
+  locale: string,
+  projectId: string,
+  formData: FormData
+) {
+  const project = await requireOwnedProject(locale, projectId);
+
+  const documentType = normalizeProjectDocumentType(formData.get("documentType"));
+  if (!documentType) {
+    throw new Error("문서 유형이 올바르지 않습니다.");
+  }
+
+  const [plan, documents, latestSnapshot] = await Promise.all([
+    getCurrentProjectPlan(projectId),
+    getProjectDocuments(projectId),
+    getLatestStateSnapshot(projectId),
+  ]);
+  const template = getProjectDocumentTemplate(documentType, locale);
+  const existingDocument = documents.find((document) => document.document_type === documentType);
+  const existingContent =
+    documentType === "prd" ? plan?.content_markdown : existingDocument?.content_markdown;
+  const draft = await generateProjectDocumentDraft({
+    project,
+    documentType,
+    template,
+    currentPlan: plan,
+    documents: summarizeStoredProjectDocuments(documents),
+    latestSnapshot,
+    existingContent,
+    locale: locale === "ko" ? "ko" : "en",
+  });
+
+  if (documentType === "prd") {
+    await upsertCurrentProjectPlan(projectId, draft.title, draft.contentMarkdown);
+  } else if (isStoredProjectDocumentType(documentType)) {
+    const meta = getProjectDocumentTypeMeta(documentType);
+    await upsertProjectDocument({
+      projectId,
+      documentType,
+      title: draft.title,
+      contentMarkdown: draft.contentMarkdown,
+      isApplied: false,
+      status: "draft",
+      analysisSignals: meta.signals,
+    });
   }
 
   revalidateProjectDocumentPaths(locale, projectId);

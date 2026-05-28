@@ -1,5 +1,15 @@
 # Checklist
 
+## 2026-05-28 Evidence AI Draft Generation
+
+- [x] 현재 문서 편집, 저장, AI 분석 구조 확인.
+- [x] 문서별 작성 질문과 생성 프롬프트 빌더 추가.
+- [x] 문서 페이지에 AI 초안 작성 서버 액션과 버튼 추가.
+- [x] 한국어와 영어 UI 문구 추가.
+- [x] 프롬프트와 view model 관련 테스트 추가 또는 갱신.
+- [x] vitest, build, lint 검증.
+- [x] 변경 사항 커밋.
+
 ## 2026-05-28 Evidence Agent Prompt Addition
 
 - [x] 현재 Evidence 템플릿 구조와 테스트 기준 확인.
