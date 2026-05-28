@@ -1,5 +1,14 @@
 # Checklist
 
+## 2026-05-28 Evidence Draft Display Fix Plan
+
+- [x] 현재 문서 관리 페이지와 editor 렌더링 구조 확인.
+- [x] 탭 전환 시 제목과 본문이 유지되는 원인 분석.
+- [x] 저장 전 template 초안 표시 정책 정의.
+- [x] 구현 계획서 작성.
+- [x] 변경 파일 검토.
+- [x] 커밋 생성.
+
 ## 2026-05-28 Project Documents Implementation
 
 - [x] 구현 결정 사항과 기존 코드 경계 재확인.

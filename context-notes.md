@@ -1,5 +1,12 @@
 # Context Notes
 
+## 2026-05-28 Evidence Draft Display Fix Plan
+
+- Observation: `ProjectDocumentEditor` uses uncontrolled `defaultValue` fields, so React can preserve the previous input DOM when only the selected `type` query parameter changes.
+- Observation: `buildDocumentViewModels` uses template titles for missing documents but leaves `contentMarkdown` empty, so per-type draft bodies are not visible until "Create from template" runs.
+- Decision: The fix should remount the editor by `selectedDocument.type` and show template content as an unsaved draft when no stored document exists.
+- Decision: Showing a template draft must not imply persistence. DB writes should still happen only through `Save document` or `Create from template`.
+
 ## 2026-05-28 Project Documents Implementation
 
 - Decision: Use a companion SQL script for `project_documents` instead of modifying only the existing core schema script, so existing deployments have a clear manual SQL to run.
