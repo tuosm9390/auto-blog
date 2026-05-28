@@ -1,5 +1,13 @@
 # Context Notes
 
+## 2026-05-28 Project Documents Feature Design
+
+- Assumption: Treat the feature as a real Synapso.dev SaaS product enhancement, not a demo-only editor.
+- Observation: The current app has `project_plans` for one current plan, `state_snapshots` for state evidence, and no document-type CRUD or `/projects/[id]/documents` page.
+- Decision: The feature should not become a generic Notion-style document system. Its core job is to make project-state analysis more inspectable and editable through typed Evidence documents.
+- Decision: A new `project_documents` model is the correct product direction because the requested view, customize, apply, and save workflow requires per-document identity, status, freshness, and analysis linkage.
+- Scope: This pass produces a design document only because `$office-hours` is a product/design review workflow, not an implementation workflow.
+
 ## 2026-05-26 GitHub OAuth redirect_uri 오류 수정
 
 - Observation: The app uses NextAuth v5 with the default GitHub provider in `auth.ts`, so the GitHub OAuth callback path is `/api/auth/callback/github`.

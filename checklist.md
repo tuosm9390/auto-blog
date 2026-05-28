@@ -1,5 +1,15 @@
 # Checklist
 
+## 2026-05-28 Project Documents Feature Design
+
+- [x] 현재 Project Memory 저장 모델과 프로젝트 상세 UI 확인.
+- [x] 기존 Evidence 문서 초안과 문서 관리 페이지 전제 확인.
+- [x] 문서 확인, 수정, 적용, 저장 기능의 제품 역할 정의.
+- [x] 구현 후보 접근 방식과 권장 범위 정리.
+- [x] 기능 설계 문서 작성.
+- [x] 변경 파일 검토.
+- [x] 커밋 생성.
+
 ## 2026-05-26 GitHub OAuth redirect_uri 오류 수정
 
 - [x] 인증 구현과 로그인 액션 확인.
