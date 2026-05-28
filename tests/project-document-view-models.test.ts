@@ -15,11 +15,13 @@ describe("project document view models", () => {
     const backlog = viewModels.find((item) => item.type === "backlog");
 
     expect(roadmap?.id).toBeNull();
-    expect(roadmap?.title).toBe("Roadmap");
+    expect(roadmap?.title).toBe("Roadmap / Milestone Plan");
     expect(roadmap?.contentMarkdown).toBe(getProjectDocumentTemplate("roadmap", "en").contentMarkdown);
+    expect(roadmap?.contentMarkdown).toContain("## 7. Agent Reading Notes");
     expect(roadmap?.readiness).toBe("draft");
     expect(roadmap?.isApplied).toBe(false);
     expect(backlog?.contentMarkdown).toBe(getProjectDocumentTemplate("backlog", "en").contentMarkdown);
+    expect(backlog?.contentMarkdown).toContain("## 2. Work Items");
   });
 
   it("shows the PRD template when no current plan exists", () => {
@@ -31,8 +33,9 @@ describe("project document view models", () => {
     const prd = viewModels.find((item) => item.type === "prd");
 
     expect(prd?.id).toBeNull();
-    expect(prd?.title).toBe("Current Plan");
+    expect(prd?.title).toBe("PRD / Requirements");
     expect(prd?.contentMarkdown).toBe(getProjectDocumentTemplate("prd", "ko").contentMarkdown);
+    expect(prd?.contentMarkdown).toContain("## 9. Agent Reading Notes");
     expect(prd?.readiness).toBe("draft");
     expect(prd?.isApplied).toBe(false);
   });

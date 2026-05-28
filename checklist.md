@@ -1,5 +1,13 @@
 # Checklist
 
+## 2026-05-28 Evidence Draft Content Sync
+
+- [x] 현재 UI 템플릿과 evidence-pack 초안 차이 확인.
+- [x] 런타임 Evidence 문서 템플릿을 세부 초안 본문으로 교체.
+- [x] 템플릿 표시 테스트 기대값 갱신.
+- [x] vitest, build, lint 검증.
+- [x] 변경 사항 커밋.
+
 ## 2026-05-28 Evidence Draft Display Fix Implementation
 
 - [x] 현재 문서 page/editor/view model 구조 재확인.

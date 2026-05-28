@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import {
   estimateDocumentReadiness,
+  getProjectDocumentTemplate,
   PROJECT_DOCUMENT_TYPES,
   STORED_PROJECT_DOCUMENT_TYPES,
 } from "@/lib/project-document-templates";
@@ -47,5 +48,22 @@ describe("project document templates", () => {
     const content = "# Roadmap\n\n## 단계\n" + "x".repeat(240);
 
     expect(estimateDocumentReadiness("roadmap", content, oldDate, now)).toBe("stale");
+  });
+
+  it("provides structured draft content for each evidence document type", () => {
+    expect(getProjectDocumentTemplate("prd", "ko")).toMatchObject({
+      title: "PRD / Requirements",
+    });
+    expect(getProjectDocumentTemplate("prd", "ko").contentMarkdown).toContain("## 9. Agent Reading Notes");
+    expect(getProjectDocumentTemplate("roadmap", "ko")).toMatchObject({
+      title: "Roadmap / Milestone Plan",
+    });
+    expect(getProjectDocumentTemplate("roadmap", "ko").contentMarkdown).toContain("## 3. Current Milestone");
+    expect(getProjectDocumentTemplate("backlog", "ko").contentMarkdown).toContain("## 2. Work Items");
+    expect(getProjectDocumentTemplate("sprint_plan", "ko").contentMarkdown).toContain("## 1. Iteration Window");
+    expect(getProjectDocumentTemplate("decision_log", "ko").contentMarkdown).toContain("## 3. Options Considered");
+    expect(getProjectDocumentTemplate("technical_design", "ko").contentMarkdown).toContain("## 7. Test Plan");
+    expect(getProjectDocumentTemplate("risk_log", "ko").contentMarkdown).toContain("## 4. Dependencies");
+    expect(getProjectDocumentTemplate("release_ops_learning", "ko").contentMarkdown).toContain("## 5. Runbook");
   });
 });

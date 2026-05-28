@@ -1,5 +1,13 @@
 # Context Notes
 
+## 2026-05-28 Evidence Draft Content Sync
+
+- Observation: The documents UI reads its initial draft body from `lib/project-document-templates.ts`, not directly from `doc/designs/evidence-pack/`.
+- Observation: The runtime templates still contain short placeholder bodies, so the page can switch tabs correctly while still showing under-specified draft content.
+- Decision: Replace each runtime template with the corresponding evidence-pack draft structure, including metadata, evidence, and agent reading notes sections.
+- Decision: Keep Korean and English runtime templates structurally aligned so locale switching does not regress document-specific draft rendering.
+- Verification: `npx vitest run tests/project-document-templates.test.ts tests/project-document-view-models.test.ts`, `npm run build`, and `npm run lint` pass.
+
 ## 2026-05-28 Evidence Draft Display Fix Implementation
 
 - Decision: Move the documents page view model builder into `lib/project-document-view-models.ts` so missing-template behavior can be unit-tested outside the Next page.
