@@ -251,6 +251,12 @@ export default async function ProjectStatePage({
             {t("shared.editProject")}
           </Link>
           <Link
+            href={`/projects/${currentProject.id}/documents`}
+            className="px-5 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors text-center"
+          >
+            {t("shared.viewDocuments")}
+          </Link>
+          <Link
             href={`/projects/${currentProject.id}/runs`}
             className="px-5 py-3 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors text-center"
           >

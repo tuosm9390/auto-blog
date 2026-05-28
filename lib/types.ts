@@ -79,6 +79,18 @@ export type ProjectStatus = "active" | "paused" | "archived";
 export type AnalysisRunStatus = "pending" | "processing" | "completed" | "failed";
 export type PlanItemStatus = "not_started" | "in_progress" | "done" | "at_risk" | "changed";
 export type DriftType = "strategic" | "scope" | "execution";
+export type ProjectDocumentType =
+  | "prd"
+  | "roadmap"
+  | "backlog"
+  | "sprint_plan"
+  | "decision_log"
+  | "technical_design"
+  | "risk_log"
+  | "release_ops_learning";
+export type StoredProjectDocumentType = Exclude<ProjectDocumentType, "prd">;
+export type ProjectDocumentStatus = "draft" | "active" | "superseded" | "archived";
+export type ProjectDocumentReadiness = "missing" | "draft" | "usable" | "stale";
 
 export interface Project {
   id: string;
@@ -105,6 +117,31 @@ export interface ProjectPlan {
   is_current: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface ProjectDocument {
+  id: string;
+  project_id: string;
+  document_type: StoredProjectDocumentType;
+  title: string;
+  status: ProjectDocumentStatus;
+  content_markdown: string;
+  is_applied: boolean;
+  related_links_json: unknown[];
+  analysis_signals_json: string[];
+  last_used_snapshot_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectDocumentSummary {
+  id: string;
+  documentType: ProjectDocumentType;
+  title: string;
+  readiness: ProjectDocumentReadiness;
+  isApplied: boolean;
+  contentPreview: string;
+  updatedAt: string | null;
 }
 
 export interface PlanProgressItem {

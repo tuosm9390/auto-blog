@@ -315,6 +315,7 @@
       "createProject": "Create project",
       "newProject": "New project",
       "editProject": "Edit project",
+      "viewDocuments": "Manage docs",
       "viewRuns": "View runs",
       "reviewDrift": "Review drift",
       "refreshState": "Refresh state",
@@ -626,6 +627,40 @@
       "noDriftItems": "No drift items yet. Once the product thesis starts moving, this is where changed decisions will show up.",
       "evidenceEntry": "Evidence entry",
       "evidenceEntryHint": "Use the panels above to inspect exactly which plans, issues, pull requests, and commits informed the latest snapshot."
+    },
+    "documents": {
+      "tag": "Evidence documents",
+      "description": "Inspect, edit, and apply the documents used to judge project state.",
+      "applied": "Applied to analysis",
+      "notApplied": "Excluded from analysis",
+      "noContent": "No content",
+      "latestCoverage": "Latest snapshot link",
+      "latestCoverageHint": "Applied documents will be attached to snapshot evidence and raw metadata on the next refresh.",
+      "noSnapshotHint": "Create the first snapshot to connect applied documents as state evidence.",
+      "metrics": {
+        "usable": "Usable",
+        "applied": "Applied",
+        "stale": "Stale"
+      },
+      "readiness": {
+        "missing": "missing",
+        "draft": "draft",
+        "usable": "usable",
+        "stale": "stale"
+      },
+      "editor": {
+        "title": "Document title",
+        "body": "Document body",
+        "save": "Save document",
+        "createFromTemplate": "Create from template",
+        "apply": "Apply to analysis",
+        "exclude": "Exclude from analysis",
+        "supersede": "Mark superseded",
+        "appliedState": "Analysis state",
+        "prdAlwaysApplied": "The PRD is managed as the current plan source and is included in analysis whenever it has content.",
+        "analysisSignals": "State signals affected",
+        "emptyHint": "Create a draft from the template or write markdown directly."
+      }
     },
     "drift": {
       "tag": "Drift",

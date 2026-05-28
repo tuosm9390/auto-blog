@@ -1,13 +1,19 @@
 import { getCommitDiff, getIssuesByNumbers, getPullRequestsForCommit, getRecentCommits } from "./github";
 import { analyzeProjectState } from "./project-memory-ai";
 import {
+  getAppliedProjectDocuments,
+  summarizeStoredProjectDocuments,
+  updateDocumentsLastUsed,
+} from "./project-documents";
+import { PROJECT_DOCUMENT_TYPES } from "./project-document-templates";
+import {
   createAnalysisRun,
   createStateSnapshot,
   getCurrentProjectPlan,
   getProjectById,
   updateAnalysisRunStatus,
 } from "./projects";
-import type { CommitDiff, IssueContext, PullRequestContext, StateSnapshot } from "./types";
+import type { CommitDiff, IssueContext, ProjectDocumentSummary, PullRequestContext, StateSnapshot } from "./types";
 
 type ProjectRefreshLocale = "ko" | "en";
 
@@ -19,6 +25,7 @@ function buildBaselineAnalysis(
   projectId: string,
   projectName: string,
   plan: Awaited<ReturnType<typeof getCurrentProjectPlan>>,
+  documents: ProjectDocumentSummary[],
   locale: ProjectRefreshLocale
 ) {
   if (locale === "ko") {
@@ -82,6 +89,12 @@ function buildBaselineAnalysis(
               },
             ]
           : []),
+        ...documents.map((document) => ({
+          type: "document",
+          title: document.title,
+          ref: document.id,
+          url: null,
+        })),
       ],
     };
   }
@@ -146,6 +159,12 @@ function buildBaselineAnalysis(
             },
           ]
         : []),
+      ...documents.map((document) => ({
+        type: "document",
+        title: document.title,
+        ref: document.id,
+        url: null,
+      })),
     ],
   };
 }
@@ -230,11 +249,23 @@ export async function refreshProjectState(params: {
 
   const currentProject = project;
   const plan = await getCurrentProjectPlan(params.projectId);
+  const appliedDocuments = await getAppliedProjectDocuments(params.projectId);
+  const documentSummaries = summarizeStoredProjectDocuments(appliedDocuments);
   const now = new Date().toISOString();
   const sourceWindowDays = params.sourceWindowDays ?? 7;
   const locale = normalizeLocale(params.locale);
   const accessToken = params.accessToken;
   const hasPlan = Boolean(plan?.content_markdown?.trim());
+  const appliedDocumentTypes = documentSummaries.map((document) => document.documentType);
+  const missingDocumentTypes = PROJECT_DOCUMENT_TYPES.filter((type) => {
+    if (type === "prd") {
+      return !hasPlan;
+    }
+    return !appliedDocumentTypes.includes(type);
+  });
+  const staleDocumentTypes = documentSummaries
+    .filter((document) => document.readiness === "stale")
+    .map((document) => document.documentType);
   const hasRepoConfigured =
     Boolean(currentProject.github_repo_owner) && Boolean(currentProject.github_repo_name);
   const planSummary = buildPlanSummary(plan?.content_markdown);
@@ -242,7 +273,7 @@ export async function refreshProjectState(params: {
   const run = await createAnalysisRun({
     projectId: params.projectId,
     triggeredBy: params.triggeredBy,
-    inputSummary: `Refresh state on ${now} | plan:${hasPlan ? "yes" : "no"} repo:${hasRepoConfigured ? "yes" : "no"} token:${accessToken ? "yes" : "no"}`,
+    inputSummary: `Refresh state on ${now} | plan:${hasPlan ? "yes" : "no"} documents:${documentSummaries.length} repo:${hasRepoConfigured ? "yes" : "no"} token:${accessToken ? "yes" : "no"}`,
     sourceWindowDays,
   });
 
@@ -313,8 +344,8 @@ export async function refreshProjectState(params: {
     const issueCoverage = buildIssueCoverage(issues);
 
     const analysis = hasRepoConnection
-      ? await analyzeProjectState(currentProject, plan, commitDiffs, pullRequests, issues, locale)
-      : buildBaselineAnalysis(currentProject.id, currentProject.name, plan, locale);
+      ? await analyzeProjectState(currentProject, plan, documentSummaries, commitDiffs, pullRequests, issues, locale)
+      : buildBaselineAnalysis(currentProject.id, currentProject.name, plan, documentSummaries, locale);
 
     const snapshot = await createStateSnapshot({
       projectId: params.projectId,
@@ -357,6 +388,12 @@ export async function refreshProjectState(params: {
         issueCoverage,
         planSummary,
         planTitle: plan?.title ?? null,
+        documentCoverage: {
+          appliedDocumentTypes,
+          appliedDocumentIds: documentSummaries.map((document) => document.id),
+          missingDocumentTypes,
+          staleDocumentTypes,
+        },
         sourceWindowDays,
         locale,
         fallbackReason: hasRepoConnection
@@ -377,6 +414,11 @@ export async function refreshProjectState(params: {
       startedAt: now,
       completedAt: new Date().toISOString(),
     });
+    await updateDocumentsLastUsed(
+      params.projectId,
+      documentSummaries.map((document) => document.id),
+      snapshot.id
+    );
 
     return { snapshot, runId: run.id };
   } catch (error) {

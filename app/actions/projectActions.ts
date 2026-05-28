@@ -3,6 +3,18 @@
 import { auth } from "@/auth";
 import { refreshProjectState } from "@/lib/project-refresh";
 import {
+  markProjectDocumentSuperseded,
+  setProjectDocumentApplied,
+  updateProjectDocument,
+  upsertProjectDocument,
+} from "@/lib/project-documents";
+import {
+  getProjectDocumentTemplate,
+  getProjectDocumentTypeMeta,
+  isStoredProjectDocumentType,
+  normalizeProjectDocumentType,
+} from "@/lib/project-document-templates";
+import {
   createProject,
   getProjectById,
   getCurrentProjectPlan,
@@ -28,6 +40,13 @@ const createProjectSchema = z.object({
 
 const updateProjectSchema = createProjectSchema.extend({
   status: z.enum(["active", "paused", "archived"]).default("active"),
+});
+
+const documentSaveSchema = z.object({
+  documentId: z.string().optional().default(""),
+  documentType: z.string().min(1),
+  title: z.string().min(1, "문서 제목은 필수입니다."),
+  contentMarkdown: z.string().optional().default(""),
 });
 
 export async function createProjectAction(locale: string, formData: FormData) {
@@ -170,4 +189,154 @@ export async function updateProjectAction(locale: string, projectId: string, for
   revalidatePath(`/${locale}/projects/${projectId}/runs`);
   revalidatePath(`/${locale}/projects/${projectId}/edit`);
   redirect({ href: `/projects/${projectId}`, locale });
+}
+
+async function requireOwnedProject(locale: string, projectId: string) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    redirect({ href: "/login", locale });
+  }
+  const safeUserId = userId as string;
+
+  const project = await getProjectById(projectId);
+  if (!project || project.owner_id !== safeUserId) {
+    redirect({ href: "/projects", locale });
+  }
+
+  return project;
+}
+
+function revalidateProjectDocumentPaths(locale: string, projectId: string) {
+  revalidatePath(`/${locale}/projects`);
+  revalidatePath(`/${locale}/projects/${projectId}`);
+  revalidatePath(`/${locale}/projects/${projectId}/documents`);
+}
+
+export async function createProjectDocumentFromTemplateAction(
+  locale: string,
+  projectId: string,
+  formData: FormData
+) {
+  await requireOwnedProject(locale, projectId);
+
+  const documentType = normalizeProjectDocumentType(formData.get("documentType"));
+  if (!documentType) {
+    throw new Error("문서 유형이 올바르지 않습니다.");
+  }
+
+  const template = getProjectDocumentTemplate(documentType, locale);
+  if (documentType === "prd") {
+    await upsertCurrentProjectPlan(projectId, template.title, template.contentMarkdown);
+  } else if (isStoredProjectDocumentType(documentType)) {
+    const meta = getProjectDocumentTypeMeta(documentType);
+    await upsertProjectDocument({
+      projectId,
+      documentType,
+      title: template.title,
+      contentMarkdown: template.contentMarkdown,
+      analysisSignals: meta.signals,
+    });
+  }
+
+  revalidateProjectDocumentPaths(locale, projectId);
+  redirect({ href: `/projects/${projectId}/documents?type=${documentType}`, locale });
+}
+
+export async function saveProjectDocumentAction(
+  locale: string,
+  projectId: string,
+  formData: FormData
+) {
+  await requireOwnedProject(locale, projectId);
+
+  const parsed = documentSaveSchema.safeParse({
+    documentId: formData.get("documentId"),
+    documentType: formData.get("documentType"),
+    title: formData.get("title"),
+    contentMarkdown: formData.get("contentMarkdown"),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message || "문서 입력값이 올바르지 않습니다.");
+  }
+
+  const documentType = normalizeProjectDocumentType(parsed.data.documentType);
+  if (!documentType) {
+    throw new Error("문서 유형이 올바르지 않습니다.");
+  }
+
+  if (documentType === "prd") {
+    await upsertCurrentProjectPlan(
+      projectId,
+      parsed.data.title.trim() || "Current Plan",
+      parsed.data.contentMarkdown
+    );
+  } else if (isStoredProjectDocumentType(documentType)) {
+    if (parsed.data.documentId) {
+      await updateProjectDocument({
+        projectId,
+        documentId: parsed.data.documentId,
+        title: parsed.data.title.trim(),
+        contentMarkdown: parsed.data.contentMarkdown,
+      });
+    } else {
+      const meta = getProjectDocumentTypeMeta(documentType);
+      await upsertProjectDocument({
+        projectId,
+        documentType,
+        title: parsed.data.title.trim(),
+        contentMarkdown: parsed.data.contentMarkdown,
+        analysisSignals: meta.signals,
+      });
+    }
+  }
+
+  revalidateProjectDocumentPaths(locale, projectId);
+  redirect({ href: `/projects/${projectId}/documents?type=${documentType}`, locale });
+}
+
+export async function applyProjectDocumentAction(
+  locale: string,
+  projectId: string,
+  documentId: string,
+  documentType: string,
+  isApplied: boolean
+) {
+  await requireOwnedProject(locale, projectId);
+
+  const normalizedType = normalizeProjectDocumentType(documentType);
+  if (!normalizedType || normalizedType === "prd") {
+    throw new Error("적용 상태를 바꿀 수 없는 문서입니다.");
+  }
+
+  const updated = await setProjectDocumentApplied(projectId, documentId, isApplied);
+  if (!updated) {
+    throw new Error("문서 적용 상태 변경에 실패했습니다.");
+  }
+
+  revalidateProjectDocumentPaths(locale, projectId);
+  redirect({ href: `/projects/${projectId}/documents?type=${normalizedType}`, locale });
+}
+
+export async function markProjectDocumentSupersededAction(
+  locale: string,
+  projectId: string,
+  documentId: string,
+  documentType: string
+) {
+  await requireOwnedProject(locale, projectId);
+
+  const normalizedType = normalizeProjectDocumentType(documentType);
+  if (!normalizedType || normalizedType === "prd") {
+    throw new Error("이 문서는 superseded 처리할 수 없습니다.");
+  }
+
+  const updated = await markProjectDocumentSuperseded(projectId, documentId);
+  if (!updated) {
+    throw new Error("문서 상태 변경에 실패했습니다.");
+  }
+
+  revalidateProjectDocumentPaths(locale, projectId);
+  redirect({ href: `/projects/${projectId}/documents?type=${normalizedType}`, locale });
 }

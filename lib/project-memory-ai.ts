@@ -6,6 +6,7 @@ import {
   IssueContext,
   PlanProgressItem,
   Project,
+  ProjectDocumentSummary,
   ProjectPlan,
   PullRequestContext,
 } from "./types";
@@ -74,6 +75,7 @@ function getOutputLanguageInstruction(locale: ProjectStateLocale) {
 function buildProjectStatePrompt(
   project: Project,
   plan: ProjectPlan | null,
+  documents: ProjectDocumentSummary[],
   commitDiffs: CommitDiff[],
   pullRequests: PullRequestContext[],
   issues: IssueContext[],
@@ -82,6 +84,20 @@ function buildProjectStatePrompt(
   const planBlock = plan?.content_markdown?.trim()
     ? plan.content_markdown
     : "현재 연결된 PRD가 없습니다. 프로젝트 설명과 최근 활동만으로 상태를 추론하세요.";
+
+  const documentBlock =
+    documents.length > 0
+      ? documents
+          .map(
+            (document) => `## ${document.title}
+Type: ${document.documentType}
+Readiness: ${document.readiness}
+Applied: ${document.isApplied ? "yes" : "no"}
+Updated at: ${document.updatedAt || "unknown"}
+Preview: ${document.contentPreview || "no content"}`
+          )
+          .join("\n\n")
+      : "적용된 Evidence 문서가 없습니다.";
 
   const commitBlock =
     commitDiffs.length > 0
@@ -164,6 +180,9 @@ Repo: ${project.github_repo_owner && project.github_repo_name ? `${project.githu
 [CURRENT PLAN / PRD]
 ${planBlock}
 
+[APPLIED EVIDENCE DOCUMENTS]
+${documentBlock}
+
 [RECENT ENGINEERING ACTIVITY]
 ${commitBlock}
 
@@ -216,13 +235,14 @@ JSON shape:
 export async function analyzeProjectState(
   project: Project,
   plan: ProjectPlan | null,
+  documents: ProjectDocumentSummary[],
   commitDiffs: CommitDiff[],
   pullRequests: PullRequestContext[],
   issues: IssueContext[],
   locale: ProjectStateLocale = "en"
 ): Promise<ProjectStateAnalysisResult> {
   const ai = getGeminiClient();
-  const prompt = buildProjectStatePrompt(project, plan, commitDiffs, pullRequests, issues, locale);
+  const prompt = buildProjectStatePrompt(project, plan, documents, commitDiffs, pullRequests, issues, locale);
 
   const schema = {
     type: Type.OBJECT,
@@ -343,6 +363,13 @@ export async function analyzeProjectState(
     url: issue.url,
   }));
 
+  const documentEvidence: EvidenceItem[] = documents.slice(0, 7).map((document) => ({
+    type: "document",
+    title: document.title,
+    ref: document.id,
+    url: null,
+  }));
+
   return {
     summary: parsed.summary,
     progressPercent: Math.max(0, Math.min(100, parsed.progressPercent)),
@@ -353,6 +380,6 @@ export async function analyzeProjectState(
     watchNext: parsed.watchNext.slice(0, 4),
     planProgress: parsed.planProgress.slice(0, 6),
     drift: parsed.drift.slice(0, 3),
-    evidence: [...planEvidence, ...issueEvidence, ...prEvidence, ...commitEvidence],
+    evidence: [...planEvidence, ...documentEvidence, ...issueEvidence, ...prEvidence, ...commitEvidence],
   };
 }

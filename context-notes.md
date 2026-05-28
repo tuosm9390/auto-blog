@@ -1,5 +1,14 @@
 # Context Notes
 
+## 2026-05-28 Project Documents Implementation
+
+- Decision: Use a companion SQL script for `project_documents` instead of modifying only the existing core schema script, so existing deployments have a clear manual SQL to run.
+- Decision: Keep v1 one-document-per-type for non-PRD Evidence docs with `UNIQUE(project_id, document_type)`.
+- Decision: Keep `project_plans` as the PRD source of truth. The Documents page will show PRD as a document card but saving PRD will continue to call `upsertCurrentProjectPlan`.
+- Decision: Compute readiness at read time so stale status can change with time without needing a background write.
+- Scope: Implement textarea-based markdown editing, typed document cards, apply/exclude, and analysis evidence integration. Do not implement version history, block editing, comments, or external sync.
+- Verification: `npx vitest run tests/project-document-templates.test.ts` and `npm run build` pass. `npm run lint` still fails on pre-existing unrelated lint errors in about/admin/auth/header/mobile/api utility files.
+
 ## 2026-05-28 Project Documents Implementation Plan
 
 - Observation: `scripts/add-project-memory-core.sql` is the current project-memory schema source, so document storage should be added there or through a companion migration that follows the same RLS style.

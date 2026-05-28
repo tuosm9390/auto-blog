@@ -315,6 +315,7 @@
       "createProject": "프로젝트 생성",
       "newProject": "새 프로젝트",
       "editProject": "프로젝트 수정",
+      "viewDocuments": "문서 관리",
       "viewRuns": "실행 이력 보기",
       "reviewDrift": "드리프트 검토",
       "refreshState": "상태 새로고침",
@@ -626,6 +627,40 @@
       "noDriftItems": "아직 드리프트 항목이 없습니다. 제품 테제가 움직이기 시작하면 여기에서 변경된 결정을 볼 수 있습니다.",
       "evidenceEntry": "근거 엔트리",
       "evidenceEntryHint": "위 패널에서 최신 스냅샷이 정확히 어떤 계획, 이슈, PR, 커밋을 근거로 삼았는지 확인하세요."
+    },
+    "documents": {
+      "tag": "Evidence 문서",
+      "description": "프로젝트 상태 판단에 쓰이는 문서를 확인하고, 수정하고, 분석에 적용합니다.",
+      "applied": "분석 적용됨",
+      "notApplied": "분석 제외",
+      "noContent": "내용 없음",
+      "latestCoverage": "최신 스냅샷 연결",
+      "latestCoverageHint": "다음 새로고침부터 적용된 문서가 snapshot evidence와 raw metadata에 함께 남습니다.",
+      "noSnapshotHint": "첫 스냅샷을 만들면 적용된 문서가 상태 판단 근거로 연결됩니다.",
+      "metrics": {
+        "usable": "사용 가능",
+        "applied": "분석 적용",
+        "stale": "오래된 문서"
+      },
+      "readiness": {
+        "missing": "누락",
+        "draft": "초안",
+        "usable": "사용 가능",
+        "stale": "오래됨"
+      },
+      "editor": {
+        "title": "문서 제목",
+        "body": "문서 내용",
+        "save": "문서 저장",
+        "createFromTemplate": "템플릿으로 생성",
+        "apply": "분석에 적용",
+        "exclude": "분석에서 제외",
+        "supersede": "대체됨으로 표시",
+        "appliedState": "분석 적용 상태",
+        "prdAlwaysApplied": "PRD는 현재 계획 원본으로 관리되며 내용이 있으면 항상 분석에 포함됩니다.",
+        "analysisSignals": "영향받는 상태 신호",
+        "emptyHint": "템플릿으로 초안을 만들거나 직접 마크다운을 입력하세요."
+      }
     },
     "drift": {
       "tag": "드리프트",

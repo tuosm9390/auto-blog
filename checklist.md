@@ -1,5 +1,18 @@
 # Checklist
 
+## 2026-05-28 Project Documents Implementation
+
+- [x] 구현 결정 사항과 기존 코드 경계 재확인.
+- [x] `project_documents` companion SQL 추가.
+- [x] ProjectDocument 타입, 템플릿, readiness, 데이터 접근 함수 추가.
+- [x] 문서 생성, 저장, 적용, 제외 서버 액션 추가.
+- [x] `/projects/[id]/documents` 페이지와 컴포넌트 추가.
+- [x] 프로젝트 상세 페이지 Documents 진입점 추가.
+- [x] refresh 분석 파이프라인에 applied documents 연결.
+- [x] 한국어와 영어 메시지 추가.
+- [x] 빌드와 lint 검증.
+- [x] 변경 사항 커밋.
+
 ## 2026-05-28 Project Documents Implementation Plan
 
 - [x] 기존 Project Documents 설계 문서와 실제 코드 경계 확인.
