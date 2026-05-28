@@ -18,14 +18,13 @@ const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
   ]);
 
 export default async function Header() {
-  const headerList = await headers();
-  const pathname = headerList.get("x-url-pathname") || "";
+  await headers();
   
   const session = await auth();
   const t = await getTranslations("Header");
   const releases = await withTimeout(getReleases(), 5000).catch(() => []);
 
-  const role = (session?.user as any)?.role || "user";
+  const role = session?.user?.role || "user";
   const isAdmin = role === "admin";
   const homeHref = session?.user ? "/projects" : "/";
 
@@ -91,7 +90,7 @@ export default async function Header() {
           {session?.user ? (
             <div className="flex items-center gap-3 ml-2">
               <Link
-                href={`/@${(session.user as any).username || session.user.name}`}
+                href={`/@${session.user.username || session.user.name}`}
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 {session.user.image && (

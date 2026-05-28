@@ -29,6 +29,17 @@ export default async function LandingPage({
   const session = await auth();
   const t = await getTranslations("About");
   await params;
+  const diffItems = [
+    { index: 1, title: "diff1Title", desc: "diff1Desc" },
+    { index: 2, title: "diff2Title", desc: "diff2Desc" },
+    { index: 3, title: "diff3Title", desc: "diff3Desc" },
+    { index: 4, title: "diff4Title", desc: "diff4Desc" },
+  ] as const;
+  const proofItems = [
+    { index: 1, title: "proof1Title", desc: "proof1Desc" },
+    { index: 2, title: "proof2Title", desc: "proof2Desc" },
+    { index: 3, title: "proof3Title", desc: "proof3Desc" },
+  ] as const;
 
   // CTA 텍스트 및 링크 결정
   const ctaText = !session ? t("ctaFree") : t("ctaManage");
@@ -116,17 +127,17 @@ export default async function LandingPage({
                 {t("diffTitle")}
               </h2>
               <div className="grid gap-8">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex gap-4">
+                {diffItems.map((item) => (
+                  <div key={item.index} className="flex gap-4">
                     <div className="w-6 h-6 rounded-full bg-accent/20 flex-shrink-0 flex items-center justify-center text-accent text-xs font-bold">
-                      {i}
+                      {item.index}
                     </div>
                     <div>
                       <h3 className="font-semibold text-text-primary mb-1">
-                        {t(`diff${i}Title` as any)}
+                        {t(item.title)}
                       </h3>
                       <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-                        {t(`diff${i}Desc` as any)}
+                        {t(item.desc)}
                       </p>
                     </div>
                   </div>
@@ -190,19 +201,19 @@ export default async function LandingPage({
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
+          {proofItems.map((item) => (
             <div
-              key={i}
+              key={item.index}
               className="border border-border-subtle rounded-2xl p-6 bg-surface/50 hover:bg-surface hover:border-border-strong transition-all duration-300"
             >
               <p className="text-xs text-accent font-mono mb-3">
-                0{i}
+                0{item.index}
               </p>
               <h3 className="text-lg font-semibold mb-3">
-                {t(`proof${i}Title` as any)}
+                {t(item.title)}
               </h3>
               <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-                {t(`proof${i}Desc` as any)}
+                {t(item.desc)}
               </p>
             </div>
           ))}

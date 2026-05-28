@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { requireAdminAuth, apiError, apiSuccess } from "@/lib/api-utils";
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { z } from "zod";
@@ -68,7 +68,8 @@ export async function PATCH(
     }
 
     return apiSuccess({ success: true, status });
-  } catch (error: any) {
-    return apiError(error.message, 401);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "인증에 실패했습니다.";
+    return apiError(message, 401);
   }
 }

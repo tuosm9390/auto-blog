@@ -1,27 +1,30 @@
-﻿import 'next-auth'
-import 'next-auth/jwt'
-import { DefaultSession } from 'next-auth'
+// NextAuth 세션과 JWT에 앱 전용 사용자 필드를 추가한다.
+import type { DefaultSession } from "next-auth";
+import type { JWT as DefaultJWT } from "next-auth/jwt";
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
-      id?: string
-      username?: string
-      avatar_url?: string | null
-      /** @server-only GitHub OAuth 토큰 — 클라이언트 컴포넌트에서 사용 금지 */
-      accessToken?: string
-      role?: string
-    } & DefaultSession['user']
+      id?: string;
+      username?: string | null;
+      avatar_url?: string | null;
+      accessToken?: string;
+      role?: string;
+    } & DefaultSession["user"];
+  }
+
+  interface User {
+    username?: string | null;
+    avatar_url?: string | null;
+    role?: string;
   }
 }
 
-declare module 'next-auth/jwt' {
-  interface JWT {
-    accessToken?: string
-      role?: string
-    username?: string
-    avatar_url?: string | null
-    name?: string | null
-    role?: string
+declare module "next-auth/jwt" {
+  interface JWT extends DefaultJWT {
+    accessToken?: string;
+    username?: string | null;
+    avatar_url?: string | null;
+    role?: string;
   }
 }

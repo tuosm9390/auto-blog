@@ -3,6 +3,12 @@ import GitHub from 'next-auth/providers/github'
 import { supabaseAdmin as supabase } from './lib/supabase-admin'
 import { upsertProfile, migrateProfileId } from './lib/profiles'
 
+interface GitHubProfile {
+  login?: string;
+  email?: string | null;
+  name?: string | null;
+  avatar_url?: string | null;
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -16,7 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     authorized: ({ auth, request: { nextUrl } }) => {
       const isLoggedIn = !!auth?.user;
-      const role = (auth?.user as any)?.role || 'user';
+      const role = auth?.user?.role || 'user';
       const isAdmin = role === 'admin';
 
       const pathname = nextUrl.pathname;
@@ -75,7 +81,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (account && profile) {
-        const githubProfile = profile as Record<string, any>;
+        const githubProfile = profile as GitHubProfile;
         if (githubProfile.login) {
           // 기존 프로필의 id(UUID)를 GitHub numeric ID로 마이그레이션 (1회성)
           await migrateProfileId(githubProfile.login, token.sub as string);
@@ -83,8 +89,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           await upsertProfile({
             id: token.sub as string,
             username: githubProfile.login,
-            email: githubProfile.email || (profile as any)?.email,
-            name: githubProfile.name || (profile as any)?.name,
+            email: githubProfile.email,
+            name: githubProfile.name,
             avatar_url: githubProfile.avatar_url,
             role: token.role as string,
           });
@@ -107,10 +113,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return token;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub;
+        session.user.id = token.sub ?? "";
         session.user.username = token.username;
         session.user.avatar_url = token.avatar_url;
         session.user.accessToken = token.accessToken;

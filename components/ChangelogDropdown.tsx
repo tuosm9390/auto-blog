@@ -22,8 +22,11 @@ export default function ChangelogDropdown({
   const t = useTranslations("Changelog");
 
   useEffect(() => {
-    const lastSeen = localStorage.getItem(LS_KEY);
-    setShowBadge(lastSeen !== latestVersion);
+    const timer = window.setTimeout(() => {
+      const lastSeen = localStorage.getItem(LS_KEY);
+      setShowBadge(lastSeen !== latestVersion);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [latestVersion]);
 
   useEffect(() => {

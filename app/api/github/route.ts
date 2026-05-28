@@ -4,7 +4,7 @@ import { requireAuth, apiError, apiSuccess, isAuthError } from "@/lib/api-utils"
 
 export async function GET(request: NextRequest) {
   try {
-    const { username, accessToken } = await requireAuth();
+    const { accessToken } = await requireAuth();
 
     const searchParams = request.nextUrl.searchParams;
     const owner = searchParams.get("owner");

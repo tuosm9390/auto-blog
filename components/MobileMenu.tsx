@@ -30,10 +30,12 @@ export default function MobileMenu({
   const ct = useTranslations("Changelog");
 
   useEffect(() => {
-    if (changelogLatest) {
+    const timer = window.setTimeout(() => {
+      if (!changelogLatest) return;
       const lastSeen = localStorage.getItem("synapso_last_seen_version");
       setShowChangelogBadge(lastSeen !== changelogLatest.version);
-    }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [changelogLatest]);
 
   const isAdmin = role === "admin";

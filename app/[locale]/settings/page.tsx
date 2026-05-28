@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { toast } from "sonner";
 import { LoginRequired } from "@/components/ui/LoginRequired";
 import { useTranslations } from "next-intl";
-import { Repo, SubscriptionInfo } from "@/lib/types";
+import { SubscriptionInfo } from "@/lib/types";
 
 import { BillingSection } from "@/components/settings/BillingSection";
 
@@ -17,7 +17,6 @@ function SettingsContent() {
   const commonT = useTranslations("Common");
 
   const [settings, setSettings] = useState<{ github_username: string; posting_mode: string; auto_repos: string[]; auto_schedule: string } | null>(null);
-  const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
@@ -35,7 +34,7 @@ function SettingsContent() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [settingsResult, reposResult, subscriptionResult] = await Promise.allSettled([
+        const [settingsResult, , subscriptionResult] = await Promise.allSettled([
           fetch("/api/settings").then(r => r.ok ? r.json() : Promise.reject(`settings: ${r.status}`)),
           fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
           fetch("/api/subscription").then(r => r.ok ? r.json() : Promise.reject(`subscription: ${r.status}`)),
@@ -48,7 +47,6 @@ function SettingsContent() {
         } else {
           setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
         }
-        if (reposResult.status === "fulfilled" && reposResult.value.repos) setRepos(reposResult.value.repos);
         if (subscriptionResult.status === "fulfilled") setSubscription(subscriptionResult.value);
       } catch (err) {
         console.error("Data load failed:", err);
@@ -112,24 +110,6 @@ function SettingsContent() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const toggleMode = () => {
-    if (!settings) return;
-    setSettings({ ...settings, posting_mode: settings.posting_mode === "auto" ? "manual" : "auto" });
-  };
-
-  const toggleRepo = (fullName: string) => {
-    if (!settings) return;
-    const current = settings.auto_repos || [];
-    if (!current.includes(fullName) && subscription?.tier === "free" && current.length >= 1) {
-      toast.error(t("repoLimit"));
-      return;
-    }
-    const updated = current.includes(fullName)
-      ? current.filter((r) => r !== fullName)
-      : [...current, fullName];
-    setSettings({ ...settings, auto_repos: updated });
   };
 
   if (status === "loading" || (status === "authenticated" && loading)) {

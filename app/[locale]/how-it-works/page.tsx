@@ -54,6 +54,12 @@ export default async function HowItWorksPage() {
       extra: null as string | null,
     },
   ];
+  const outputItems = [
+    "output1",
+    "output2",
+    "output3",
+    "output4",
+  ] as const;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 md:py-24 animate-fade-in-up">
@@ -91,10 +97,10 @@ export default async function HowItWorksPage() {
                   <p className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-3">
                     {t("outputPreviewLabel")}
                   </p>
-                  {[1, 2, 3, 4].map((idx) => (
-                    <div key={idx} className="flex items-center gap-3 py-1.5 border-b border-border-subtle last:border-0">
-                      <span className="text-accent text-xs font-bold w-5">§{idx}</span>
-                      <span className="text-sm font-medium">{t(`output${idx}` as any)}</span>
+                  {outputItems.map((key, index) => (
+                    <div key={key} className="flex items-center gap-3 py-1.5 border-b border-border-subtle last:border-0">
+                      <span className="text-accent text-xs font-bold w-5">§{index + 1}</span>
+                      <span className="text-sm font-medium">{t(key)}</span>
                     </div>
                   ))}
                 </div>

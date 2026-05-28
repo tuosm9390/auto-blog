@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useConfirm } from "@/components/ConfirmProvider";
+import Image from "next/image";
 
 interface Application {
   id: string;
@@ -77,7 +78,7 @@ export default function TesterManagementClient() {
       } else {
         alert("처리에 실패했습니다.");
       }
-    } catch (err) {
+    } catch {
       alert("오류가 발생했습니다.");
     }
   };
@@ -107,9 +108,11 @@ export default function TesterManagementClient() {
                   {/* 헤더: 사용자 정보 */}
                   <div className="flex items-center gap-3">
                     {app.profiles.avatar_url && (
-                      <img
+                      <Image
                         src={app.profiles.avatar_url}
                         alt={app.github_username}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full border border-border-subtle"
                       />
                     )}

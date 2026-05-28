@@ -23,7 +23,7 @@ export async function requireAuth() {
 
 export async function requirePrivilegedAuth() {
   const session = await auth();
-  const role = (session?.user as any)?.role || 'user';
+  const role = session?.user?.role || 'user';
 
   if (!session?.user?.username || !session?.user?.accessToken) {
     throw new AuthError("인증이 필요합니다.");
@@ -34,7 +34,7 @@ export async function requirePrivilegedAuth() {
 
 export async function requireAdminAuth() {
   const session = await auth();
-  const role = (session?.user as any)?.role || 'user';
+  const role = session?.user?.role || 'user';
 
   if (role !== 'admin') {
     throw new AuthError("관리자 권한이 필요합니다.");
