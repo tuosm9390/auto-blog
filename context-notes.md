@@ -1,5 +1,12 @@
 # Context Notes
 
+## 2026-05-28 Evidence Agent Prompt Addition
+
+- Observation: Evidence templates already include `Agent Reading Notes`, but those notes tell the system how to interpret a document rather than giving the user a reusable prompt for agent collaboration.
+- Decision: Add a document-specific `Agent Collaboration Prompt` section to each runtime template so users can ask an agent to analyze project state using the document as evidence.
+- Decision: Keep prompts inside the editable markdown body so users can customize or remove them per project before saving.
+- Verification: `npx vitest run tests/project-document-templates.test.ts tests/project-document-view-models.test.ts`, `npm run build`, and `npm run lint` pass.
+
 ## 2026-05-28 Evidence Draft Content Sync
 
 - Observation: The documents UI reads its initial draft body from `lib/project-document-templates.ts`, not directly from `doc/designs/evidence-pack/`.

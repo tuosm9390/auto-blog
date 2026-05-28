@@ -18,6 +18,7 @@ describe("project document view models", () => {
     expect(roadmap?.title).toBe("Roadmap / Milestone Plan");
     expect(roadmap?.contentMarkdown).toBe(getProjectDocumentTemplate("roadmap", "en").contentMarkdown);
     expect(roadmap?.contentMarkdown).toContain("## 7. Agent Reading Notes");
+    expect(roadmap?.contentMarkdown).toContain("## Agent Collaboration Prompt");
     expect(roadmap?.readiness).toBe("draft");
     expect(roadmap?.isApplied).toBe(false);
     expect(backlog?.contentMarkdown).toBe(getProjectDocumentTemplate("backlog", "en").contentMarkdown);
@@ -36,6 +37,7 @@ describe("project document view models", () => {
     expect(prd?.title).toBe("PRD / Requirements");
     expect(prd?.contentMarkdown).toBe(getProjectDocumentTemplate("prd", "ko").contentMarkdown);
     expect(prd?.contentMarkdown).toContain("## 9. Agent Reading Notes");
+    expect(prd?.contentMarkdown).toContain("## Agent Collaboration Prompt");
     expect(prd?.readiness).toBe("draft");
     expect(prd?.isApplied).toBe(false);
   });

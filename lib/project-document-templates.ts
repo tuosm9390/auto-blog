@@ -166,7 +166,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 9. Agent Reading Notes
 - Goal과 Acceptance Criteria를 우선 추출한다.
 - In Scope와 Out of Scope를 drift 판단 기준으로 사용한다.
-- Acceptance Criteria가 비어 있으면 progress 신뢰도를 낮춘다.`,
+- Acceptance Criteria가 비어 있으면 progress 신뢰도를 낮춘다.
+
+## Agent Collaboration Prompt
+이 PRD를 프로젝트 상태 판단 근거로 사용해서 현재 프로젝트를 분석해줘.
+- Goal, Scope, Acceptance Criteria가 실제 진행 상황과 맞는지 비교해줘.
+- 누락된 요구사항, 범위 이탈, 완료 기준의 모호함을 찾아줘.
+- 결론은 progress, blocker, risk, drift, watchNext, evidence로 정리해줘.`,
     },
     roadmap: {
       title: "Roadmap / Milestone Plan",
@@ -218,7 +224,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 7. Agent Reading Notes
 - Current Milestone을 currentPhase 후보로 사용한다.
 - Target Date가 지났고 Status가 done이 아니면 risk 또는 blocker 후보로 본다.
-- Changes Since Last Update는 drift 후보로 본다.`,
+- Changes Since Last Update는 drift 후보로 본다.
+
+## Agent Collaboration Prompt
+이 roadmap을 기준으로 프로젝트의 현재 단계와 다음 우선순위를 분석해줘.
+- Current Milestone이 실제 작업과 맞는지 확인해줘.
+- 지연된 milestone, 의존성, 일정 변경이 risk나 blocker인지 판단해줘.
+- 결론은 currentPhase, progress, blocker, risk, drift, watchNext로 정리해줘.`,
     },
     backlog: {
       title: "Backlog / Issue / Task",
@@ -262,7 +274,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 6. Agent Reading Notes
 - Status와 Priority를 progress와 watchNext 계산에 사용한다.
 - Blocker가 있으면 blockerCount 후보로 본다.
-- PRD에 없는 새 작업은 scope drift 후보로 본다.`,
+- PRD에 없는 새 작업은 scope drift 후보로 본다.
+
+## Agent Collaboration Prompt
+이 backlog를 기준으로 프로젝트 실행 상태를 분석해줘.
+- P0/P1 작업의 진행률과 막힌 작업을 먼저 판단해줘.
+- PRD나 roadmap에 없는 작업이 새로 생겼는지 찾아줘.
+- 다음에 처리해야 할 작업을 watchNext로 정리하고 evidence를 함께 제시해줘.`,
     },
     sprint_plan: {
       title: "Sprint / Iteration Plan",
@@ -312,7 +330,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 7. Agent Reading Notes
 - Iteration Window와 Selected Work를 현재 실행 상태 판단에 사용한다.
 - carried_over가 반복되면 execution drift 또는 risk 후보로 본다.
-- Sprint Goal이 PRD 목표와 다르면 drift 후보로 본다.`,
+- Sprint Goal이 PRD 목표와 다르면 drift 후보로 본다.
+
+## Agent Collaboration Prompt
+이 sprint plan을 기준으로 이번 cycle의 실행 가능성을 분석해줘.
+- Sprint Goal과 Selected Work가 PRD, roadmap과 정렬되어 있는지 확인해줘.
+- blocked, carried_over, daily risk 항목을 실제 blocker와 risk로 분류해줘.
+- 이번 cycle에서 완료 가능성이 높은 일과 조정해야 할 일을 구분해줘.`,
     },
     decision_log: {
       title: "Decision Log / ADR",
@@ -366,7 +390,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 8. Agent Reading Notes
 - accepted 결정은 현재 기준선으로 사용한다.
 - superseded 결정은 drift 근거로 사용한다.
-- proposed 결정이 오래 열려 있으면 blocker 후보로 본다.`,
+- proposed 결정이 오래 열려 있으면 blocker 후보로 본다.
+
+## Agent Collaboration Prompt
+이 decision log를 기준으로 프로젝트 방향과 결정 리스크를 분석해줘.
+- accepted 결정이 현재 구현과 문서에 일관되게 반영됐는지 확인해줘.
+- proposed 또는 superseded 결정이 blocker, drift, risk를 만들고 있는지 판단해줘.
+- 다시 검토해야 할 결정과 그 이유를 watchNext로 정리해줘.`,
     },
     technical_design: {
       title: "Technical Design / RFC",
@@ -429,7 +459,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 10. Agent Reading Notes
 - Error Paths와 Test Plan이 비어 있으면 risk 후보로 본다.
 - Proposed Design과 실제 PR diff가 다르면 technical drift 후보로 본다.
-- Security가 비어 있으면 high-risk 신호로 본다.`,
+- Security가 비어 있으면 high-risk 신호로 본다.
+
+## Agent Collaboration Prompt
+이 technical design을 기준으로 구현 리스크와 설계 일치성을 분석해줘.
+- Proposed Design, Interfaces, Data Flow가 실제 구현 방향과 맞는지 비교해줘.
+- Error Paths, Security, Test Plan의 빈칸이나 약한 부분을 risk로 분류해줘.
+- 구현 전에 결정해야 할 기술적 blocker와 검증해야 할 항목을 정리해줘.`,
     },
     risk_log: {
       title: "Risk / Issue / Dependency Log",
@@ -478,7 +514,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 7. Agent Reading Notes
 - Blocking이 yes인 dependency는 blocker 후보로 본다.
 - Probability와 Impact가 high인 risk는 riskCount에 강하게 반영한다.
-- Mitigation 없는 high risk는 watchNext 후보로 본다.`,
+- Mitigation 없는 high risk는 watchNext 후보로 본다.
+
+## Agent Collaboration Prompt
+이 risk log를 기준으로 프로젝트의 위험, 이슈, 의존성을 분석해줘.
+- high probability 또는 high impact 항목을 우선순위화해줘.
+- blocking dependency와 active issue가 현재 진행을 막는지 판단해줘.
+- mitigation이 부족한 항목과 결정이 필요한 항목을 watchNext로 정리해줘.`,
     },
     release_ops_learning: {
       title: "Release / Changelog / Runbook / Postmortem",
@@ -536,7 +578,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 8. Agent Reading Notes
 - Planned가 no인 shipped item은 scope drift 후보로 본다.
 - rollback 조건이나 runbook이 비어 있으면 operational risk 후보로 본다.
-- postmortem action item은 watchNext 후보로 본다.`,
+- postmortem action item은 watchNext 후보로 본다.
+
+## Agent Collaboration Prompt
+이 release/ops 문서를 기준으로 배포 결과와 운영 리스크를 분석해줘.
+- shipped item이 계획된 범위와 일치하는지 확인해줘.
+- rollout, rollback, runbook의 공백이 operational risk인지 판단해줘.
+- postmortem action item과 다음 릴리스에 반영할 일을 watchNext로 정리해줘.`,
     },
   },
   en: {
@@ -602,7 +650,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 9. Agent Reading Notes
 - Extract Goal and Acceptance Criteria first.
 - Use In Scope and Out of Scope as drift criteria.
-- Lower progress confidence when Acceptance Criteria is empty.`,
+- Lower progress confidence when Acceptance Criteria is empty.
+
+## Agent Collaboration Prompt
+Use this PRD as project-state evidence and analyze the current project.
+- Compare Goal, Scope, and Acceptance Criteria against actual progress.
+- Find missing requirements, scope drift, and ambiguous completion criteria.
+- Summarize the conclusion as progress, blocker, risk, drift, watchNext, and evidence.`,
     },
     roadmap: {
       title: "Roadmap / Milestone Plan",
@@ -654,7 +708,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 7. Agent Reading Notes
 - Use Current Milestone as a currentPhase candidate.
 - Treat overdue target dates without done status as risk or blocker candidates.
-- Treat Changes Since Last Update as drift candidates.`,
+- Treat Changes Since Last Update as drift candidates.
+
+## Agent Collaboration Prompt
+Use this roadmap to analyze the current phase and next priorities.
+- Check whether Current Milestone matches the actual work.
+- Decide whether delayed milestones, dependencies, or schedule changes are risks or blockers.
+- Summarize the conclusion as currentPhase, progress, blocker, risk, drift, and watchNext.`,
     },
     backlog: {
       title: "Backlog / Issue / Task",
@@ -698,7 +758,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 6. Agent Reading Notes
 - Use Status and Priority for progress and watchNext.
 - Treat Blocker as a blockerCount candidate.
-- Treat new work outside the PRD as a scope drift candidate.`,
+- Treat new work outside the PRD as a scope drift candidate.
+
+## Agent Collaboration Prompt
+Use this backlog to analyze execution state.
+- Start with progress on P0/P1 work and currently blocked items.
+- Find work that is not supported by the PRD or roadmap.
+- Summarize the next work as watchNext and include evidence for each conclusion.`,
     },
     sprint_plan: {
       title: "Sprint / Iteration Plan",
@@ -748,7 +814,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 7. Agent Reading Notes
 - Use Iteration Window and Selected Work for current execution state.
 - Repeated carried_over items are execution drift or risk candidates.
-- Treat Sprint Goal mismatch with PRD goals as drift.`,
+- Treat Sprint Goal mismatch with PRD goals as drift.
+
+## Agent Collaboration Prompt
+Use this sprint plan to analyze whether the current cycle is executable.
+- Check whether Sprint Goal and Selected Work align with the PRD and roadmap.
+- Classify blocked, carried_over, and daily risk items as blockers or risks.
+- Separate work likely to finish this cycle from work that needs adjustment.`,
     },
     decision_log: {
       title: "Decision Log / ADR",
@@ -802,7 +874,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 8. Agent Reading Notes
 - Use accepted decisions as the current baseline.
 - Use superseded decisions as drift evidence.
-- Treat long-open proposed decisions as blocker candidates.`,
+- Treat long-open proposed decisions as blocker candidates.
+
+## Agent Collaboration Prompt
+Use this decision log to analyze project direction and decision risk.
+- Check whether accepted decisions are reflected consistently in implementation and documents.
+- Decide whether proposed or superseded decisions create blockers, drift, or risk.
+- List decisions that should be reviewed again and explain why in watchNext.`,
     },
     technical_design: {
       title: "Technical Design / RFC",
@@ -865,7 +943,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 10. Agent Reading Notes
 - Treat empty Error Paths or Test Plan as risk candidates.
 - Treat mismatch between Proposed Design and PR diff as technical drift.
-- Treat empty Security as a high-risk signal.`,
+- Treat empty Security as a high-risk signal.
+
+## Agent Collaboration Prompt
+Use this technical design to analyze implementation risk and design alignment.
+- Compare Proposed Design, Interfaces, and Data Flow with the actual implementation direction.
+- Classify gaps in Error Paths, Security, and Test Plan as risks.
+- Summarize technical blockers and validation items needed before implementation.`,
     },
     risk_log: {
       title: "Risk / Issue / Dependency Log",
@@ -914,7 +998,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 7. Agent Reading Notes
 - Treat dependencies marked Blocking yes as blocker candidates.
 - Weight high Probability and high Impact risks strongly in riskCount.
-- Treat high risks without Mitigation as watchNext candidates.`,
+- Treat high risks without Mitigation as watchNext candidates.
+
+## Agent Collaboration Prompt
+Use this risk log to analyze project risks, issues, and dependencies.
+- Prioritize high probability or high impact items.
+- Decide whether blocking dependencies and active issues are stopping current progress.
+- Summarize weak mitigations and decisions needed as watchNext.`,
     },
     release_ops_learning: {
       title: "Release / Changelog / Runbook / Postmortem",
@@ -972,7 +1062,13 @@ const TEMPLATES: Record<ProjectDocumentLocale, Record<ProjectDocumentType, Proje
 ## 8. Agent Reading Notes
 - Treat shipped items marked Planned no as scope drift candidates.
 - Treat empty rollback condition or runbook as operational risk.
-- Treat postmortem action items as watchNext candidates.`,
+- Treat postmortem action items as watchNext candidates.
+
+## Agent Collaboration Prompt
+Use this release/ops document to analyze release outcome and operational risk.
+- Check whether shipped items match the planned scope.
+- Decide whether gaps in rollout, rollback, or runbook create operational risk.
+- Summarize postmortem action items and next-release follow-up as watchNext.`,
     },
   },
 };

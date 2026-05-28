@@ -66,4 +66,16 @@ describe("project document templates", () => {
     expect(getProjectDocumentTemplate("risk_log", "ko").contentMarkdown).toContain("## 4. Dependencies");
     expect(getProjectDocumentTemplate("release_ops_learning", "ko").contentMarkdown).toContain("## 5. Runbook");
   });
+
+  it("includes agent collaboration prompts for project analysis", () => {
+    for (const type of PROJECT_DOCUMENT_TYPES) {
+      expect(getProjectDocumentTemplate(type, "ko").contentMarkdown).toContain("## Agent Collaboration Prompt");
+      expect(getProjectDocumentTemplate(type, "en").contentMarkdown).toContain("## Agent Collaboration Prompt");
+    }
+
+    expect(getProjectDocumentTemplate("prd", "ko").contentMarkdown).toContain("프로젝트 상태 판단 근거");
+    expect(getProjectDocumentTemplate("roadmap", "ko").contentMarkdown).toContain("현재 단계와 다음 우선순위");
+    expect(getProjectDocumentTemplate("technical_design", "ko").contentMarkdown).toContain("구현 리스크와 설계 일치성");
+    expect(getProjectDocumentTemplate("release_ops_learning", "en").contentMarkdown).toContain("release outcome and operational risk");
+  });
 });

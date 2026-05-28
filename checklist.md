@@ -1,5 +1,13 @@
 # Checklist
 
+## 2026-05-28 Evidence Agent Prompt Addition
+
+- [x] 현재 Evidence 템플릿 구조와 테스트 기준 확인.
+- [x] 각 문서별 프로젝트 분석 요청 프롬프트 추가.
+- [x] 프롬프트 포함 여부 테스트 추가.
+- [x] vitest, build, lint 검증.
+- [x] 변경 사항 커밋.
+
 ## 2026-05-28 Evidence Draft Content Sync
 
 - [x] 현재 UI 템플릿과 evidence-pack 초안 차이 확인.
