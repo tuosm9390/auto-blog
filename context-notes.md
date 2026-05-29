@@ -1,5 +1,13 @@
 # Context Notes
 
+## 2026-05-29 Evidence Document Client Selection Premise
+
+- Observation: `generateProjectDocumentDraftAction` persists AI-generated PRD drafts through `upsertCurrentProjectPlan` and non-PRD Evidence drafts through `upsertProjectDocument`.
+- Observation: `/projects/[id]/documents` already fetches plan, documents, setup state, project, and latest snapshot once per server render, but document selection is encoded in `searchParams.type`.
+- Observation: `DocumentCoverageGrid` uses `Link` to `/projects/{id}/documents?type={type}`, so each selection performs navigation and triggers a new server component request.
+- Decision: Client-side selection is feasible because the page already has all document view models needed to render every tab, but mutation actions should remain server actions and revalidate after writes.
+- Output: Wrote `doc/designs/evidence-document-client-selection-premise.md` with the storage answer, current request cause, client-state feasibility, risks, and recommended implementation premise.
+
 ## 2026-05-28 Evidence AI Draft Generation
 
 - Observation: `Apply to analysis` only marks saved non-PRD documents as included in future refresh runs; it does not create usable document content.

@@ -1,5 +1,14 @@
 # Checklist
 
+## 2026-05-29 Evidence Document Client Selection Premise
+
+- [x] AI 초안 저장 동작 확인.
+- [x] 문서 선택 시 서버 요청이 발생하는 원인 확인.
+- [x] 초기 데이터 로드 후 클라이언트 상태 전환 가능성 분석.
+- [x] 제품 및 구현 전제 문서 작성.
+- [x] 변경 파일 검토.
+- [x] 커밋 생성.
+
 ## 2026-05-28 Evidence AI Draft Generation
 
 - [x] 현재 문서 편집, 저장, AI 분석 구조 확인.
