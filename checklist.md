@@ -1,5 +1,15 @@
 # Checklist
 
+## 2026-05-29 Evidence Client Selection Implementation Plan
+
+- [x] 기존 전제 문서와 현재 문서 페이지 구조 재확인.
+- [x] 클라이언트 선택 전환 구현 범위 정의.
+- [x] 서버 액션과 form data 변경 계획 정의.
+- [x] 테스트와 검증 계획 정의.
+- [x] 구현 계획서 작성.
+- [x] 변경 파일 검토.
+- [x] 커밋 생성.
+
 ## 2026-05-29 Evidence Document Client Selection Premise
 
 - [x] AI 초안 저장 동작 확인.

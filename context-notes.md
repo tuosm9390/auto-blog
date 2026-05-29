@@ -1,5 +1,12 @@
 # Context Notes
 
+## 2026-05-29 Evidence Client Selection Implementation Plan
+
+- Input: Use `doc/designs/evidence-document-client-selection-premise.md` as the source premise.
+- Decision: Plan implementation around a thin client workspace that owns only selection state, while the server page keeps authentication, data loading, translation loading, and action binding.
+- Decision: Use form hidden inputs for document-specific mutation parameters so apply/exclude/supersede can work with client-selected documents without creating per-document action maps.
+- Output: Wrote `doc/designs/evidence-client-selection-implementation-plan.md` with component changes, server action changes, test plan, risks, and completion criteria.
+
 ## 2026-05-29 Evidence Document Client Selection Premise
 
 - Observation: `generateProjectDocumentDraftAction` persists AI-generated PRD drafts through `upsertCurrentProjectPlan` and non-PRD Evidence drafts through `upsertProjectDocument`.
