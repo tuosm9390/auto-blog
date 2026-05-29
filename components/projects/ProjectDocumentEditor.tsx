@@ -16,9 +16,8 @@ interface ProjectDocumentEditorProps {
   saveAction: (formData: FormData) => void | Promise<void>;
   createFromTemplateAction: (formData: FormData) => void | Promise<void>;
   generateDraftAction: (formData: FormData) => void | Promise<void>;
-  applyAction?: () => void | Promise<void>;
-  excludeAction?: () => void | Promise<void>;
-  supersedeAction?: () => void | Promise<void>;
+  applyAction?: (formData: FormData) => void | Promise<void>;
+  supersedeAction?: (formData: FormData) => void | Promise<void>;
   labels: {
     title: string;
     body: string;
@@ -52,7 +51,6 @@ export default function ProjectDocumentEditor({
   createFromTemplateAction,
   generateDraftAction,
   applyAction,
-  excludeAction,
   supersedeAction,
   labels,
 }: ProjectDocumentEditorProps) {
@@ -85,9 +83,12 @@ export default function ProjectDocumentEditor({
               pendingLabel={labels.generatingDraft}
             />
           </form>
-          {!isPrd && documentId && (applyAction || excludeAction) ? (
+          {!isPrd && documentId && applyAction ? (
             <>
-              <form action={(isApplied ? excludeAction : applyAction) as () => void | Promise<void>}>
+              <form action={applyAction}>
+                <input type="hidden" name="documentId" value={documentId} />
+                <input type="hidden" name="documentType" value={documentType} />
+                <input type="hidden" name="isApplied" value={isApplied ? "false" : "true"} />
                 <button
                   type="submit"
                   className="px-4 py-2 bg-accent text-black rounded-lg text-sm font-semibold hover:bg-accent-hover transition-colors"
@@ -97,6 +98,8 @@ export default function ProjectDocumentEditor({
               </form>
               {supersedeAction ? (
                 <form action={supersedeAction}>
+                  <input type="hidden" name="documentId" value={documentId} />
+                  <input type="hidden" name="documentType" value={documentType} />
                   <button
                     type="submit"
                     className="px-4 py-2 border border-border-subtle rounded-lg text-sm text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"

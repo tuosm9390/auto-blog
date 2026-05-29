@@ -1,5 +1,4 @@
 // 프로젝트 Evidence 문서의 준비 상태 카드를 렌더링한다.
-import { Link } from "@/i18n/routing";
 import type { ProjectDocumentReadiness, ProjectDocumentType } from "@/lib/types";
 
 export interface DocumentCoverageItem {
@@ -13,12 +12,11 @@ export interface DocumentCoverageItem {
 }
 
 export default function DocumentCoverageGrid({
-  projectId,
   selectedType,
   items,
   labels,
+  onSelect,
 }: {
-  projectId: string;
   selectedType: ProjectDocumentType;
   items: DocumentCoverageItem[];
   labels: {
@@ -28,23 +26,26 @@ export default function DocumentCoverageGrid({
     noContent: string;
     readiness: Record<ProjectDocumentReadiness, string>;
   };
+  onSelect: (type: ProjectDocumentType) => void;
 }) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       {items.map((item) => {
         const isSelected = item.type === selectedType;
         return (
-          <Link
+          <button
             key={item.type}
-            href={`/projects/${projectId}/documents?type=${item.type}`}
-            className={`border rounded-2xl p-4 transition-colors ${
+            type="button"
+            aria-pressed={isSelected}
+            onClick={() => onSelect(item.type)}
+            className={`text-left border rounded-2xl p-4 transition-colors ${
               isSelected
                 ? "border-accent bg-accent/10"
                 : "border-border-subtle bg-surface/30 hover:border-border-strong"
             }`}
           >
             <div className="flex items-start justify-between gap-3 mb-3">
-              <h2 className="text-sm font-semibold leading-5">{item.label}</h2>
+              <span className="text-sm font-semibold leading-5">{item.label}</span>
               <span className={getReadinessClass(item.readiness)}>
                 {labels.readiness[item.readiness]}
               </span>
@@ -64,7 +65,7 @@ export default function DocumentCoverageGrid({
               <span>{item.isApplied ? labels.applied : labels.notApplied}</span>
               <span>{item.updatedAt ? `${labels.updated} ${formatDate(item.updatedAt)}` : labels.noContent}</span>
             </div>
-          </Link>
+          </button>
         );
       })}
     </div>

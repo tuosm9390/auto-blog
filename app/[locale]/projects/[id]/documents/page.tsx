@@ -8,8 +8,7 @@ import {
   refreshProjectStateAction,
   saveProjectDocumentAction,
 } from "@/app/actions/projectActions";
-import DocumentCoverageGrid from "@/components/projects/DocumentCoverageGrid";
-import ProjectDocumentEditor from "@/components/projects/ProjectDocumentEditor";
+import ProjectDocumentsWorkspace from "@/components/projects/ProjectDocumentsWorkspace";
 import { RefreshStateButton } from "@/components/projects/RefreshStateButton";
 import { Link, redirect } from "@/i18n/routing";
 import {
@@ -65,7 +64,6 @@ export default async function ProjectDocumentsPage({
     plan,
     documents,
   });
-  const selectedDocument = viewModels.find((item) => item.type === selectedType) ?? viewModels[0];
   const appliedCount = viewModels.filter((item) => item.isApplied).length;
   const usableCount = viewModels.filter((item) => item.readiness === "usable").length;
   const staleCount = viewModels.filter((item) => item.readiness === "stale").length;
@@ -73,15 +71,8 @@ export default async function ProjectDocumentsPage({
   const createAction = createProjectDocumentFromTemplateAction.bind(null, locale, id);
   const generateDraftAction = generateProjectDocumentDraftAction.bind(null, locale, id);
   const saveAction = saveProjectDocumentAction.bind(null, locale, id);
-  const applyAction = selectedDocument.id
-    ? applyProjectDocumentAction.bind(null, locale, id, selectedDocument.id, selectedDocument.type, true)
-    : undefined;
-  const excludeAction = selectedDocument.id
-    ? applyProjectDocumentAction.bind(null, locale, id, selectedDocument.id, selectedDocument.type, false)
-    : undefined;
-  const supersedeAction = selectedDocument.id
-    ? markProjectDocumentSupersededAction.bind(null, locale, id, selectedDocument.id, selectedDocument.type)
-    : undefined;
+  const applyAction = applyProjectDocumentAction.bind(null, locale, id);
+  const supersedeAction = markProjectDocumentSupersededAction.bind(null, locale, id);
 
   const readinessLabels: Record<ProjectDocumentReadiness, string> = {
     missing: t("documents.readiness.missing"),
@@ -136,40 +127,19 @@ export default async function ProjectDocumentsPage({
         </div>
       </section>
 
-      <section className="mb-6">
-        <DocumentCoverageGrid
-          projectId={id}
-          selectedType={selectedDocument.type}
-          items={viewModels}
-          labels={{
-            applied: t("documents.applied"),
-            notApplied: t("documents.notApplied"),
-            updated: t("shared.updated"),
-            noContent: t("documents.noContent"),
-            readiness: readinessLabels,
-          }}
-        />
-      </section>
-
-      <ProjectDocumentEditor
-        key={selectedDocument.type}
-        documentType={selectedDocument.type}
-        documentId={selectedDocument.id}
-        title={selectedDocument.title}
-        contentMarkdown={selectedDocument.contentMarkdown}
-        label={selectedDocument.label}
-        description={selectedDocument.description}
-        readiness={selectedDocument.readiness}
-        isApplied={selectedDocument.isApplied}
-        isPrd={selectedDocument.isPrd}
-        signals={selectedDocument.signals}
+      <ProjectDocumentsWorkspace
+        initialSelectedType={selectedType}
+        items={viewModels}
         saveAction={saveAction}
         createFromTemplateAction={createAction}
         generateDraftAction={generateDraftAction}
         applyAction={applyAction}
-        excludeAction={excludeAction}
         supersedeAction={supersedeAction}
         labels={{
+          applied: t("documents.applied"),
+          notApplied: t("documents.notApplied"),
+          updated: t("shared.updated"),
+          noContent: t("documents.noContent"),
           title: t("documents.editor.title"),
           body: t("documents.editor.body"),
           save: t("documents.editor.save"),
@@ -179,11 +149,12 @@ export default async function ProjectDocumentsPage({
           apply: t("documents.editor.apply"),
           exclude: t("documents.editor.exclude"),
           supersede: t("documents.editor.supersede"),
-          applied: t("documents.editor.appliedState"),
+          appliedState: t("documents.editor.appliedState"),
           prdAlwaysApplied: t("documents.editor.prdAlwaysApplied"),
           analysisSignals: t("documents.editor.analysisSignals"),
           readiness: readinessLabels,
-          emptyHint: selectedDocument.id ? t("documents.editor.emptyHint") : t("documents.editor.unsavedDraftHint"),
+          emptyHint: t("documents.editor.emptyHint"),
+          unsavedDraftHint: t("documents.editor.unsavedDraftHint"),
         }}
       />
 

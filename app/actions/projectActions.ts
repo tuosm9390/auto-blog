@@ -4,6 +4,10 @@ import { auth } from "@/auth";
 import { refreshProjectState } from "@/lib/project-refresh";
 import { generateProjectDocumentDraft } from "@/lib/project-document-draft-ai";
 import {
+  parseProjectDocumentApplyInput,
+  parseProjectDocumentSupersedeInput,
+} from "@/lib/project-document-action-inputs";
+import {
   getProjectDocuments,
   markProjectDocumentSuperseded,
   setProjectDocumentApplied,
@@ -355,44 +359,37 @@ export async function generateProjectDocumentDraftAction(
 export async function applyProjectDocumentAction(
   locale: string,
   projectId: string,
-  documentId: string,
-  documentType: string,
-  isApplied: boolean
+  formData: FormData
 ) {
   await requireOwnedProject(locale, projectId);
+  const parsed = parseProjectDocumentApplyInput(formData);
 
-  const normalizedType = normalizeProjectDocumentType(documentType);
-  if (!normalizedType || normalizedType === "prd") {
-    throw new Error("적용 상태를 바꿀 수 없는 문서입니다.");
-  }
-
-  const updated = await setProjectDocumentApplied(projectId, documentId, isApplied);
+  const updated = await setProjectDocumentApplied(
+    projectId,
+    parsed.documentId,
+    parsed.isApplied
+  );
   if (!updated) {
     throw new Error("문서 적용 상태 변경에 실패했습니다.");
   }
 
   revalidateProjectDocumentPaths(locale, projectId);
-  redirect({ href: `/projects/${projectId}/documents?type=${normalizedType}`, locale });
+  redirect({ href: `/projects/${projectId}/documents?type=${parsed.documentType}`, locale });
 }
 
 export async function markProjectDocumentSupersededAction(
   locale: string,
   projectId: string,
-  documentId: string,
-  documentType: string
+  formData: FormData
 ) {
   await requireOwnedProject(locale, projectId);
+  const parsed = parseProjectDocumentSupersedeInput(formData);
 
-  const normalizedType = normalizeProjectDocumentType(documentType);
-  if (!normalizedType || normalizedType === "prd") {
-    throw new Error("이 문서는 superseded 처리할 수 없습니다.");
-  }
-
-  const updated = await markProjectDocumentSuperseded(projectId, documentId);
+  const updated = await markProjectDocumentSuperseded(projectId, parsed.documentId);
   if (!updated) {
     throw new Error("문서 상태 변경에 실패했습니다.");
   }
 
   revalidateProjectDocumentPaths(locale, projectId);
-  redirect({ href: `/projects/${projectId}/documents?type=${normalizedType}`, locale });
+  redirect({ href: `/projects/${projectId}/documents?type=${parsed.documentType}`, locale });
 }

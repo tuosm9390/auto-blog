@@ -1,5 +1,16 @@
 # Checklist
 
+## 2026-05-29 Evidence Client Selection Implementation
+
+- [x] 현재 문서 페이지, 카드, editor, 서버 액션 구조 확인.
+- [x] apply/exclude/supersede 서버 액션을 form data 기반으로 변경.
+- [x] 문서 선택을 담당하는 클라이언트 workspace 추가.
+- [x] DocumentCoverageGrid를 button 기반 선택 UI로 변경.
+- [x] 서버 페이지를 workspace 전달 구조로 단순화.
+- [x] 관련 테스트 추가 또는 갱신.
+- [x] vitest, build, lint 검증.
+- [x] 변경 사항 커밋.
+
 ## 2026-05-29 Evidence Client Selection Implementation Plan
 
 - [x] 기존 전제 문서와 현재 문서 페이지 구조 재확인.

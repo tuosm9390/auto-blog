@@ -1,5 +1,13 @@
 # Context Notes
 
+## 2026-05-29 Evidence Client Selection Implementation
+
+- Decision: Keep `/projects/[id]/documents` as a server page for auth, data loading, and translation loading.
+- Decision: Move document tab selection into a new client workspace so switching cards does not navigate to `?type=` links.
+- Decision: Convert apply/exclude/supersede actions to read hidden form fields, because selected document identity now changes on the client.
+- Verification: `npx vitest run tests/project-document-action-inputs.test.ts tests/project-document-draft-ai.test.ts tests/project-document-templates.test.ts tests/project-document-view-models.test.ts`, `npm run build`, and `npm run lint` pass.
+- Verification: Local dev server responds at `http://localhost:3010/ko/projects`.
+
 ## 2026-05-29 Evidence Client Selection Implementation Plan
 
 - Input: Use `doc/designs/evidence-document-client-selection-premise.md` as the source premise.
