@@ -116,3 +116,13 @@
 - Decision: Add PRD guidance inside the project create/edit form because that is where users attach the current plan that powers snapshots, progress, and drift.
 - Decision: Do not auto-fill the textarea with template content. Placeholder template text can accidentally be saved as real PRD content if the user submits without editing, so the template should be visible as guidance instead.
 - Scope: Keep the first version as localized copy and UI guidance only. Do not add database fields, new routes, or AI generation for PRDs.
+
+## 2026-05-31 init-deep AGENTS.md Knowledge Base
+
+- Assumption: Treat `$omo:init-deep` as update mode because no `--create-new` flag was supplied.
+- Observation: No existing `AGENTS.md` file was found under the repository outside ignored build/dependency folders.
+- Observation: The repository is a Next.js 16 / React 19 localized SaaS app with about 402 tracked workspace files, 25k code/doc lines, and maximum directory depth 5.
+- Decision: Generate a root `AGENTS.md` plus targeted child files only where the directory has a distinct operating model: `app/api`, `lib`, `components`, and `tests`.
+- Decision: Do not generate child files for `doc`, `scripts`, or `app/[locale]` in this pass. Their rules are already captured by the root router and existing `doc/rules/**` files, and extra child files would mostly repeat parent content.
+- Verification: Generated AGENTS files are within target sizes: root 69 lines; child files 30-34 lines.
+- Verification: `npm run lint` passes after the documentation changes.

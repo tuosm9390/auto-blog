@@ -147,3 +147,13 @@
 - [x] Add Korean and English localized template copy.
 - [x] Verify JSON, typecheck, and build.
 - [ ] Commit the logical change.
+
+## 2026-05-31 init-deep AGENTS.md Knowledge Base
+
+- [x] 필수 프로젝트 규칙과 기존 지식 파일 확인.
+- [x] 병렬 탐색 에이전트와 로컬 구조 분석 실행.
+- [x] AGENTS.md 배치 위치 점수화.
+- [x] 루트 및 하위 AGENTS.md 생성.
+- [x] 중복 제거와 크기 검토.
+- [x] 문서 변경 검증 실행.
+- [x] 변경 사항 커밋.
