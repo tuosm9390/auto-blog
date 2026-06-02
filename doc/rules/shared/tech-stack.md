@@ -13,7 +13,6 @@ Author: Antigravity
 
 ## 2. AI & Third-Party
 - **Google Gemini SDK (@google/genai)**: Gemini 2.5 Pro/Flash를 활용한 프로젝트 상태 AI 분석 (thesis drift 추적).
-- **PortOne V2 SDK**: 구독 결제 처리 (`lib/portone-billing.ts`). Stripe는 레거시(410 스텁).
 - **Octokit**: GitHub API 연동 및 레포지토리/커밋 데이터 관리.
 - **Resend**: 트랜잭션 이메일 발송 (`lib/email.ts`).
 - **Upstash Redis/Ratelimit**: 서버리스 환경의 분산 레이트 리미팅 처리.

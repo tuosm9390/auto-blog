@@ -20,7 +20,7 @@ Tests use Vitest with jsdom, globals, React plugin, and `@` mapped to the reposi
 - Put small library tests near the module under `lib/__tests__/`.
 - Use `npx vitest run <file>` for focused checks and `npx vitest` for the full suite.
 - Test behavior at module boundaries rather than implementation details.
-- Prefer deterministic fixtures over live GitHub, Supabase, Gemini, or PortOne calls.
+- Prefer deterministic fixtures over live GitHub, Supabase, or Gemini calls.
 - When testing server actions or route helpers, assert ownership and invalid input paths as well as the happy path.
 
 ## COMMANDS

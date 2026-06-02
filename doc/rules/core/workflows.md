@@ -46,18 +46,14 @@ Impact: <영향 범위 — 어느 기능/사용자 흐름에 영향을 주는지
 | `chore` | 빌드·설정·의존성 변경 |
 | `perf` | 성능 개선 |
 
-**scope 선택 기준**: 변경된 도메인 또는 레이어 (`billing`, `auth`, `csp`, `api`, `ui`, `db` 등)
+**scope 선택 기준**: 변경된 도메인 또는 레이어 (`auth`, `csp`, `api`, `ui`, `db` 등)
 
 **예시**
 ```
-security(csp): allow PortOne/TossPayments domains to unblock payment flow
+security(csp): tighten external API allowlist for project refresh
 
-- next.config.ts: script-src에 cdn.portone.io 추가
-- next.config.ts: connect-src에 *.portone.io, *.iamport.co, *.tosspayments.com 추가
-- next.config.ts: frame-src 디렉티브 신규 추가 (결제 팝업 iframe 허용)
+- next.config.ts: connect-src 허용 도메인을 실제 사용 API로 축소
 
-Why: PortOne V2 SDK가 cdn.portone.io에서 스크립트를 동적 로드하고
-     iamport.co(구 도메인) 및 tosspayments.com을 PG 서브도메인으로 사용하나
-     기존 CSP에 해당 도메인이 누락되어 결제 플로우 전체가 차단됨
-Impact: 프라이싱 페이지의 구독 결제 버튼 정상 동작
+Why: 사용하지 않는 외부 연결 허용 범위를 줄여 CSP를 최소 권한 원칙에 맞춤
+Impact: 프로젝트 상태 새로고침과 GitHub 연동 보안 경계 강화
 ```

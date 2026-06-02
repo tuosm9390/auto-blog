@@ -15,7 +15,7 @@
 
 프로젝트 전반의 지식이 필요할 때 로드하십시오.
 
-- **doc/rules/shared/tech-stack.md**: Next.js 16, Tailwind v4, Gemini 2.5 SDK, Stripe 등 최신 기술 명세.
+- **doc/rules/shared/tech-stack.md**: Next.js 16, Tailwind v4, Gemini 2.5 SDK 등 최신 기술 명세.
 - **doc/rules/shared/architecture.md**: 디렉토리 구조 및 데이터베이스 스키마 (v0.6.0 기준).
 - **doc/rules/shared/conventions.md**: 명명 규칙(PascalCase 등), 에러 핸들링 및 문서화 표준.
 
@@ -25,7 +25,6 @@
 
 - **[인증/API 관리 시]** (app/api/auth/**, middleware.ts): doc/rules/client/auth.md
 - **[포스트/AI 작업 관리 시]** (lib/posts.ts, lib/jobs.ts, app/api/posts/**, app/api/jobs/**): doc/rules/client/posts-jobs.md
-- **[결제/구독 관리 시]** (app/api/checkout/**, app/api/webhooks/stripe/**, lib/stripe.ts): doc/rules/client/billing.md
 
 ## ✅ 검증 (Validation)
 

@@ -8,12 +8,6 @@ export interface Profile {
   name: string | null;
   avatar_url: string | null;
   bio: string | null;
-  stripe_customer_id?: string | null; // 감사 목적 보존
-  portone_billing_key?: string | null;
-  billing_cycle?: 'monthly' | 'yearly' | null;
-  subscription_tier?: 'free' | 'pro' | 'business';
-  subscription_status?: string;
-  usage_count_month?: number;
   usage_reset_date?: string;
   role?: string;
   updated_at: string;

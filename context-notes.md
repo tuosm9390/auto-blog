@@ -126,3 +126,25 @@
 - Decision: Do not generate child files for `doc`, `scripts`, or `app/[locale]` in this pass. Their rules are already captured by the root router and existing `doc/rules/**` files, and extra child files would mostly repeat parent content.
 - Verification: Generated AGENTS files are within target sizes: root 69 lines; child files 30-34 lines.
 - Verification: `npm run lint` passes after the documentation changes.
+
+## 2026-06-01 Payment System Removal
+
+- Assumption: The request covers runtime payment and subscription functionality, user-facing billing UI, direct PortOne/Stripe dependencies, Vercel billing cron, CSP payment domains, and current project guidance docs.
+- Constraint: Do not edit `.env.local` because it may contain local secrets and the user did not explicitly request secret file cleanup.
+- Decision: Keep project planning concepts such as `project_plans`, `planProgress`, and `sprint_plan`; these are product planning artifacts, not payment plan features.
+- Decision: Remove payment migration scripts from the repo, but do not attempt a live DB destructive migration in this pass.
+- QA Plan: Use a RED→GREEN Vitest file plus HTTP route checks, browser UI checks, and tmux dependency/static-scan checks.
+- RED Evidence: `npx vitest run tests/payment-removal.test.ts` failed all 4 tests because payment API routes, UI files, PortOne dependencies, and payment domain modules still exist. Output saved to `.omo/ulw-loop/evidence/red-payment-removal.txt`.
+- Implementation: Removed payment API routes, pricing/admin subscription UI, settings billing UI, PortOne/Stripe/subscription domain modules, PortOne dependencies, payment CSP/cron config, payment migration script, and active project guidance references.
+- Decision: Browser QA used the Browser plugin Chrome extension surface because `iab` was unavailable in this session. The app redirects admin access to port 3000, so the final Browser pass used `http://127.0.0.1:3000`.
+- Constraint: `tmux` is unavailable on this Windows host, so C003 was captured as an equivalent PowerShell CLI transcript with the same commands and exit codes.
+- Verification: `npx vitest run tests/payment-removal.test.ts`, `npx vitest run`, `npm run lint`, and `npm run build` pass. HTTP QA confirms removed payment API endpoints return 404. Browser QA confirms settings/admin-visible surfaces have no payment text or links.
+- Review Fix: Final reviewer found stale PortOne entries in tracked `pnpm-lock.yaml`, missing command strings in C003 evidence, and the new test file being absent from diff views. Regenerated `pnpm-lock.yaml`, added lockfile assertions to `tests/payment-removal.test.ts`, refreshed C003 evidence with exact commands, and marked the test file intent-to-add for diff audit without committing.
+- Final Review: `payment_removal_final_reviewer_fast` returned PASS. Remaining risks are limited to out-of-scope local secrets in `.env.local` and live DB cleanup requiring separate approval.
+
+## 2026-06-02 Project Description Regeneration
+
+- Assumption: `$project-describer` means regenerate the default root `DESCRIPTION.md`.
+- Constraint: The description must reflect the post-payment-removal codebase and should not describe removed payment features.
+- Decision: Use current `package.json`, `README.md`, App Router files, API routes, `lib` services, components, tests, and SQL scripts as source of truth.
+- Verification: `rg -n -i "portone|stripe|billing|subscription|pricing|payment|결제|구독|요금제|TossPayments|@portone" DESCRIPTION.md` returns no matches. `npx vitest run tests/payment-removal.test.ts` and `npm run lint` pass.

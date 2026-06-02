@@ -16,7 +16,7 @@
 | --- | --- | --- |
 | `AGENTS.md` | 프로젝트 전체 라우터와 핵심 규칙 진입점 | 50-150라인, 명령/구조/금기 포함 |
 | `app/api/AGENTS.md` | 인증, IDOR, Zod, 웹훅 등 API 보안 경계 | 소유권 확인 규칙 포함 |
-| `lib/AGENTS.md` | 프로젝트/문서/AI/결제 서비스 레이어 집중 | 도메인별 진입 파일 포함 |
+| `lib/AGENTS.md` | 프로젝트/문서/AI 서비스 레이어 집중 | 도메인별 진입 파일 포함 |
 | `components/AGENTS.md` | UI primitive와 프로젝트 workspace 컴포넌트 경계 | Tailwind v4와 접근성 규칙 포함 |
 | `tests/AGENTS.md` | Vitest 설정과 테스트 배치 규칙 분리 | 실제 테스트 명령 포함 |
 

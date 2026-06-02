@@ -10,7 +10,7 @@
 components/
 ├── ui/          # Button, Card, PageContainer, form/filter primitives
 ├── projects/    # 프로젝트 생성, refresh, Evidence 문서 UI
-├── settings/    # 구독 설정 UI
+├── settings/    # 계정 설정 UI
 └── *.tsx        # Header, Footer, Providers, auth/profile/search components
 ```
 
@@ -25,7 +25,6 @@ components/
 | Project form | `projects/ProjectEditorForm.tsx` | create/edit project fields |
 | Evidence workspace | `projects/ProjectDocumentsWorkspace.tsx` | selected document state |
 | Evidence editor | `projects/ProjectDocumentEditor.tsx` | textarea markdown editor actions |
-| Billing settings | `settings/BillingSection.tsx` | subscription controls |
 
 ## CONVENTIONS
 

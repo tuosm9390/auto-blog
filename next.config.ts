@@ -22,18 +22,17 @@ const nextConfig: NextConfig = {
         // HTTPS 강제 (Vercel은 자동 적용, 로컬/기타 환경 대비)
         { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
         // 불필요한 브라우저 기능 비활성화
-        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         // Content Security Policy
         {
           key: "Content-Security-Policy",
           value: [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://cdn.portone.io",
+            "script-src 'self' 'unsafe-inline'",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https://avatars.githubusercontent.com",
             "font-src 'self'",
-            `connect-src 'self' https://*.supabase.co https://api.github.com https://api.portone.io https://*.portone.io https://*.iamport.co https://*.tosspayments.com`,
-            "frame-src https://*.portone.io https://*.iamport.co https://*.tosspayments.com",
+            "connect-src 'self' https://*.supabase.co https://api.github.com",
             "frame-ancestors 'none'",
           ].join("; "),
         },

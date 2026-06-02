@@ -29,7 +29,6 @@
 `app/` 또는 `lib/` 하위의 특정 비즈니스 로직을 다룰 때 적절한 문서를 선택하여 읽으십시오.
 
 - `[doc/rules/client/auth.md](doc/rules/client/auth.md)` : GitHub OAuth 기반 인증 구조, RBAC 역할(admin, tester, user) 관리 등
-- `[doc/rules/client/billing.md](doc/rules/client/billing.md)` : Stripe 결제 및 구독 로직, 웹훅 멱등성 및 티어별 제한 수칙
 - `[doc/rules/client/posts-jobs.md](doc/rules/client/posts-jobs.md)` : AI 포스트 생성 파이프라인, 비동기 작업 큐(Job Queue) 처리 및 GitHub 데이터 필터링 원칙
 
 ---

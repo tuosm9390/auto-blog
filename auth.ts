@@ -36,7 +36,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const isPublicPage =
         cleanPath === '/' ||
         cleanPath.startsWith('/about') ||
-        cleanPath.startsWith('/pricing') ||
         cleanPath.startsWith('/tester-apply') ||
         cleanPath.startsWith('/terms') ||
         cleanPath.startsWith('/login') ||

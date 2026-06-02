@@ -14,7 +14,6 @@ export default async function UsersPage() {
           <tr className='border-b'>
             <th className='p-2'>{t('Username')}</th>
             <th className='p-2'>{t('Email')}</th>
-            <th className='p-2'>{t('Tier')}</th>
             <th className='p-2'>{t('Role')}</th>
           </tr>
         </thead>
@@ -23,7 +22,6 @@ export default async function UsersPage() {
             <tr key={user.id} className='border-b'>
               <td className='p-2'>{user.username}</td>
               <td className='p-2'>{user.email}</td>
-              <td className='p-2'>{user.subscription_tier}</td>
               <td className='p-2'>{user.role || 'user'}</td>
             </tr>
           ))}

@@ -6,22 +6,15 @@ import { Suspense } from "react";
 import { toast } from "sonner";
 import { LoginRequired } from "@/components/ui/LoginRequired";
 import { useTranslations } from "next-intl";
-import { SubscriptionInfo } from "@/lib/types";
-
-import { BillingSection } from "@/components/settings/BillingSection";
 
 function SettingsContent() {
   const { data: session, status } = useSession();
   const t = useTranslations("Settings");
-  const pricingT = useTranslations("Pricing");
   const commonT = useTranslations("Common");
 
   const [settings, setSettings] = useState<{ github_username: string; posting_mode: string; auto_repos: string[]; auto_schedule: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
-  const [cancelLoading, setCancelLoading] = useState(false);
-  const [cancelConfirming, setCancelConfirming] = useState(false);
 
   const username = session?.user?.username;
 
@@ -34,10 +27,8 @@ function SettingsContent() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [settingsResult, , subscriptionResult] = await Promise.allSettled([
+        const [settingsResult] = await Promise.allSettled([
           fetch("/api/settings").then(r => r.ok ? r.json() : Promise.reject(`settings: ${r.status}`)),
-          fetch("/api/github/repos").then(r => r.ok ? r.json() : Promise.reject(`repos: ${r.status}`)),
-          fetch("/api/subscription").then(r => r.ok ? r.json() : Promise.reject(`subscription: ${r.status}`)),
         ]);
 
         if (!isMounted) return;
@@ -47,7 +38,6 @@ function SettingsContent() {
         } else {
           setSettings({ github_username: username || "", posting_mode: "manual", auto_repos: [], auto_schedule: "daily" });
         }
-        if (subscriptionResult.status === "fulfilled") setSubscription(subscriptionResult.value);
       } catch (err) {
         console.error("Data load failed:", err);
         if (isMounted) {
@@ -62,33 +52,6 @@ function SettingsContent() {
 
     return () => { isMounted = false; };
   }, [username, settings]);
-
-  const handleCancelRequest = () => {
-    setCancelConfirming(true);
-  };
-
-  const handleCancelAbort = () => {
-    setCancelConfirming(false);
-  };
-
-  const handleCancelConfirm = async () => {
-    setCancelLoading(true);
-    try {
-      const res = await fetch("/api/subscription", { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      toast.success(t("cancelSuccess"));
-      setCancelConfirming(false);
-      setSubscription(prev =>
-        prev ? { ...prev, tier: "free", monthlyLimit: 3, remaining: 3, billingCycle: null } : null,
-      );
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : commonT("unknownError");
-      toast.error(message);
-    } finally {
-      setCancelLoading(false);
-    }
-  };
 
   const saveSettings = async () => {
     if (!settings) return;
@@ -140,20 +103,6 @@ function SettingsContent() {
 
       {settings && (
         <div className="space-y-6">
-          {subscription && (
-            <BillingSection
-              subscription={subscription}
-              cancelConfirming={cancelConfirming}
-              cancelLoading={cancelLoading}
-              onCancelRequest={handleCancelRequest}
-              onCancelConfirm={handleCancelConfirm}
-              onCancelAbort={handleCancelAbort}
-              t={t}
-              pricingT={pricingT}
-              commonT={commonT}
-            />
-          )}
-
           <div className="flex justify-end">
             <button
               onClick={saveSettings}

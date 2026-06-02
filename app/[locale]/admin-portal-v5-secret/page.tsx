@@ -23,7 +23,7 @@ export default async function AdminDashboardPage() {
         <p className="text-text-secondary">{tD("Subtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         <Card className="p-6 hover:border-accent/30 transition-all group">
           <div className="flex flex-col h-full">
             <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -38,23 +38,6 @@ export default async function AdminDashboardPage() {
               className="inline-flex items-center justify-center px-4 py-2 bg-blue-500/10 text-blue-400 rounded-lg font-semibold hover:bg-blue-500/20 transition-colors"
             >
               {tD("UserLink")}
-            </Link>
-          </div>
-        </Card>
-        <Card className="p-6 hover:border-accent/30 transition-all group">
-          <div className="flex flex-col h-full">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <span className="text-2xl">💳</span>
-            </div>
-            <h2 className="text-xl font-bold mb-2">{t("adminSubs")}</h2>
-            <p className="text-sm text-text-secondary mb-6 flex-grow">
-              {tD("SubDesc")}
-            </p>
-            <Link
-              href="/admin/subscriptions"
-              className="inline-flex items-center justify-center px-4 py-2 bg-purple-500/10 text-purple-400 rounded-lg font-semibold hover:bg-purple-500/20 transition-colors"
-            >
-              {tD("SubLink")}
             </Link>
           </div>
         </Card>

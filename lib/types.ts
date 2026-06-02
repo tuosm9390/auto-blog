@@ -46,8 +46,6 @@ export interface IssueContext {
   author: string;
 }
 
-export type SubscriptionTier = "free" | "pro" | "business";
-
 export interface GenerateRequest {
   owner: string;
   repo: string;
@@ -64,15 +62,6 @@ export interface Repo {
   description?: string | null;
   url?: string;
   updated_at?: string | null;
-}
-
-export interface SubscriptionInfo {
-  tier: string;
-  usageCount: number;
-  monthlyLimit: number;
-  remaining: number;
-  resetDate: string | null;
-  billingCycle?: 'monthly' | 'yearly' | null;
 }
 
 export type ProjectStatus = "active" | "paused" | "archived";

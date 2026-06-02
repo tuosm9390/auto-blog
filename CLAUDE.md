@@ -15,7 +15,7 @@
 
 프로젝트 전반의 지식이 필요할 때 로드하십시오.
 
-- doc/rules/shared/tech-stack.md: Next.js 16, Tailwind v4, Gemini SDK, PortOne 등 기술 명세.
+- doc/rules/shared/tech-stack.md: Next.js 16, Tailwind v4, Gemini SDK 등 기술 명세.
 - doc/rules/shared/architecture.md: 디렉토리 구조 및 데이터베이스 스키마(v0.6.0 기준).
 - doc/rules/shared/conventions.md: 명명 규칙(PascalCase 등), 에러 핸들링 및 문서화 표준.
 
@@ -25,7 +25,6 @@
 
 - **[인증/API 관리 시]** (app/api/auth/**, middleware.ts): doc/rules/client/auth.md
 - **[프로젝트 분석 관리 시]** (lib/projects.ts, lib/project-refresh.ts, app/api/projects/**): doc/rules/client/posts-jobs.md
-- **[결제/구독 관리 시]** (app/api/portone/**, lib/portone-billing.ts, app/api/cron/billing/**): doc/rules/client/billing.md
 
 ## ⚡ 필수 커맨드 (Quick Reference)
 
@@ -41,7 +40,6 @@ npx vitest       # 단위/통합 테스트
 - **`cookies()` 반드시 await**: `const cookieStore = await cookies()` — Next.js 15+에서 동기 호출 시 오류
 - **`jose` 미설치**: JWT 직접 서명 시 `jose` 사용 금지. `crypto.createHmac` (Node.js 내장) 사용
 - **Octokit `type: "public"` 오류**: `listForUser`에 `type` 필드 전달 금지 — TypeScript 오류 발생
-- **Stripe 레거시**: `lib/stripe.ts` 및 관련 파일은 410 스텁. 신규 결제 코드는 `lib/portone-billing.ts` 사용
 
 ## ✅ 검증 (Validation)
 
@@ -62,4 +60,4 @@ Impact: <영향 받는 기능/사용자 흐름>
 ```
 
 **type**: `feat` / `fix` / `security` / `refactor` / `docs` / `chore` / `perf`
-**scope**: `billing` / `auth` / `csp` / `api` / `ui` / `db` 등 변경 도메인
+**scope**: `auth` / `csp` / `api` / `ui` / `db` 등 변경 도메인

@@ -3,7 +3,7 @@ import { parseBody } from "../changelog";
 
 const FULL_BODY = `## 🚀 새 기능
 - AI Reverse Spec Recovery
-- PortOne 결제 시스템 전환
+- Project Memory 상태 분석 전환
 
 ## 🐛 버그 수정
 - 포스트 링크 404 수정
@@ -19,7 +19,7 @@ describe("parseBody()", () => {
     const result = parseBody(FULL_BODY);
     expect(result.features).toEqual([
       "AI Reverse Spec Recovery",
-      "PortOne 결제 시스템 전환",
+      "Project Memory 상태 분석 전환",
     ]);
     expect(result.fixes).toEqual(["포스트 링크 404 수정"]);
     expect(result.security).toEqual(["보안 취약점 8건 패치"]);
