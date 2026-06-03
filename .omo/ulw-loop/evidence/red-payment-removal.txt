@@ -1,0 +1,103 @@
+
+ RUN  v4.1.2 D:/development/auto-blog
+
+ ❯ tests/payment-removal.test.ts (4 tests | 4 failed) 19ms
+     × removes payment api route files 11ms
+     × removes payment UI surfaces 2ms
+     × removes payment dependencies and config 3ms
+     × removes payment domain modules and docs guidance 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/payment-removal.test.ts > payment system removal > removes payment api route files
+AssertionError: payment API routes should be deleted: expected [ …(5) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "app/api/subscription/route.ts",
++   "app/api/subscription/verify/route.ts",
++   "app/api/portone/billing-key/route.ts",
++   "app/api/webhooks/portone/route.ts",
++   "app/api/cron/billing/route.ts",
++ ]
+
+ ❯ tests/payment-removal.test.ts:44:68
+     42|     );
+     43|
+     44|     expect(existingRoutes, "payment API routes should be deleted").toE…
+       |                                                                    ^
+     45|   });
+     46|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/payment-removal.test.ts > payment system removal > removes payment UI surfaces
+AssertionError: payment UI files should be deleted: expected [ …(4) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "app/[locale]/pricing/page.tsx",
++   "app/[locale]/pricing/PricingClient.tsx",
++   "app/[locale]/admin/subscriptions/page.tsx",
++   "components/settings/BillingSection.tsx",
++ ]
+
+ ❯ tests/payment-removal.test.ts:58:67
+     56|     );
+     57|
+     58|     expect(existingUiFiles, "payment UI files should be deleted").toEq…
+       |                                                                   ^
+     59|
+     60|     const activeUiFiles = [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/payment-removal.test.ts > payment system removal > removes payment dependencies and config
+AssertionError: expected [ '@google/genai', …(43) ] to not include '@portone/browser-sdk'
+ ❯ tests/payment-removal.test.ts:95:33
+     93|     ];
+     94|
+     95|     expect(dependencyNames).not.toContain("@portone/browser-sdk");
+       |                                 ^
+     96|     expect(dependencyNames).not.toContain("@portone/server-sdk");
+     97|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/payment-removal.test.ts > payment system removal > removes payment domain modules and docs guidance
+AssertionError: payment domain files should be deleted: expected [ 'lib/portone-billing.ts', …(4) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "lib/portone-billing.ts",
++   "lib/billing.ts",
++   "lib/stripe.ts",
++   "lib/subscription.ts",
++   "scripts/add-subscription-fields.sql",
++ ]
+
+ ❯ tests/payment-removal.test.ts:117:75
+    115|     );
+    116|
+    117|     expect(existingDomainFiles, "payment domain files should be delete…
+       |                                                                           ^
+    118|
+    119|     const docsAndInstructions = [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  19:04:27
+   Duration  2.43s (transform 60ms, setup 225ms, import 39ms, tests 19ms, environment 1.59s)
+

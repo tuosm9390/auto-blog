@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "createdAt": "2026-06-01T09:54:13.094Z",
+  "updatedAt": "2026-06-02T01:50:08.373Z",
+  "briefPath": ".omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/brief.md",
+  "goalsPath": ".omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/goals.json",
+  "ledgerPath": ".omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/ledger.jsonl",
+  "codexGoalMode": "aggregate",
+  "goals": [
+    {
+      "id": "G001",
+      "title": "결제시스템 관련된 모든 내용을 삭제해줘. 이 프로젝트에서는 더이상 결제 기능을 사용하지 않아.",
+      "objective": "결제시스템 관련된 모든 내용을 삭제해줘. 이 프로젝트에서는 더이상 결제 기능을 사용하지 않아.",
+      "status": "complete",
+      "successCriteria": [
+        {
+          "id": "C001",
+          "scenario": "HTTP call: start Next dev server on 127.0.0.1:3210, then run curl -i against /api/subscription, /api/portone/billing-key, /api/webhooks/portone, /api/cron/billing. PASS only if all four return HTTP/1.1 404 or HTTP/2 404 and no billing handler body.",
+          "userModel": "happy",
+          "expectedEvidence": ".omo/ulw-loop/evidence/G001-C001-http-payment-routes.txt",
+          "capturedEvidence": ".omo/ulw-loop/evidence/G001-C001-http-payment-routes.txt | four removed payment API endpoints returned HTTP/1.1 404; cleanup recorded",
+          "status": "pass",
+          "capturedAt": "2026-06-01T10:26:58.611Z"
+        },
+        {
+          "id": "C002",
+          "scenario": "Browser use: start Next dev server on 127.0.0.1:3211, open /ko/settings and /ko/admin-portal-v5-secret in a real browser context. PASS only if visible text contains no 결제, 구독, Billing, Subscription, Pricing, 요금제 and there is no link href containing pricing, subscription, portone, billing.",
+          "userModel": "edge",
+          "expectedEvidence": ".omo/ulw-loop/evidence/G001-C002-browser-ui-payment-removed.md",
+          "capturedEvidence": ".omo/ulw-loop/evidence/G001-C002-browser-ui-payment-removed.md | Browser plugin Chrome opened /ko/settings and /ko/admin-portal-v5-secret on port 3000; no forbidden visible text or links",
+          "status": "pass",
+          "capturedAt": "2026-06-01T10:26:56.264Z"
+        },
+        {
+          "id": "C003",
+          "scenario": "tmux CLI: run npm ls @portone/browser-sdk @portone/server-sdk, rg payment/billing allowlist scans, npx vitest run tests/payment-removal.test.ts, npm run lint, npm run build. PASS only if PortOne deps are absent, allowed-scan has no active payment code, tests/lint/build pass.",
+          "userModel": "regression",
+          "expectedEvidence": ".omo/ulw-loop/evidence/G001-C003-tmux-build-and-scan.txt",
+          "capturedEvidence": ".omo/ulw-loop/evidence/G001-C003-tmux-build-and-scan.txt | updated: command strings included; package-lock and pnpm-lock scan clean; targeted/full vitest, lint, build pass",
+          "status": "pass",
+          "capturedAt": "2026-06-01T10:44:33.501Z"
+        }
+      ],
+      "attempt": 1,
+      "createdAt": "2026-06-01T09:54:13.094Z",
+      "updatedAt": "2026-06-02T01:50:08.373Z",
+      "startedAt": "2026-06-01T10:00:57.387Z",
+      "completedAt": "2026-06-02T01:50:08.373Z",
+      "evidence": "All criteria pass; final reviewer PASS; C001/C002/C003 evidence files recorded"
+    }
+  ],
+  "codexObjective": "Complete the durable ulw-loop plan in .omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/goals.json, including later accepted/appended stories, under the original brief constraints; use .omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/ledger.jsonl as the audit trail.",
+  "aggregateCompletion": {
+    "status": "complete",
+    "completedAt": "2026-06-02T01:50:08.373Z",
+    "evidence": "All criteria pass; final reviewer PASS; C001/C002/C003 evidence files recorded",
+    "codexGoal": {
+      "remainingTokens": null,
+      "completionBudgetReport": "Goal achieved.",
+      "goal": {
+        "updatedAt": 1780364873,
+        "threadId": "019e7e41-ff64-7b60-b9c8-a216515df0ce",
+        "createdAt": 1780307633,
+        "tokensUsed": 860025,
+        "status": "complete",
+        "objective": "Complete the durable ulw-loop plan in .omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/goals.json, including later accepted/appended stories, under the original brief constraints; use .omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/ledger.jsonl as the audit trail.",
+        "timeUsedSeconds": 5660
+      }
+    }
+  }
+}

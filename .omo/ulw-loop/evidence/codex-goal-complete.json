@@ -1,0 +1,13 @@
+{
+  "remainingTokens": null,
+  "completionBudgetReport": "Goal achieved.",
+  "goal": {
+    "updatedAt": 1780364873,
+    "threadId": "019e7e41-ff64-7b60-b9c8-a216515df0ce",
+    "createdAt": 1780307633,
+    "tokensUsed": 860025,
+    "status": "complete",
+    "objective": "Complete the durable ulw-loop plan in .omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/goals.json, including later accepted/appended stories, under the original brief constraints; use .omo/ulw-loop/019e7e41-ff64-7b60-b9c8-a216515df0ce/ledger.jsonl as the audit trail.",
+    "timeUsedSeconds": 5660
+  }
+}

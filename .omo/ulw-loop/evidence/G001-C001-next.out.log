@@ -1,0 +1,39 @@
+
+> synapso.dev@0.2.0 dev
+> next dev --hostname 127.0.0.1 --port 3210
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://127.0.0.1:3210
+- Network:       http://127.0.0.1:3210
+- Environments: .env.local
+
+✓ Starting...
+✓ Ready in 1727ms
+ GET /api/subscription 404 in 1365ms (compile: 1238ms, render: 127ms)
+ GET /api/portone/billing-key 404 in 40ms (compile: 5ms, render: 35ms)
+ GET /api/webhooks/portone 404 in 36ms (compile: 4ms, render: 31ms)
+ GET /api/cron/billing 404 in 35ms (compile: 5ms, render: 30ms)
+ GET /ko/settings 200 in 4.2s (compile: 3.3s, proxy.ts: 31ms, render: 935ms)
+ GET /api/auth/session 200 in 1443ms (compile: 1423ms, render: 21ms)
+ GET /api/auth/session 200 in 23ms (compile: 15ms, render: 8ms)
+ GET /ko/settings 200 in 182ms (compile: 26ms, proxy.ts: 10ms, render: 146ms)
+ GET /api/auth/session 200 in 39ms (compile: 26ms, render: 13ms)
+ GET /api/auth/session 200 in 18ms (compile: 7ms, render: 12ms)
+ GET /ko/settings 200 in 205ms (compile: 24ms, proxy.ts: 12ms, render: 169ms)
+ GET /api/auth/session 200 in 35ms (compile: 26ms, render: 10ms)
+ GET /api/auth/session 200 in 13ms (compile: 4ms, render: 9ms)
+ GET /ko/settings 200 in 185ms (compile: 27ms, proxy.ts: 7ms, render: 151ms)
+ GET /ko/login 200 in 2.1s (compile: 1991ms, proxy.ts: 7ms, render: 52ms)
+ GET /api/auth/session 200 in 37ms (compile: 24ms, render: 14ms)
+ GET /api/auth/session 200 in 20ms (compile: 8ms, render: 12ms)
+ GET /api/auth/session 200 in 14ms (compile: 5ms, render: 9ms)
+ GET /api/auth/providers 200 in 11ms (compile: 4ms, render: 8ms)
+ GET /api/auth/csrf 200 in 13ms (compile: 4ms, render: 9ms)
+ POST /api/auth/signin/github? 200 in 39ms (compile: 4ms, render: 35ms)
+ GET /ko/login 200 in 50ms (compile: 18ms, proxy.ts: 5ms, render: 26ms)
+ GET /api/auth/providers 200 in 21ms (compile: 14ms, render: 7ms)
+ GET /api/auth/csrf 200 in 6ms (compile: 2ms, render: 4ms)
+ POST /api/auth/signin/github? 200 in 15ms (compile: 3ms, render: 12ms)
+ GET /ko/settings 200 in 345ms (compile: 32ms, proxy.ts: 9ms, render: 304ms)
+ GET /api/auth/session 200 in 36ms (compile: 26ms, render: 11ms)
+ GET /api/auth/session 200 in 12ms (compile: 4ms, render: 8ms)
